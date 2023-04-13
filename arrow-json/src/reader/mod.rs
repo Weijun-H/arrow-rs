@@ -633,7 +633,7 @@ fn make_decoder(
 }
 
 fn tape_error(d: TapeElement, expected: &str) -> ArrowError {
-    ArrowError::JsonError(format!("expected {expected} got {d}"))
+    ArrowError::JsonError(format!("Invalid tape element, expected {expected} got {d}"))
 }
 
 #[cfg(test)]
@@ -971,7 +971,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Json error: expected string got number".to_string()
+            "Json error: Invalid tape element, expected string got number".to_string()
         );
 
         let buf = r#"{"a": true}"#;
@@ -984,7 +984,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Json error: expected string got true".to_string()
+            "Json error: Invalid tape element, expected string got true".to_string()
         );
     }
 
