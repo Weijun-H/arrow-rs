@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-flight/src/sql/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_flight" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_flight/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-flight/src/sql/client.rs`."><title>client.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_flight" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -600,19 +600,86 @@
 <a href="#600" id="600">600</a>
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -626,20 +693,24 @@
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>tonic::metadata::AsciiMetadataKey;
 
+<span class="kw">use </span><span class="kw">crate</span>::decode::FlightRecordBatchStream;
+<span class="kw">use </span><span class="kw">crate</span>::encode::FlightDataEncoderBuilder;
+<span class="kw">use </span><span class="kw">crate</span>::error::FlightError;
 <span class="kw">use </span><span class="kw">crate</span>::flight_service_client::FlightServiceClient;
 <span class="kw">use </span><span class="kw">crate</span>::sql::server::{CLOSE_PREPARED_STATEMENT, CREATE_PREPARED_STATEMENT};
 <span class="kw">use </span><span class="kw">crate</span>::sql::{
     ActionClosePreparedStatementRequest, ActionCreatePreparedStatementRequest,
-    ActionCreatePreparedStatementResult, Any, CommandGetCatalogs,
-    CommandGetCrossReference, CommandGetDbSchemas, CommandGetExportedKeys,
-    CommandGetImportedKeys, CommandGetPrimaryKeys, CommandGetSqlInfo,
-    CommandGetTableTypes, CommandGetTables, CommandGetXdbcTypeInfo,
-    CommandPreparedStatementQuery, CommandStatementQuery, CommandStatementUpdate,
-    DoPutUpdateResult, ProstMessageExt, SqlInfo,
+    ActionCreatePreparedStatementResult, Any, CommandGetCatalogs, CommandGetCrossReference,
+    CommandGetDbSchemas, CommandGetExportedKeys, CommandGetImportedKeys, CommandGetPrimaryKeys,
+    CommandGetSqlInfo, CommandGetTableTypes, CommandGetTables, CommandGetXdbcTypeInfo,
+    CommandPreparedStatementQuery, CommandPreparedStatementUpdate, CommandStatementQuery,
+    CommandStatementUpdate, DoPutPreparedStatementResult, DoPutUpdateResult, ProstMessageExt,
+    SqlInfo,
 };
+<span class="kw">use </span><span class="kw">crate</span>::trailers::extract_lazy_trailers;
 <span class="kw">use crate</span>::{
-    Action, FlightData, FlightDescriptor, FlightInfo, HandshakeRequest,
-    HandshakeResponse, IpcMessage, PutResult, Ticket,
+    Action, FlightData, FlightDescriptor, FlightInfo, HandshakeRequest, HandshakeResponse,
+    IpcMessage, PutResult, Ticket,
 };
 <span class="kw">use </span>arrow_array::RecordBatch;
 <span class="kw">use </span>arrow_buffer::Buffer;
@@ -662,7 +733,7 @@
 }
 
 <span class="doccomment">/// A FlightSql protocol client that can run queries against FlightSql servers
-/// This client is in the &quot;experimental&quot; stage. It is not guaranteed to follow the spec in all instances.
+/// This client is in the "experimental" stage. It is not guaranteed to follow the spec in all instances.
 /// Github issues are welcomed.
 </span><span class="kw">impl </span>FlightSqlServiceClient&lt;Channel&gt; {
     <span class="doccomment">/// Creates a new FlightSql client that connects to a server over an arbitrary tonic `Channel`
@@ -693,6 +764,11 @@
     <span class="doccomment">/// Set auth token to the given value.
     </span><span class="kw">pub fn </span>set_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: String) {
         <span class="self">self</span>.token = <span class="prelude-val">Some</span>(token);
+    }
+
+    <span class="doccomment">/// Clear the auth token.
+    </span><span class="kw">pub fn </span>clear_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.token = <span class="prelude-val">None</span>;
     }
 
     <span class="doccomment">/// Set header value.
@@ -730,49 +806,49 @@
         <span class="self">self</span>.get_flight_info_for_command(cmd).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Perform a `handshake` with the server, passing credentials and establishing a session
-    /// Returns arbitrary auth/handshake info binary blob
-    </span><span class="kw">pub async fn </span>handshake(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        username: <span class="kw-2">&amp;</span>str,
-        password: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes, ArrowError&gt; {
+    <span class="doccomment">/// Perform a `handshake` with the server, passing credentials and establishing a session.
+    ///
+    /// If the server returns an "authorization" header, it is automatically parsed and set as
+    /// a token for future requests. Any other data returned by the server in the handshake
+    /// response is returned as a binary blob.
+    </span><span class="kw">pub async fn </span>handshake(<span class="kw-2">&amp;mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes, ArrowError&gt; {
         <span class="kw">let </span>cmd = HandshakeRequest {
             protocol_version: <span class="number">0</span>,
             payload: Default::default(),
         };
         <span class="kw">let </span><span class="kw-2">mut </span>req = tonic::Request::new(stream::iter(<span class="macro">vec!</span>[cmd]));
-        <span class="kw">let </span>val = BASE64_STANDARD.encode(<span class="macro">format!</span>(<span class="string">&quot;{username}:{password}&quot;</span>));
-        <span class="kw">let </span>val = <span class="macro">format!</span>(<span class="string">&quot;Basic {val}&quot;</span>)
+        <span class="kw">let </span>val = BASE64_STANDARD.encode(<span class="macro">format!</span>(<span class="string">"{username}:{password}"</span>));
+        <span class="kw">let </span>val = <span class="macro">format!</span>(<span class="string">"Basic {val}"</span>)
             .parse()
-            .map_err(|<span class="kw">_</span>| ArrowError::ParseError(<span class="string">&quot;Cannot parse header&quot;</span>.to_string()))<span class="question-mark">?</span>;
-        req.metadata_mut().insert(<span class="string">&quot;authorization&quot;</span>, val);
+            .map_err(|<span class="kw">_</span>| ArrowError::ParseError(<span class="string">"Cannot parse header"</span>.to_string()))<span class="question-mark">?</span>;
+        req.metadata_mut().insert(<span class="string">"authorization"</span>, val);
         <span class="kw">let </span>req = <span class="self">self</span>.set_request_headers(req)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self
             </span>.flight_client
             .handshake(req)
             .<span class="kw">await
-            </span>.map_err(|e| ArrowError::IpcError(<span class="macro">format!</span>(<span class="string">&quot;Can&#39;t handshake {e}&quot;</span>)))<span class="question-mark">?</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(auth) = resp.metadata().get(<span class="string">&quot;authorization&quot;</span>) {
-            <span class="kw">let </span>auth = auth.to_str().map_err(|<span class="kw">_</span>| {
-                ArrowError::ParseError(<span class="string">&quot;Can&#39;t read auth header&quot;</span>.to_string())
-            })<span class="question-mark">?</span>;
-            <span class="kw">let </span>bearer = <span class="string">&quot;Bearer &quot;</span>;
+            </span>.map_err(|e| ArrowError::IpcError(<span class="macro">format!</span>(<span class="string">"Can't handshake {e}"</span>)))<span class="question-mark">?</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(auth) = resp.metadata().get(<span class="string">"authorization"</span>) {
+            <span class="kw">let </span>auth = auth
+                .to_str()
+                .map_err(|<span class="kw">_</span>| ArrowError::ParseError(<span class="string">"Can't read auth header"</span>.to_string()))<span class="question-mark">?</span>;
+            <span class="kw">let </span>bearer = <span class="string">"Bearer "</span>;
             <span class="kw">if </span>!auth.starts_with(bearer) {
-                <span class="prelude-val">Err</span>(ArrowError::ParseError(<span class="string">&quot;Invalid auth header!&quot;</span>.to_string()))<span class="question-mark">?</span>;
+                <span class="prelude-val">Err</span>(ArrowError::ParseError(<span class="string">"Invalid auth header!"</span>.to_string()))<span class="question-mark">?</span>;
             }
             <span class="kw">let </span>auth = auth[bearer.len()..].to_string();
             <span class="self">self</span>.token = <span class="prelude-val">Some</span>(auth);
         }
-        <span class="kw">let </span>responses: Vec&lt;HandshakeResponse&gt; =
-            resp.into_inner().try_collect().<span class="kw">await</span>.map_err(|<span class="kw">_</span>| {
-                ArrowError::ParseError(<span class="string">&quot;Can&#39;t collect responses&quot;</span>.to_string())
-            })<span class="question-mark">?</span>;
+        <span class="kw">let </span>responses: Vec&lt;HandshakeResponse&gt; = resp
+            .into_inner()
+            .try_collect()
+            .<span class="kw">await
+            </span>.map_err(|<span class="kw">_</span>| ArrowError::ParseError(<span class="string">"Can't collect responses"</span>.to_string()))<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="kw">match </span>responses.as_slice() {
             [resp] =&gt; resp.payload.clone(),
             [] =&gt; Bytes::new(),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ArrowError::ParseError(
-                <span class="string">&quot;Multiple handshake responses&quot;</span>.to_string(),
+                <span class="string">"Multiple handshake responses"</span>.to_string(),
             ))<span class="question-mark">?</span>,
         };
         <span class="prelude-val">Ok</span>(resp)
@@ -807,8 +883,7 @@
             .<span class="kw">await
             </span>.map_err(status_to_arrow_error)<span class="question-mark">?
             </span>.unwrap();
-        <span class="kw">let </span>any =
-            Any::decode(<span class="kw-2">&amp;*</span>result.app_metadata).map_err(decode_error_to_arrow_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>any = Any::decode(<span class="kw-2">&amp;*</span>result.app_metadata).map_err(decode_error_to_arrow_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>result: DoPutUpdateResult = any.unpack()<span class="question-mark">?</span>.unwrap();
         <span class="prelude-val">Ok</span>(result.record_count)
     }
@@ -831,14 +906,22 @@
     </span><span class="kw">pub async fn </span>do_get(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         ticket: <span class="kw">impl </span>IntoRequest&lt;Ticket&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Streaming&lt;FlightData&gt;, ArrowError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;FlightRecordBatchStream, ArrowError&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.set_request_headers(ticket.into_request())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self
+
+        <span class="kw">let </span>(md, response_stream, _ext) = <span class="self">self
             </span>.flight_client
             .do_get(req)
             .<span class="kw">await
             </span>.map_err(status_to_arrow_error)<span class="question-mark">?
-            </span>.into_inner())
+            </span>.into_parts();
+        <span class="kw">let </span>(response_stream, trailers) = extract_lazy_trailers(response_stream);
+
+        <span class="prelude-val">Ok</span>(FlightRecordBatchStream::new_from_flight_data(
+            response_stream.map_err(FlightError::Tonic),
+        )
+        .with_headers(md)
+        .with_trailers(trailers))
     }
 
     <span class="doccomment">/// Push a stream to the flight service associated with a particular flight stream.
@@ -983,7 +1066,8 @@
 
     <span class="doccomment">/// Explicitly shut down and clean up the client.
     </span><span class="kw">pub async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
-        <span class="prelude-val">Ok</span>(())
+        <span class="comment">// TODO: consume self instead of &amp;mut self to explicitly prevent reuse?
+        </span><span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>set_request_headers&lt;T&gt;(
@@ -992,22 +1076,18 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;tonic::Request&lt;T&gt;, ArrowError&gt; {
         <span class="kw">for </span>(k, v) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.headers {
             <span class="kw">let </span>k = AsciiMetadataKey::from_str(k.as_str()).map_err(|e| {
-                ArrowError::ParseError(<span class="macro">format!</span>(<span class="string">&quot;Cannot convert header key \&quot;{k}\&quot;: {e}&quot;</span>))
+                ArrowError::ParseError(<span class="macro">format!</span>(<span class="string">"Cannot convert header key \"{k}\": {e}"</span>))
             })<span class="question-mark">?</span>;
             <span class="kw">let </span>v = v.parse().map_err(|e| {
-                ArrowError::ParseError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Cannot convert header value \&quot;{v}\&quot;: {e}&quot;
-                </span>))
+                ArrowError::ParseError(<span class="macro">format!</span>(<span class="string">"Cannot convert header value \"{v}\": {e}"</span>))
             })<span class="question-mark">?</span>;
             req.metadata_mut().insert(k, v);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(token) = <span class="kw-2">&amp;</span><span class="self">self</span>.token {
-            <span class="kw">let </span>val = <span class="macro">format!</span>(<span class="string">&quot;Bearer {token}&quot;</span>).parse().map_err(|e| {
-                ArrowError::ParseError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Cannot convert token to header value: {e}&quot;
-                </span>))
+            <span class="kw">let </span>val = <span class="macro">format!</span>(<span class="string">"Bearer {token}"</span>).parse().map_err(|e| {
+                ArrowError::ParseError(<span class="macro">format!</span>(<span class="string">"Cannot convert token to header value: {e}"</span>))
             })<span class="question-mark">?</span>;
-            req.metadata_mut().insert(<span class="string">&quot;authorization&quot;</span>, val);
+            req.metadata_mut().insert(<span class="string">"authorization"</span>, val);
         }
         <span class="prelude-val">Ok</span>(req)
     }
@@ -1041,9 +1121,12 @@
 
     <span class="doccomment">/// Executes the prepared statement query on the server.
     </span><span class="kw">pub async fn </span>execute(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;FlightInfo, ArrowError&gt; {
+        <span class="self">self</span>.write_bind_params().<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="kw">let </span>cmd = CommandPreparedStatementQuery {
             prepared_statement_handle: <span class="self">self</span>.handle.clone(),
         };
+
         <span class="kw">let </span>result = <span class="self">self
             </span>.flight_sql_client
             .get_flight_info_for_command(cmd)
@@ -1053,7 +1136,9 @@
 
     <span class="doccomment">/// Executes the prepared statement update query on the server.
     </span><span class="kw">pub async fn </span>execute_update(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;i64, ArrowError&gt; {
-        <span class="kw">let </span>cmd = CommandPreparedStatementQuery {
+        <span class="self">self</span>.write_bind_params().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>cmd = CommandPreparedStatementUpdate {
             prepared_statement_handle: <span class="self">self</span>.handle.clone(),
         };
         <span class="kw">let </span>descriptor = FlightDescriptor::new_cmd(cmd.as_any().encode_to_vec());
@@ -1069,8 +1154,7 @@
             .<span class="kw">await
             </span>.map_err(status_to_arrow_error)<span class="question-mark">?
             </span>.unwrap();
-        <span class="kw">let </span>any =
-            Any::decode(<span class="kw-2">&amp;*</span>result.app_metadata).map_err(decode_error_to_arrow_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>any = Any::decode(<span class="kw-2">&amp;*</span>result.app_metadata).map_err(decode_error_to_arrow_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>result: DoPutUpdateResult = any.unpack()<span class="question-mark">?</span>.unwrap();
         <span class="prelude-val">Ok</span>(result.record_count)
     }
@@ -1086,12 +1170,61 @@
     }
 
     <span class="doccomment">/// Set a RecordBatch that contains the parameters that will be bind.
-    </span><span class="kw">pub fn </span>set_parameters(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        parameter_binding: RecordBatch,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
+    </span><span class="kw">pub fn </span>set_parameters(<span class="kw-2">&amp;mut </span><span class="self">self</span>, parameter_binding: RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
         <span class="self">self</span>.parameter_binding = <span class="prelude-val">Some</span>(parameter_binding);
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Submit parameters to the server, if any have been set on this prepared statement instance
+    /// Updates our stored prepared statement handle with the handle given by the server response.
+    </span><span class="kw">async fn </span>write_bind_params(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>params_batch) = <span class="self">self</span>.parameter_binding {
+            <span class="kw">let </span>cmd = CommandPreparedStatementQuery {
+                prepared_statement_handle: <span class="self">self</span>.handle.clone(),
+            };
+
+            <span class="kw">let </span>descriptor = FlightDescriptor::new_cmd(cmd.as_any().encode_to_vec());
+            <span class="kw">let </span>flight_stream_builder = FlightDataEncoderBuilder::new()
+                .with_flight_descriptor(<span class="prelude-val">Some</span>(descriptor))
+                .with_schema(params_batch.schema());
+            <span class="kw">let </span>flight_data = flight_stream_builder
+                .build(futures::stream::iter(
+                    <span class="self">self</span>.parameter_binding.clone().map(<span class="prelude-val">Ok</span>),
+                ))
+                .try_collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
+                .<span class="kw">await
+                </span>.map_err(flight_error_to_arrow_error)<span class="question-mark">?</span>;
+
+            <span class="comment">// Attempt to update the stored handle with any updated handle in the DoPut result.
+            // Older servers do not respond with a result for DoPut, so skip this step when
+            // the stream closes with no response.
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(result) = <span class="self">self
+                </span>.flight_sql_client
+                .do_put(stream::iter(flight_data))
+                .<span class="kw">await</span><span class="question-mark">?
+                </span>.message()
+                .<span class="kw">await
+                </span>.map_err(status_to_arrow_error)<span class="question-mark">?
+            </span>{
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(handle) = <span class="self">self</span>.unpack_prepared_statement_handle(<span class="kw-2">&amp;</span>result)<span class="question-mark">? </span>{
+                    <span class="self">self</span>.handle = handle;
+                }
+            }
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Decodes the app_metadata stored in a [`PutResult`] as a
+    /// [`DoPutPreparedStatementResult`] and then returns
+    /// the inner prepared statement handle as [`Bytes`]
+    </span><span class="kw">fn </span>unpack_prepared_statement_handle(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        put_result: <span class="kw-2">&amp;</span>PutResult,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Bytes&gt;, ArrowError&gt; {
+        <span class="kw">let </span>any = Any::decode(<span class="kw-2">&amp;*</span>put_result.app_metadata).map_err(decode_error_to_arrow_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(any
+            .unpack::&lt;DoPutPreparedStatementResult&gt;()<span class="question-mark">?
+            </span>.and_then(|result| result.prepared_statement_handle))
     }
 
     <span class="doccomment">/// Close the prepared statement, so that this PreparedStatement can not used
@@ -1114,7 +1247,14 @@
 }
 
 <span class="kw">fn </span>status_to_arrow_error(status: tonic::Status) -&gt; ArrowError {
-    ArrowError::IpcError(<span class="macro">format!</span>(<span class="string">&quot;{status:?}&quot;</span>))
+    ArrowError::IpcError(<span class="macro">format!</span>(<span class="string">"{status:?}"</span>))
+}
+
+<span class="kw">fn </span>flight_error_to_arrow_error(err: FlightError) -&gt; ArrowError {
+    <span class="kw">match </span>err {
+        FlightError::Arrow(e) =&gt; e,
+        e =&gt; ArrowError::ExternalError(Box::new(e)),
+    }
 }
 
 <span class="comment">// A polymorphic structure to natively represent different types of data contained in `FlightData`
@@ -1128,19 +1268,16 @@
     flight_data: FlightData,
     arrow_schema_ref: <span class="kw-2">&amp;</span>SchemaRef,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;ArrowFlightData, ArrowError&gt; {
-    <span class="kw">let </span>ipc_message = root_as_message(<span class="kw-2">&amp;</span>flight_data.data_header[..]).map_err(|err| {
-        ArrowError::ParseError(<span class="macro">format!</span>(<span class="string">&quot;Unable to get root as message: {err:?}&quot;</span>))
-    })<span class="question-mark">?</span>;
+    <span class="kw">let </span>ipc_message = root_as_message(<span class="kw-2">&amp;</span>flight_data.data_header[..])
+        .map_err(|err| ArrowError::ParseError(<span class="macro">format!</span>(<span class="string">"Unable to get root as message: {err:?}"</span>)))<span class="question-mark">?</span>;
 
     <span class="kw">match </span>ipc_message.header_type() {
         MessageHeader::RecordBatch =&gt; {
-            <span class="kw">let </span>ipc_record_batch =
-                ipc_message.header_as_record_batch().ok_or_else(|| {
-                    ArrowError::ComputeError(
-                        <span class="string">&quot;Unable to convert flight data header to a record batch&quot;
-                            </span>.to_string(),
-                    )
-                })<span class="question-mark">?</span>;
+            <span class="kw">let </span>ipc_record_batch = ipc_message.header_as_record_batch().ok_or_else(|| {
+                ArrowError::ComputeError(
+                    <span class="string">"Unable to convert flight data header to a record batch"</span>.to_string(),
+                )
+            })<span class="question-mark">?</span>;
 
             <span class="kw">let </span>dictionaries_by_field = HashMap::new();
             <span class="kw">let </span>record_batch = read_record_batch(
@@ -1156,7 +1293,7 @@
         MessageHeader::Schema =&gt; {
             <span class="kw">let </span>ipc_schema = ipc_message.header_as_schema().ok_or_else(|| {
                 ArrowError::ComputeError(
-                    <span class="string">&quot;Unable to convert flight data header to a schema&quot;</span>.to_string(),
+                    <span class="string">"Unable to convert flight data header to a schema"</span>.to_string(),
                 )
             })<span class="question-mark">?</span>;
 
@@ -1166,38 +1303,35 @@
         MessageHeader::DictionaryBatch =&gt; {
             <span class="kw">let _ </span>= ipc_message.header_as_dictionary_batch().ok_or_else(|| {
                 ArrowError::ComputeError(
-                    <span class="string">&quot;Unable to convert flight data header to a dictionary batch&quot;
-                        </span>.to_string(),
+                    <span class="string">"Unable to convert flight data header to a dictionary batch"</span>.to_string(),
                 )
             })<span class="question-mark">?</span>;
             <span class="prelude-val">Err</span>(ArrowError::NotYetImplemented(
-                <span class="string">&quot;no idea on how to convert an ipc dictionary batch to an arrow type&quot;
-                    </span>.to_string(),
+                <span class="string">"no idea on how to convert an ipc dictionary batch to an arrow type"</span>.to_string(),
             ))
         }
         MessageHeader::Tensor =&gt; {
             <span class="kw">let _ </span>= ipc_message.header_as_tensor().ok_or_else(|| {
                 ArrowError::ComputeError(
-                    <span class="string">&quot;Unable to convert flight data header to a tensor&quot;</span>.to_string(),
+                    <span class="string">"Unable to convert flight data header to a tensor"</span>.to_string(),
                 )
             })<span class="question-mark">?</span>;
             <span class="prelude-val">Err</span>(ArrowError::NotYetImplemented(
-                <span class="string">&quot;no idea on how to convert an ipc tensor to an arrow type&quot;</span>.to_string(),
+                <span class="string">"no idea on how to convert an ipc tensor to an arrow type"</span>.to_string(),
             ))
         }
         MessageHeader::SparseTensor =&gt; {
             <span class="kw">let _ </span>= ipc_message.header_as_sparse_tensor().ok_or_else(|| {
                 ArrowError::ComputeError(
-                    <span class="string">&quot;Unable to convert flight data header to a sparse tensor&quot;</span>.to_string(),
+                    <span class="string">"Unable to convert flight data header to a sparse tensor"</span>.to_string(),
                 )
             })<span class="question-mark">?</span>;
             <span class="prelude-val">Err</span>(ArrowError::NotYetImplemented(
-                <span class="string">&quot;no idea on how to convert an ipc sparse tensor to an arrow type&quot;
-                    </span>.to_string(),
+                <span class="string">"no idea on how to convert an ipc sparse tensor to an arrow type"</span>.to_string(),
             ))
         }
         <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ArrowError::ComputeError(<span class="macro">format!</span>(
-            <span class="string">&quot;Unable to convert message with header_type: &#39;{:?}&#39; to arrow data&quot;</span>,
+            <span class="string">"Unable to convert message with header_type: '{:?}' to arrow data"</span>,
             ipc_message.header_type()
         ))),
     }

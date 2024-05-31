@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/file/metadata.rs`."><title>metadata.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="parquet" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../parquet/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/file/metadata.rs`."><title>metadata.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="parquet" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1130,47 +1130,153 @@
 <a href="#1130" id="1130">1130</a>
 <a href="#1131" id="1131">1131</a>
 <a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
+<a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
+<a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
+<a href="#1144" id="1144">1144</a>
+<a href="#1145" id="1145">1145</a>
+<a href="#1146" id="1146">1146</a>
+<a href="#1147" id="1147">1147</a>
+<a href="#1148" id="1148">1148</a>
+<a href="#1149" id="1149">1149</a>
+<a href="#1150" id="1150">1150</a>
+<a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
+<a href="#1157" id="1157">1157</a>
+<a href="#1158" id="1158">1158</a>
+<a href="#1159" id="1159">1159</a>
+<a href="#1160" id="1160">1160</a>
+<a href="#1161" id="1161">1161</a>
+<a href="#1162" id="1162">1162</a>
+<a href="#1163" id="1163">1163</a>
+<a href="#1164" id="1164">1164</a>
+<a href="#1165" id="1165">1165</a>
+<a href="#1166" id="1166">1166</a>
+<a href="#1167" id="1167">1167</a>
+<a href="#1168" id="1168">1168</a>
+<a href="#1169" id="1169">1169</a>
+<a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="doccomment">//! Contains information about available Parquet metadata.
+</span><span class="doccomment">//! Parquet metadata structures
 //!
-//! The hierarchy of metadata is as follows:
+//! * [`ParquetMetaData`]: Top level metadata container, read from the Parquet
+//!   file footer.
 //!
-//! [`ParquetMetaData`](struct.ParquetMetaData.html) contains
-//! [`FileMetaData`](struct.FileMetaData.html) and zero or more
-//! [`RowGroupMetaData`](struct.RowGroupMetaData.html) for each row group.
+//! * [`FileMetaData`]: File level metadata such as schema, row counts and
+//!   version.
 //!
-//! [`FileMetaData`](struct.FileMetaData.html) includes file version, application specific
-//! metadata.
+//! * [`RowGroupMetaData`]: Metadata for each Row Group with a File, such as
+//!   location and number of rows, and column chunks.
 //!
-//! Each [`RowGroupMetaData`](struct.RowGroupMetaData.html) contains information about row
-//! group and one or more [`ColumnChunkMetaData`](struct.ColumnChunkMetaData.html) for
-//! each column chunk.
-//!
-//! [`ColumnChunkMetaData`](struct.ColumnChunkMetaData.html) has information about column
-//! chunk (primitive leaf column), including encoding/compression, number of values, etc.
+//! * [`ColumnChunkMetaData`]: Metadata for each column chunk (primitive leaf)
+//!   within a Row Group including encoding and compression information,
+//!   number of values, statistics, etc.
 
 </span><span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::format::{
-    BoundaryOrder, ColumnChunk, ColumnIndex, ColumnMetaData, OffsetIndex, PageLocation,
-    RowGroup, SortingColumn,
+    BoundaryOrder, ColumnChunk, ColumnIndex, ColumnMetaData, OffsetIndex, PageLocation, RowGroup,
+    SortingColumn,
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::basic::{ColumnOrder, Compression, Encoding, Type};
@@ -1193,7 +1299,7 @@
 /// column in the third row group of the parquet file.
 </span><span class="kw">pub type </span>ParquetColumnIndex = Vec&lt;Vec&lt;Index&gt;&gt;;
 
-<span class="doccomment">/// [`PageLocation`] for each datapage of each row group of each column.
+<span class="doccomment">/// [`PageLocation`] for each data page of each row group of each column.
 ///
 /// `offset_index[row_group_number][column_number][page_number]` holds
 /// the [`PageLocation`] corresponding to page `page_number` of column
@@ -1204,14 +1310,30 @@
 /// parquet file.
 </span><span class="kw">pub type </span>ParquetOffsetIndex = Vec&lt;Vec&lt;Vec&lt;PageLocation&gt;&gt;&gt;;
 
-<span class="doccomment">/// Global Parquet metadata.
+<span class="doccomment">/// Global Parquet metadata, including [`FileMetaData`], [`RowGroupMetaData`].
+///
+/// This structure is stored in the footer of Parquet files, in the format
+/// defined by [`parquet.thrift`]. It contains:
+///
+/// * File level metadata: [`FileMetaData`]
+/// * Row Group level metadata: [`RowGroupMetaData`]
+/// * (Optional) "Page Index" structures: [`ParquetColumnIndex`] and [`ParquetOffsetIndex`]
+///
+/// [`parquet.thrift`]: https://github.com/apache/parquet-format/blob/master/src/main/thrift/parquet.thrift
+///
+/// This structure is read by the various readers in this crate or can be read
+/// directly from a file using the [`parse_metadata`] function.
+///
+/// [`parse_metadata`]: crate::file::footer::parse_metadata
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>ParquetMetaData {
-    file_metadata: FileMetaData,
-    row_groups: Vec&lt;RowGroupMetaData&gt;,
-    <span class="doccomment">/// Page index for all pages in each column chunk
+    <span class="doccomment">/// File level metadata
+    </span>file_metadata: FileMetaData,
+    <span class="doccomment">/// Row group metadata
+    </span>row_groups: Vec&lt;RowGroupMetaData&gt;,
+    <span class="doccomment">/// Page level index for each page in each column chunk
     </span>column_index: <span class="prelude-ty">Option</span>&lt;ParquetColumnIndex&gt;,
-    <span class="doccomment">/// Offset index for all pages in each column chunk
+    <span class="doccomment">/// Offset index for all each page in each column chunk
     </span>offset_index: <span class="prelude-ty">Option</span>&lt;ParquetOffsetIndex&gt;,
 }
 
@@ -1265,7 +1387,7 @@
     }
 
     <span class="doccomment">/// Returns page indexes in this file.
-    </span><span class="attr">#[deprecated(note = <span class="string">&quot;Use Self::column_index&quot;</span>)]
+    </span><span class="attr">#[deprecated(note = <span class="string">"Use Self::column_index"</span>)]
     </span><span class="kw">pub fn </span>page_indexes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ParquetColumnIndex&gt; {
         <span class="self">self</span>.column_index.as_ref()
     }
@@ -1276,7 +1398,7 @@
     }
 
     <span class="doccomment">/// Returns the offset index for this file if loaded
-    </span><span class="attr">#[deprecated(note = <span class="string">&quot;Use Self::offset_index&quot;</span>)]
+    </span><span class="attr">#[deprecated(note = <span class="string">"Use Self::offset_index"</span>)]
     </span><span class="kw">pub fn </span>offset_indexes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ParquetOffsetIndex&gt; {
         <span class="self">self</span>.offset_index.as_ref()
     }
@@ -1287,13 +1409,13 @@
     }
 
     <span class="doccomment">/// Override the column index
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;arrow&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"arrow"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_column_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: <span class="prelude-ty">Option</span>&lt;ParquetColumnIndex&gt;) {
         <span class="self">self</span>.column_index = index;
     }
 
     <span class="doccomment">/// Override the offset index
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;arrow&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"arrow"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_offset_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: <span class="prelude-ty">Option</span>&lt;ParquetOffsetIndex&gt;) {
         <span class="self">self</span>.offset_index = index;
     }
@@ -1304,7 +1426,9 @@
 <span class="doccomment">/// Reference counted pointer for [`FileMetaData`].
 </span><span class="kw">pub type </span>FileMetaDataPtr = Arc&lt;FileMetaData&gt;;
 
-<span class="doccomment">/// Metadata for a Parquet file.
+<span class="doccomment">/// File level metadata for a Parquet file.
+///
+/// Includes the version of the file, metadata, number of rows, schema, and column orders
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>FileMetaData {
     version: i32,
@@ -1403,7 +1527,10 @@
 <span class="doccomment">/// Reference counted pointer for [`RowGroupMetaData`].
 </span><span class="kw">pub type </span>RowGroupMetaDataPtr = Arc&lt;RowGroupMetaData&gt;;
 
-<span class="doccomment">/// Metadata for a row group.
+<span class="doccomment">/// Metadata for a row group
+///
+/// Includes [`ColumnChunkMetaData`] for each column in the row group, the number of rows
+/// the total byte size of the row group, and the [`SchemaDescriptor`] for the row group.
 </span><span class="attr">#[derive(Debug, Clone, PartialEq)]
 </span><span class="kw">pub struct </span>RowGroupMetaData {
     columns: Vec&lt;ColumnChunkMetaData&gt;,
@@ -1411,9 +1538,10 @@
     sorting_columns: <span class="prelude-ty">Option</span>&lt;Vec&lt;SortingColumn&gt;&gt;,
     total_byte_size: i64,
     schema_descr: SchemaDescPtr,
-    <span class="comment">// We can&#39;t infer from file offset of first column since there may empty columns in row group.
+    <span class="doccomment">/// We can't infer from file offset of first column since there may empty columns in row group.
     </span>file_offset: <span class="prelude-ty">Option</span>&lt;i64&gt;,
-    ordinal: <span class="prelude-ty">Option</span>&lt;i16&gt;,
+    <span class="doccomment">/// Ordinal position of this row group in file
+    </span>ordinal: <span class="prelude-ty">Option</span>&lt;i16&gt;,
 }
 
 <span class="kw">impl </span>RowGroupMetaData {
@@ -1467,7 +1595,10 @@
         <span class="self">self</span>.schema_descr.clone()
     }
 
-    <span class="doccomment">/// Returns ordinal of this row group in file
+    <span class="doccomment">/// Returns ordinal position of this row group in file.
+    ///
+    /// For example if this is the first row group in the file, this will return 0.
+    /// If this is the second row group in the file, this will return 1.
     </span><span class="attr">#[inline(always)]
     </span><span class="kw">pub fn </span>ordinal(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="self">self</span>.ordinal
@@ -1480,11 +1611,14 @@
     }
 
     <span class="doccomment">/// Method to convert from Thrift.
-    </span><span class="kw">pub fn </span>from_thrift(
-        schema_descr: SchemaDescPtr,
-        <span class="kw-2">mut </span>rg: RowGroup,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;RowGroupMetaData&gt; {
-        <span class="macro">assert_eq!</span>(schema_descr.num_columns(), rg.columns.len());
+    </span><span class="kw">pub fn </span>from_thrift(schema_descr: SchemaDescPtr, <span class="kw-2">mut </span>rg: RowGroup) -&gt; <span class="prelude-ty">Result</span>&lt;RowGroupMetaData&gt; {
+        <span class="kw">if </span>schema_descr.num_columns() != rg.columns.len() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">general_err!</span>(
+                <span class="string">"Column count mismatch. Schema has {} columns while Row Group has {}"</span>,
+                schema_descr.num_columns(),
+                rg.columns.len()
+            ));
+        }
         <span class="kw">let </span>total_byte_size = rg.total_byte_size;
         <span class="kw">let </span>num_rows = rg.num_rows;
         <span class="kw">let </span><span class="kw-2">mut </span>columns = <span class="macro">vec!</span>[];
@@ -1579,7 +1713,7 @@
     </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RowGroupMetaData&gt; {
         <span class="kw">if </span><span class="self">self</span>.<span class="number">0</span>.schema_descr.num_columns() != <span class="self">self</span>.<span class="number">0</span>.columns.len() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">general_err!</span>(
-                <span class="string">&quot;Column length mismatch: {} != {}&quot;</span>,
+                <span class="string">"Column length mismatch: {} != {}"</span>,
                 <span class="self">self</span>.<span class="number">0</span>.schema_descr.num_columns(),
                 <span class="self">self</span>.<span class="number">0</span>.columns.len()
             ));
@@ -1606,6 +1740,7 @@
     statistics: <span class="prelude-ty">Option</span>&lt;Statistics&gt;,
     encoding_stats: <span class="prelude-ty">Option</span>&lt;Vec&lt;PageEncodingStats&gt;&gt;,
     bloom_filter_offset: <span class="prelude-ty">Option</span>&lt;i64&gt;,
+    bloom_filter_length: <span class="prelude-ty">Option</span>&lt;i32&gt;,
     offset_index_offset: <span class="prelude-ty">Option</span>&lt;i64&gt;,
     offset_index_length: <span class="prelude-ty">Option</span>&lt;i32&gt;,
     column_index_offset: <span class="prelude-ty">Option</span>&lt;i64&gt;,
@@ -1701,7 +1836,7 @@
         <span class="kw">let </span>col_len = <span class="self">self</span>.compressed_size();
         <span class="macro">assert!</span>(
             col_start &gt;= <span class="number">0 </span>&amp;&amp; col_len &gt;= <span class="number">0</span>,
-            <span class="string">&quot;column start and length should not be negative&quot;
+            <span class="string">"column start and length should not be negative"
         </span>);
         (col_start <span class="kw">as </span>u64, col_len <span class="kw">as </span>u64)
     }
@@ -1721,6 +1856,11 @@
     <span class="doccomment">/// Returns the offset for the bloom filter.
     </span><span class="kw">pub fn </span>bloom_filter_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i64&gt; {
         <span class="self">self</span>.bloom_filter_offset
+    }
+
+    <span class="doccomment">/// Returns the offset for the bloom filter.
+    </span><span class="kw">pub fn </span>bloom_filter_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
+        <span class="self">self</span>.bloom_filter_length
     }
 
     <span class="doccomment">/// Returns the offset for the column index.
@@ -1760,7 +1900,7 @@
     <span class="doccomment">/// Method to convert from Thrift.
     </span><span class="kw">pub fn </span>from_thrift(column_descr: ColumnDescPtr, cc: ColumnChunk) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>cc.meta_data.is_none() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">general_err!</span>(<span class="string">&quot;Expected to have column metadata&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">general_err!</span>(<span class="string">"Expected to have column metadata"</span>));
         }
         <span class="kw">let </span><span class="kw-2">mut </span>col_metadata: ColumnMetaData = cc.meta_data.unwrap();
         <span class="kw">let </span>column_type = Type::try_from(col_metadata.type_)<span class="question-mark">?</span>;
@@ -1789,6 +1929,7 @@
             })
             .transpose()<span class="question-mark">?</span>;
         <span class="kw">let </span>bloom_filter_offset = col_metadata.bloom_filter_offset;
+        <span class="kw">let </span>bloom_filter_length = col_metadata.bloom_filter_length;
         <span class="kw">let </span>offset_index_offset = cc.offset_index_offset;
         <span class="kw">let </span>offset_index_length = cc.offset_index_length;
         <span class="kw">let </span>column_index_offset = cc.column_index_offset;
@@ -1809,6 +1950,7 @@
             statistics,
             encoding_stats,
             bloom_filter_offset,
+            bloom_filter_length,
             offset_index_offset,
             offset_index_length,
             column_index_offset,
@@ -1854,6 +1996,7 @@
                 .as_ref()
                 .map(|vec| vec.iter().map(page_encoding_stats::to_thrift).collect()),
             bloom_filter_offset: <span class="self">self</span>.bloom_filter_offset,
+            bloom_filter_length: <span class="self">self</span>.bloom_filter_length,
         }
     }
 
@@ -1884,6 +2027,7 @@
             statistics: <span class="prelude-val">None</span>,
             encoding_stats: <span class="prelude-val">None</span>,
             bloom_filter_offset: <span class="prelude-val">None</span>,
+            bloom_filter_length: <span class="prelude-val">None</span>,
             offset_index_offset: <span class="prelude-val">None</span>,
             offset_index_length: <span class="prelude-val">None</span>,
             column_index_offset: <span class="prelude-val">None</span>,
@@ -1969,6 +2113,12 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Sets optional bloom filter length in bytes.
+    </span><span class="kw">pub fn </span>set_bloom_filter_length(<span class="kw-2">mut </span><span class="self">self</span>, value: <span class="prelude-ty">Option</span>&lt;i32&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.<span class="number">0</span>.bloom_filter_length = value;
+        <span class="self">self
+    </span>}
+
     <span class="doccomment">/// Sets optional offset index offset in bytes.
     </span><span class="kw">pub fn </span>set_offset_index_offset(<span class="kw-2">mut </span><span class="self">self</span>, value: <span class="prelude-ty">Option</span>&lt;i64&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.<span class="number">0</span>.offset_index_offset = value;
@@ -2004,10 +2154,9 @@
     null_pages: Vec&lt;bool&gt;,
     min_values: Vec&lt;Vec&lt;u8&gt;&gt;,
     max_values: Vec&lt;Vec&lt;u8&gt;&gt;,
-    <span class="comment">// TODO: calc the order for all pages in this column
-    </span>boundary_order: BoundaryOrder,
     null_counts: Vec&lt;i64&gt;,
-    <span class="comment">// If one page can&#39;t get build index, need to ignore all index in this column
+    boundary_order: BoundaryOrder,
+    <span class="comment">// If one page can't get build index, need to ignore all index in this column
     </span>valid: bool,
 }
 
@@ -2023,8 +2172,8 @@
             null_pages: Vec::new(),
             min_values: Vec::new(),
             max_values: Vec::new(),
-            boundary_order: BoundaryOrder::UNORDERED,
             null_counts: Vec::new(),
+            boundary_order: BoundaryOrder::UNORDERED,
             valid: <span class="bool-val">true</span>,
         }
     }
@@ -2040,6 +2189,10 @@
         <span class="self">self</span>.min_values.push(min_value);
         <span class="self">self</span>.max_values.push(max_value);
         <span class="self">self</span>.null_counts.push(null_count);
+    }
+
+    <span class="kw">pub fn </span>set_boundary_order(<span class="kw-2">&amp;mut </span><span class="self">self</span>, boundary_order: BoundaryOrder) {
+        <span class="self">self</span>.boundary_order = boundary_order;
     }
 
     <span class="kw">pub fn </span>to_invalid(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -2104,9 +2257,7 @@
             .iter()
             .zip(<span class="self">self</span>.compressed_page_size_array.iter())
             .zip(<span class="self">self</span>.first_row_index_array.iter())
-            .map(|((offset, size), row_index)| {
-                PageLocation::new(<span class="kw-2">*</span>offset, <span class="kw-2">*</span>size, <span class="kw-2">*</span>row_index)
-            })
+            .map(|((offset, size), row_index)| PageLocation::new(<span class="kw-2">*</span>offset, <span class="kw-2">*</span>size, <span class="kw-2">*</span>row_index))
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
         OffsetIndex::new(locations)
     }
@@ -2115,7 +2266,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::basic::{Encoding, PageType};
+    <span class="kw">use </span><span class="kw">crate</span>::basic::PageType;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_row_group_metadata_thrift_conversion() {
@@ -2135,10 +2286,9 @@
             .unwrap();
 
         <span class="kw">let </span>row_group_exp = row_group_meta.to_thrift();
-        <span class="kw">let </span>row_group_res =
-            RowGroupMetaData::from_thrift(schema_descr, row_group_exp.clone())
-                .unwrap()
-                .to_thrift();
+        <span class="kw">let </span>row_group_res = RowGroupMetaData::from_thrift(schema_descr, row_group_exp.clone())
+            .unwrap()
+            .to_thrift();
 
         <span class="macro">assert_eq!</span>(row_group_res, row_group_exp);
     }
@@ -2152,10 +2302,79 @@
         <span class="macro">assert!</span>(row_group_meta.is_err());
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = row_group_meta {
             <span class="macro">assert_eq!</span>(
-                <span class="macro">format!</span>(<span class="string">&quot;{e}&quot;</span>),
-                <span class="string">&quot;Parquet error: Column length mismatch: 2 != 0&quot;
+                <span class="macro">format!</span>(<span class="string">"{e}"</span>),
+                <span class="string">"Parquet error: Column length mismatch: 2 != 0"
             </span>);
         }
+    }
+
+    <span class="doccomment">/// Test reading a corrupted Parquet file with 3 columns in its schema but only 2 in its row group
+    </span><span class="attr">#[test]
+    </span><span class="kw">fn </span>test_row_group_metadata_thrift_corrupted() {
+        <span class="kw">let </span>schema_descr_2cols = Arc::new(SchemaDescriptor::new(Arc::new(
+            SchemaType::group_type_builder(<span class="string">"schema"</span>)
+                .with_fields(<span class="macro">vec!</span>[
+                    Arc::new(
+                        SchemaType::primitive_type_builder(<span class="string">"a"</span>, Type::INT32)
+                            .build()
+                            .unwrap(),
+                    ),
+                    Arc::new(
+                        SchemaType::primitive_type_builder(<span class="string">"b"</span>, Type::INT32)
+                            .build()
+                            .unwrap(),
+                    ),
+                ])
+                .build()
+                .unwrap(),
+        )));
+
+        <span class="kw">let </span>schema_descr_3cols = Arc::new(SchemaDescriptor::new(Arc::new(
+            SchemaType::group_type_builder(<span class="string">"schema"</span>)
+                .with_fields(<span class="macro">vec!</span>[
+                    Arc::new(
+                        SchemaType::primitive_type_builder(<span class="string">"a"</span>, Type::INT32)
+                            .build()
+                            .unwrap(),
+                    ),
+                    Arc::new(
+                        SchemaType::primitive_type_builder(<span class="string">"b"</span>, Type::INT32)
+                            .build()
+                            .unwrap(),
+                    ),
+                    Arc::new(
+                        SchemaType::primitive_type_builder(<span class="string">"c"</span>, Type::INT32)
+                            .build()
+                            .unwrap(),
+                    ),
+                ])
+                .build()
+                .unwrap(),
+        )));
+
+        <span class="kw">let </span>row_group_meta_2cols = RowGroupMetaData::builder(schema_descr_2cols.clone())
+            .set_num_rows(<span class="number">1000</span>)
+            .set_total_byte_size(<span class="number">2000</span>)
+            .set_column_metadata(<span class="macro">vec!</span>[
+                ColumnChunkMetaData::builder(schema_descr_2cols.column(<span class="number">0</span>))
+                    .build()
+                    .unwrap(),
+                ColumnChunkMetaData::builder(schema_descr_2cols.column(<span class="number">1</span>))
+                    .build()
+                    .unwrap(),
+            ])
+            .set_ordinal(<span class="number">1</span>)
+            .build()
+            .unwrap();
+
+        <span class="kw">let </span>err =
+            RowGroupMetaData::from_thrift(schema_descr_3cols, row_group_meta_2cols.to_thrift())
+                .unwrap_err()
+                .to_string();
+        <span class="macro">assert_eq!</span>(
+            err,
+            <span class="string">"Parquet error: Column count mismatch. Schema has 3 columns while Row Group has 2"
+        </span>);
     }
 
     <span class="attr">#[test]
@@ -2164,7 +2383,7 @@
 
         <span class="kw">let </span>col_metadata = ColumnChunkMetaData::builder(column_descr.clone())
             .set_encodings(<span class="macro">vec!</span>[Encoding::PLAIN, Encoding::RLE])
-            .set_file_path(<span class="string">&quot;file_path&quot;</span>.to_owned())
+            .set_file_path(<span class="string">"file_path"</span>.to_owned())
             .set_file_offset(<span class="number">100</span>)
             .set_num_values(<span class="number">1000</span>)
             .set_compression(Compression::SNAPPY)
@@ -2185,6 +2404,7 @@
                 },
             ])
             .set_bloom_filter_offset(<span class="prelude-val">Some</span>(<span class="number">6000</span>))
+            .set_bloom_filter_length(<span class="prelude-val">Some</span>(<span class="number">25</span>))
             .set_offset_index_offset(<span class="prelude-val">Some</span>(<span class="number">7000</span>))
             .set_offset_index_length(<span class="prelude-val">Some</span>(<span class="number">25</span>))
             .set_column_index_offset(<span class="prelude-val">Some</span>(<span class="number">8000</span>))
@@ -2193,8 +2413,7 @@
             .unwrap();
 
         <span class="kw">let </span>col_chunk_res =
-            ColumnChunkMetaData::from_thrift(column_descr, col_metadata.to_thrift())
-                .unwrap();
+            ColumnChunkMetaData::from_thrift(column_descr, col_metadata.to_thrift()).unwrap();
 
         <span class="macro">assert_eq!</span>(col_chunk_res, col_metadata);
     }
@@ -2208,10 +2427,9 @@
             .unwrap();
 
         <span class="kw">let </span>col_chunk_exp = col_metadata.to_thrift();
-        <span class="kw">let </span>col_chunk_res =
-            ColumnChunkMetaData::from_thrift(column_descr, col_chunk_exp.clone())
-                .unwrap()
-                .to_thrift();
+        <span class="kw">let </span>col_chunk_res = ColumnChunkMetaData::from_thrift(column_descr, col_chunk_exp.clone())
+            .unwrap()
+            .to_thrift();
 
         <span class="macro">assert_eq!</span>(col_chunk_res, col_chunk_exp);
     }
@@ -2243,15 +2461,15 @@
 
     <span class="doccomment">/// Returns sample schema descriptor so we can create column metadata.
     </span><span class="kw">fn </span>get_test_schema_descr() -&gt; SchemaDescPtr {
-        <span class="kw">let </span>schema = SchemaType::group_type_builder(<span class="string">&quot;schema&quot;</span>)
+        <span class="kw">let </span>schema = SchemaType::group_type_builder(<span class="string">"schema"</span>)
             .with_fields(<span class="macro">vec!</span>[
                 Arc::new(
-                    SchemaType::primitive_type_builder(<span class="string">&quot;a&quot;</span>, Type::INT32)
+                    SchemaType::primitive_type_builder(<span class="string">"a"</span>, Type::INT32)
                         .build()
                         .unwrap(),
                 ),
                 Arc::new(
-                    SchemaType::primitive_type_builder(<span class="string">&quot;b&quot;</span>, Type::INT32)
+                    SchemaType::primitive_type_builder(<span class="string">"b"</span>, Type::INT32)
                         .build()
                         .unwrap(),
                 ),

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/fixed_size_list_array.rs`."><title>fixed_size_list_array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/fixed_size_list_array.rs`."><title>fixed_size_list_array.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -691,25 +691,19 @@
 <a href="#691" id="691">691</a>
 <a href="#692" id="692">692</a>
 <a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -726,7 +720,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="doccomment">/// An array of [fixed length lists], similar to JSON arrays
-/// (e.g. `[&quot;A&quot;, &quot;B&quot;]`).
+/// (e.g. `["A", "B"]`).
 ///
 /// Lists are represented using a `values` child
 /// array where each list has a fixed size of `value_length`.
@@ -794,7 +788,7 @@
 ///     .build()
 ///     .unwrap();
 /// let list_data_type = DataType::FixedSizeList(
-///     Arc::new(Field::new(&quot;item&quot;, DataType::Int32, false)),
+///     Arc::new(Field::new("item", DataType::Int32, false)),
 ///     3,
 /// );
 /// let list_data = ArrayData::builder(list_data_type.clone())
@@ -829,12 +823,7 @@
     /// # Panics
     ///
     /// Panics if [`Self::try_new`] returns an error
-    </span><span class="kw">pub fn </span>new(
-        field: FieldRef,
-        size: i32,
-        values: ArrayRef,
-        nulls: <span class="prelude-ty">Option</span>&lt;NullBuffer&gt;,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(field: FieldRef, size: i32, values: ArrayRef, nulls: <span class="prelude-ty">Option</span>&lt;NullBuffer&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::try_new(field, size, values, nulls).unwrap()
     }
 
@@ -853,26 +842,29 @@
         nulls: <span class="prelude-ty">Option</span>&lt;NullBuffer&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>s = size.to_usize().ok_or_else(|| {
-            ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Size cannot be negative, got {}&quot;</span>,
-                size
-            ))
+            ArrowError::InvalidArgumentError(<span class="macro">format!</span>(<span class="string">"Size cannot be negative, got {}"</span>, size))
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>len = values.len() / s.max(<span class="number">1</span>);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = nulls.as_ref() {
-            <span class="kw">if </span>n.len() != len {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Incorrect length of null buffer for FixedSizeListArray, expected {} got {}&quot;</span>,
-                    len,
-                    n.len(),
-                )));
+        <span class="kw">let </span>len = <span class="kw">match </span>s {
+            <span class="number">0 </span>=&gt; nulls.as_ref().map(|x| x.len()).unwrap_or_default(),
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>len = values.len() / s.max(<span class="number">1</span>);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = nulls.as_ref() {
+                    <span class="kw">if </span>n.len() != len {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
+                            <span class="string">"Incorrect length of null buffer for FixedSizeListArray, expected {} got {}"</span>,
+                            len,
+                            n.len(),
+                        )));
+                    }
+                }
+                len
             }
-        }
+        };
 
         <span class="kw">if </span>field.data_type() != values.data_type() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;FixedSizeListArray expected data type {} got {} for {:?}&quot;</span>,
+                <span class="string">"FixedSizeListArray expected data type {} got {} for {:?}"</span>,
                 field.data_type(),
                 values.data_type(),
                 field.name()
@@ -884,11 +876,12 @@
                 || nulls
                     .as_ref()
                     .map(|n| n.expand(size <span class="kw">as _</span>).contains(<span class="kw-2">&amp;</span>a))
-                    .unwrap_or_default();
+                    .unwrap_or_default()
+                || (nulls.is_none() &amp;&amp; a.null_count() == <span class="number">0</span>);
 
             <span class="kw">if </span>!nulls_valid {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Found unmasked nulls for non-nullable FixedSizeListArray field {:?}&quot;</span>,
+                    <span class="string">"Found unmasked nulls for non-nullable FixedSizeListArray field {:?}"</span>,
                     field.name()
                 )));
             }
@@ -950,7 +943,7 @@
 
     <span class="doccomment">/// Returns the offset for value at index `i`.
     ///
-    /// Note this doesn&#39;t do any bound checking, for performance reason.
+    /// Note this doesn't do any bound checking, for performance reason.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>value_offset(<span class="kw-2">&amp;</span><span class="self">self</span>, i: usize) -&gt; i32 {
         <span class="self">self</span>.value_offset_at(i)
@@ -973,7 +966,7 @@
     </span><span class="kw">pub fn </span>slice(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: usize, len: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(
             offset.saturating_add(len) &lt;= <span class="self">self</span>.len,
-            <span class="string">&quot;the length + offset of the sliced FixedSizeListArray cannot exceed the existing length&quot;
+            <span class="string">"the length + offset of the sliced FixedSizeListArray cannot exceed the existing length"
         </span>);
         <span class="kw">let </span>size = <span class="self">self</span>.value_length <span class="kw">as </span>usize;
 
@@ -999,7 +992,7 @@
     ///    Some(vec![Some(6), Some(7), Some(45)]),
     /// ];
     /// let list_array = FixedSizeListArray::from_iter_primitive::&lt;Int32Type, _, _&gt;(data, 3);
-    /// println!(&quot;{:?}&quot;, list_array);
+    /// println!("{:?}", list_array);
     /// ```
     </span><span class="kw">pub fn </span>from_iter_primitive&lt;T, P, I&gt;(iter: I, length: i32) -&gt; <span class="self">Self
     </span><span class="kw">where
@@ -1034,7 +1027,7 @@
     }
 
     <span class="doccomment">/// constructs a new iterator
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FixedSizeListIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FixedSizeListIter&lt;<span class="lifetime">'_</span>&gt; {
         FixedSizeListIter::new(<span class="self">self</span>)
     }
 }
@@ -1044,14 +1037,13 @@
         <span class="kw">let </span>value_length = <span class="kw">match </span>data.data_type() {
             DataType::FixedSizeList(<span class="kw">_</span>, len) =&gt; <span class="kw-2">*</span>len,
             <span class="kw">_ </span>=&gt; {
-                <span class="macro">panic!</span>(<span class="string">&quot;FixedSizeListArray data should contain a FixedSizeList data type&quot;</span>)
+                <span class="macro">panic!</span>(<span class="string">"FixedSizeListArray data should contain a FixedSizeList data type"</span>)
             }
         };
 
         <span class="kw">let </span>size = value_length <span class="kw">as </span>usize;
-        <span class="kw">let </span>values = make_array(
-            data.child_data()[<span class="number">0</span>].slice(data.offset() * size, data.len() * size),
-        );
+        <span class="kw">let </span>values =
+            make_array(data.child_data()[<span class="number">0</span>].slice(data.offset() * size, data.len() * size));
         <span class="self">Self </span>{
             data_type: data.data_type().clone(),
             values,
@@ -1141,15 +1133,15 @@
 
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>FixedSizeListArray {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;FixedSizeListArray&lt;{}&gt;\n[\n&quot;</span>, <span class="self">self</span>.value_length())<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"FixedSizeListArray&lt;{}&gt;\n[\n"</span>, <span class="self">self</span>.value_length())<span class="question-mark">?</span>;
         print_long_array(<span class="self">self</span>, f, |array, index, f| {
             std::fmt::Debug::fmt(<span class="kw-2">&amp;</span>array.value(index), f)
         })<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(f, <span class="string">&quot;]&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"]"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ArrayAccessor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FixedSizeListArray {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ArrayAccessor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>FixedSizeListArray {
     <span class="kw">type </span>Item = ArrayRef;
 
     <span class="kw">fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="self">Self</span>::Item {
@@ -1168,7 +1160,7 @@
 
     <span class="kw">use </span><span class="kw">crate</span>::cast::AsArray;
     <span class="kw">use </span><span class="kw">crate</span>::types::Int32Type;
-    <span class="kw">use </span><span class="kw">crate</span>::Int32Array;
+    <span class="kw">use crate</span>::{new_empty_array, Int32Array};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -1182,10 +1174,8 @@
             .unwrap();
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type = DataType::FixedSizeList(
-            Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
-            <span class="number">3</span>,
-        );
+        </span><span class="kw">let </span>list_data_type =
+            DataType::FixedSizeList(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)), <span class="number">3</span>);
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type.clone())
             .len(<span class="number">3</span>)
             .add_child_data(value_data.clone())
@@ -1224,10 +1214,10 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;assertion failed: (offset + length) &lt;= self.len()&quot;</span>)]
+    #[should_panic(expected = <span class="string">"assertion failed: (offset + length) &lt;= self.len()"</span>)]
     </span><span class="comment">// Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;force_validate&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"force_validate"</span>))]
     </span><span class="kw">fn </span>test_fixed_size_list_array_unequal_children() {
         <span class="comment">// Construct a value array
         </span><span class="kw">let </span>value_data = ArrayData::builder(DataType::Int32)
@@ -1237,10 +1227,8 @@
             .unwrap();
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type = DataType::FixedSizeList(
-            Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
-            <span class="number">3</span>,
-        );
+        </span><span class="kw">let </span>list_data_type =
+            DataType::FixedSizeList(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)), <span class="number">3</span>);
         <span class="kw">let </span>list_data = <span class="kw">unsafe </span>{
             ArrayData::builder(list_data_type)
                 .len(<span class="number">3</span>)
@@ -1268,10 +1256,8 @@
         bit_util::set_bit(<span class="kw-2">&amp;mut </span>null_bits, <span class="number">4</span>);
 
         <span class="comment">// Construct a fixed size list array from the above two
-        </span><span class="kw">let </span>list_data_type = DataType::FixedSizeList(
-            Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
-            <span class="number">2</span>,
-        );
+        </span><span class="kw">let </span>list_data_type =
+            DataType::FixedSizeList(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)), <span class="number">2</span>);
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">5</span>)
             .add_child_data(value_data.clone())
@@ -1310,9 +1296,7 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;the offset of the new Buffer cannot exceed the existing length&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"the offset of the new Buffer cannot exceed the existing length"</span>)]
     </span><span class="kw">fn </span>test_fixed_size_list_array_index_out_of_bound() {
         <span class="comment">// Construct a value array
         </span><span class="kw">let </span>value_data = ArrayData::builder(DataType::Int32)
@@ -1330,10 +1314,8 @@
         bit_util::set_bit(<span class="kw-2">&amp;mut </span>null_bits, <span class="number">4</span>);
 
         <span class="comment">// Construct a fixed size list array from the above two
-        </span><span class="kw">let </span>list_data_type = DataType::FixedSizeList(
-            Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
-            <span class="number">2</span>,
-        );
+        </span><span class="kw">let </span>list_data_type =
+            DataType::FixedSizeList(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)), <span class="number">2</span>);
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">5</span>)
             .add_child_data(value_data)
@@ -1356,7 +1338,7 @@
             <span class="prelude-val">Some</span>(<span class="number">4</span>),
         ]));
 
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">true</span>));
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">true</span>));
         <span class="kw">let </span>list = FixedSizeListArray::new(field.clone(), <span class="number">2</span>, values.clone(), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(list.len(), <span class="number">3</span>);
 
@@ -1367,33 +1349,39 @@
         <span class="kw">let </span>list = FixedSizeListArray::new(field.clone(), <span class="number">4</span>, values.clone(), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(list.len(), <span class="number">1</span>);
 
-        <span class="kw">let </span>err = FixedSizeListArray::try_new(field.clone(), -<span class="number">1</span>, values.clone(), <span class="prelude-val">None</span>)
-            .unwrap_err();
+        <span class="kw">let </span>err = FixedSizeListArray::try_new(field.clone(), -<span class="number">1</span>, values.clone(), <span class="prelude-val">None</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(
             err.to_string(),
-            <span class="string">&quot;Invalid argument error: Size cannot be negative, got -1&quot;
+            <span class="string">"Invalid argument error: Size cannot be negative, got -1"
         </span>);
 
         <span class="kw">let </span>list = FixedSizeListArray::new(field.clone(), <span class="number">0</span>, values.clone(), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(list.len(), <span class="number">6</span>);
+        <span class="macro">assert_eq!</span>(list.len(), <span class="number">0</span>);
 
         <span class="kw">let </span>nulls = NullBuffer::new_null(<span class="number">2</span>);
-        <span class="kw">let </span>err = FixedSizeListArray::try_new(field, <span class="number">2</span>, values.clone(), <span class="prelude-val">Some</span>(nulls))
-            .unwrap_err();
-        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">&quot;Invalid argument error: Incorrect length of null buffer for FixedSizeListArray, expected 3 got 2&quot;</span>);
+        <span class="kw">let </span>err = FixedSizeListArray::try_new(field, <span class="number">2</span>, values.clone(), <span class="prelude-val">Some</span>(nulls)).unwrap_err();
+        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">"Invalid argument error: Incorrect length of null buffer for FixedSizeListArray, expected 3 got 2"</span>);
 
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>));
-        <span class="kw">let </span>err = FixedSizeListArray::try_new(field.clone(), <span class="number">2</span>, values.clone(), <span class="prelude-val">None</span>)
-            .unwrap_err();
-        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">&quot;Invalid argument error: Found unmasked nulls for non-nullable FixedSizeListArray field \&quot;item\&quot;&quot;</span>);
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>err = FixedSizeListArray::try_new(field.clone(), <span class="number">2</span>, values.clone(), <span class="prelude-val">None</span>).unwrap_err();
+        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">"Invalid argument error: Found unmasked nulls for non-nullable FixedSizeListArray field \"item\""</span>);
 
         <span class="comment">// Valid as nulls in child masked by parent
         </span><span class="kw">let </span>nulls = NullBuffer::new(BooleanBuffer::new(<span class="macro">vec!</span>[<span class="number">0b0000101</span>].into(), <span class="number">0</span>, <span class="number">3</span>));
         FixedSizeListArray::new(field, <span class="number">2</span>, values.clone(), <span class="prelude-val">Some</span>(nulls));
 
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int64, <span class="bool-val">true</span>));
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int64, <span class="bool-val">true</span>));
         <span class="kw">let </span>err = FixedSizeListArray::try_new(field, <span class="number">2</span>, values, <span class="prelude-val">None</span>).unwrap_err();
-        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">&quot;Invalid argument error: FixedSizeListArray expected data type Int64 got Int32 for \&quot;item\&quot;&quot;</span>);
+        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">"Invalid argument error: FixedSizeListArray expected data type Int64 got Int32 for \"item\""</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>empty_fixed_size_list() {
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">true</span>));
+        <span class="kw">let </span>nulls = NullBuffer::new_null(<span class="number">2</span>);
+        <span class="kw">let </span>values = new_empty_array(<span class="kw-2">&amp;</span>DataType::Int32);
+        <span class="kw">let </span>list = FixedSizeListArray::new(field.clone(), <span class="number">0</span>, values, <span class="prelude-val">Some</span>(nulls));
+        <span class="macro">assert_eq!</span>(list.len(), <span class="number">2</span>);
     }
 }
 </code></pre></div></section></main></body></html>

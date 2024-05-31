@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/list_array.rs`."><title>list_array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/list_array.rs`."><title>list_array.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1222,46 +1222,19 @@
 <a href="#1222" id="1222">1222</a>
 <a href="#1223" id="1223">1223</a>
 <a href="#1224" id="1224">1224</a>
-<a href="#1225" id="1225">1225</a>
-<a href="#1226" id="1226">1226</a>
-<a href="#1227" id="1227">1227</a>
-<a href="#1228" id="1228">1228</a>
-<a href="#1229" id="1229">1229</a>
-<a href="#1230" id="1230">1230</a>
-<a href="#1231" id="1231">1231</a>
-<a href="#1232" id="1232">1232</a>
-<a href="#1233" id="1233">1233</a>
-<a href="#1234" id="1234">1234</a>
-<a href="#1235" id="1235">1235</a>
-<a href="#1236" id="1236">1236</a>
-<a href="#1237" id="1237">1237</a>
-<a href="#1238" id="1238">1238</a>
-<a href="#1239" id="1239">1239</a>
-<a href="#1240" id="1240">1240</a>
-<a href="#1241" id="1241">1241</a>
-<a href="#1242" id="1242">1242</a>
-<a href="#1243" id="1243">1243</a>
-<a href="#1244" id="1244">1244</a>
-<a href="#1245" id="1245">1245</a>
-<a href="#1246" id="1246">1246</a>
-<a href="#1247" id="1247">1247</a>
-<a href="#1248" id="1248">1248</a>
-<a href="#1249" id="1249">1249</a>
-<a href="#1250" id="1250">1250</a>
-<a href="#1251" id="1251">1251</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -1292,21 +1265,21 @@
     <span class="doccomment">/// True for 64 bit offset size and false for 32 bit offset size
     </span><span class="kw">const </span>IS_LARGE: bool;
     <span class="doccomment">/// Prefix for the offset size
-    </span><span class="kw">const </span>PREFIX: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    </span><span class="kw">const </span>PREFIX: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 }
 
 <span class="kw">impl </span>OffsetSizeTrait <span class="kw">for </span>i32 {
     <span class="kw">const </span>IS_LARGE: bool = <span class="bool-val">false</span>;
-    <span class="kw">const </span>PREFIX: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;&quot;</span>;
+    <span class="kw">const </span>PREFIX: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">""</span>;
 }
 
 <span class="kw">impl </span>OffsetSizeTrait <span class="kw">for </span>i64 {
     <span class="kw">const </span>IS_LARGE: bool = <span class="bool-val">true</span>;
-    <span class="kw">const </span>PREFIX: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;Large&quot;</span>;
+    <span class="kw">const </span>PREFIX: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">"Large"</span>;
 }
 
 <span class="doccomment">/// An array of [variable length lists], similar to JSON arrays
-/// (e.g. `[&quot;A&quot;, &quot;B&quot;, &quot;C&quot;]`).
+/// (e.g. `["A", "B", "C"]`).
 ///
 /// Lists are represented using `offsets` into a `values` child
 /// array. Offsets are stored in two adjacent entries of an
@@ -1421,11 +1394,11 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>len = offsets.len() - <span class="number">1</span>; <span class="comment">// Offsets guaranteed to not be empty
         </span><span class="kw">let </span>end_offset = offsets.last().unwrap().as_usize();
-        <span class="comment">// don&#39;t need to check other values of `offsets` because they are checked
+        <span class="comment">// don't need to check other values of `offsets` because they are checked
         // during construction of `OffsetBuffer`
         </span><span class="kw">if </span>end_offset &gt; values.len() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Max offset of {end_offset} exceeds length of values {}&quot;</span>,
+                <span class="string">"Max offset of {end_offset} exceeds length of values {}"</span>,
                 values.len()
             )));
         }
@@ -1433,7 +1406,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = nulls.as_ref() {
             <span class="kw">if </span>n.len() != len {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Incorrect length of null buffer for {}ListArray, expected {len} got {}&quot;</span>,
+                    <span class="string">"Incorrect length of null buffer for {}ListArray, expected {len} got {}"</span>,
                     OffsetSize::PREFIX,
                     n.len(),
                 )));
@@ -1441,7 +1414,7 @@
         }
         <span class="kw">if </span>!field.is_nullable() &amp;&amp; values.is_nullable() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Non-nullable field of {}ListArray {:?} cannot contain nulls&quot;</span>,
+                <span class="string">"Non-nullable field of {}ListArray {:?} cannot contain nulls"</span>,
                 OffsetSize::PREFIX,
                 field.name()
             )));
@@ -1449,7 +1422,7 @@
 
         <span class="kw">if </span>field.data_type() != values.data_type() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;{}ListArray expected data type {} got {} for {:?}&quot;</span>,
+                <span class="string">"{}ListArray expected data type {} got {} for {:?}"</span>,
                 OffsetSize::PREFIX,
                 field.data_type(),
                 values.data_type(),
@@ -1556,8 +1529,8 @@
     }
 
     <span class="doccomment">/// constructs a new iterator
-    </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; GenericListArrayIter&lt;<span class="lifetime">&#39;a</span>, OffsetSize&gt; {
-        GenericListArrayIter::&lt;<span class="lifetime">&#39;a</span>, OffsetSize&gt;::new(<span class="self">self</span>)
+    </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; GenericListArrayIter&lt;<span class="lifetime">'a</span>, OffsetSize&gt; {
+        GenericListArrayIter::&lt;<span class="lifetime">'a</span>, OffsetSize&gt;::new(<span class="self">self</span>)
     }
 
     <span class="attr">#[inline]
@@ -1593,7 +1566,7 @@
     ///    Some(vec![Some(6), Some(7)]),
     /// ];
     /// let list_array = ListArray::from_iter_primitive::&lt;Int32Type, _, _&gt;(data);
-    /// println!(&quot;{:?}&quot;, list_array);
+    /// println!("{:?}", list_array);
     /// ```
     </span><span class="kw">pub fn </span>from_iter_primitive&lt;T, P, I&gt;(iter: I) -&gt; <span class="self">Self
     </span><span class="kw">where
@@ -1623,9 +1596,8 @@
 
 <span class="kw">impl</span>&lt;OffsetSize: OffsetSizeTrait&gt; From&lt;ArrayData&gt; <span class="kw">for </span>GenericListArray&lt;OffsetSize&gt; {
     <span class="kw">fn </span>from(data: ArrayData) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::try_new_from_array_data(data).expect(
-            <span class="string">&quot;Expected infallible creation of GenericListArray from ArrayDataRef failed&quot;</span>,
-        )
+        <span class="self">Self</span>::try_new_from_array_data(data)
+            .expect(<span class="string">"Expected infallible creation of GenericListArray from ArrayDataRef failed"</span>)
     }
 }
 
@@ -1642,17 +1614,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;OffsetSize: OffsetSizeTrait&gt; From&lt;FixedSizeListArray&gt;
-    <span class="kw">for </span>GenericListArray&lt;OffsetSize&gt;
-{
+<span class="kw">impl</span>&lt;OffsetSize: OffsetSizeTrait&gt; From&lt;FixedSizeListArray&gt; <span class="kw">for </span>GenericListArray&lt;OffsetSize&gt; {
     <span class="kw">fn </span>from(value: FixedSizeListArray) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(field, size) = <span class="kw">match </span>value.data_type() {
             DataType::FixedSizeList(f, size) =&gt; (f, <span class="kw-2">*</span>size <span class="kw">as </span>usize),
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         };
 
-        <span class="kw">let </span>offsets =
-            OffsetBuffer::from_lengths(std::iter::repeat(size).take(value.len()));
+        <span class="kw">let </span>offsets = OffsetBuffer::from_lengths(std::iter::repeat(size).take(value.len()));
 
         <span class="self">Self </span>{
             data_type: <span class="self">Self</span>::DATA_TYPE_CONSTRUCTOR(field.clone()),
@@ -1666,14 +1635,15 @@
 <span class="kw">impl</span>&lt;OffsetSize: OffsetSizeTrait&gt; GenericListArray&lt;OffsetSize&gt; {
     <span class="kw">fn </span>try_new_from_array_data(data: ArrayData) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">if </span>data.buffers().len() != <span class="number">1 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                <span class="macro">format!</span>(<span class="string">&quot;ListArray data should contain a single buffer only (value offsets), had {}&quot;</span>,
-                        data.buffers().len())));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
+                <span class="string">"ListArray data should contain a single buffer only (value offsets), had {}"</span>,
+                data.buffers().len()
+            )));
         }
 
         <span class="kw">if </span>data.child_data().len() != <span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;ListArray should contain a single child array (values array), had {}&quot;</span>,
+                <span class="string">"ListArray should contain a single child array (values array), had {}"</span>,
                 data.child_data().len()
             )));
         }
@@ -1683,15 +1653,15 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(child_data_type) = <span class="self">Self</span>::get_type(data.data_type()) {
             <span class="kw">if </span>values.data_type() != child_data_type {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;[Large]ListArray&#39;s child datatype {:?} does not \
-                             correspond to the List&#39;s datatype {:?}&quot;</span>,
+                    <span class="string">"[Large]ListArray's child datatype {:?} does not \
+                             correspond to the List's datatype {:?}"</span>,
                     values.data_type(),
                     child_data_type
                 )));
             }
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;[Large]ListArray&#39;s datatype must be [Large]ListArray(). It is {:?}&quot;</span>,
+                <span class="string">"[Large]ListArray's datatype must be [Large]ListArray(). It is {:?}"</span>,
                 data.data_type()
             )));
         }
@@ -1766,7 +1736,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, OffsetSize: OffsetSizeTrait&gt; ArrayAccessor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>GenericListArray&lt;OffsetSize&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, OffsetSize: OffsetSizeTrait&gt; ArrayAccessor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>GenericListArray&lt;OffsetSize&gt; {
     <span class="kw">type </span>Item = ArrayRef;
 
     <span class="kw">fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="self">Self</span>::Item {
@@ -1782,11 +1752,11 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">let </span>prefix = OffsetSize::PREFIX;
 
-        <span class="macro">write!</span>(f, <span class="string">&quot;{prefix}ListArray\n[\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"{prefix}ListArray\n[\n"</span>)<span class="question-mark">?</span>;
         print_long_array(<span class="self">self</span>, f, |array, index, f| {
             std::fmt::Debug::fmt(<span class="kw-2">&amp;</span>array.value(index), f)
         })<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(f, <span class="string">&quot;]&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"]"</span>)
     }
 }
 
@@ -1814,7 +1784,7 @@
         <span class="comment">//  [[0, 1, 2], [3, 4, 5], [6, 7]]
         </span><span class="kw">let </span>values = Int32Array::from(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);
         <span class="kw">let </span>offsets = OffsetBuffer::new(ScalarBuffer::from(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">8</span>]));
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">true</span>));
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">true</span>));
         ListArray::new(field, offsets, Arc::new(values), <span class="prelude-val">None</span>)
     }
 
@@ -1844,8 +1814,7 @@
         </span><span class="kw">let </span>value_offsets = Buffer::from([]);
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        </span><span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">0</span>)
             .add_buffer(value_offsets)
@@ -1871,8 +1840,7 @@
         </span><span class="kw">let </span>value_offsets = Buffer::from_slice_ref([<span class="number">0</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">8</span>]);
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        </span><span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type.clone())
             .len(<span class="number">3</span>)
             .add_buffer(value_offsets.clone())
@@ -1961,8 +1929,7 @@
         </span><span class="kw">let </span>value_offsets = Buffer::from_slice_ref([<span class="number">0i64</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">8</span>]);
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type =
-            DataType::LargeList(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        </span><span class="kw">let </span>list_data_type = DataType::new_large_list(DataType::Int32, <span class="bool-val">false</span>);
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type.clone())
             .len(<span class="number">3</span>)
             .add_buffer(value_offsets.clone())
@@ -2058,8 +2025,7 @@
         bit_util::set_bit(<span class="kw-2">&amp;mut </span>null_bits, <span class="number">8</span>);
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        </span><span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">9</span>)
             .add_buffer(value_offsets)
@@ -2090,8 +2056,7 @@
         }
 
         <span class="comment">// Check offset and length for each non-null value.
-        </span><span class="kw">let </span>sliced_list_array =
-            sliced_array.as_any().downcast_ref::&lt;ListArray&gt;().unwrap();
+        </span><span class="kw">let </span>sliced_list_array = sliced_array.as_any().downcast_ref::&lt;ListArray&gt;().unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, sliced_list_array.value_offsets()[<span class="number">2</span>]);
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, sliced_list_array.value_length(<span class="number">2</span>));
         <span class="macro">assert_eq!</span>(<span class="number">4</span>, sliced_list_array.value_offsets()[<span class="number">3</span>]);
@@ -2121,8 +2086,7 @@
         bit_util::set_bit(<span class="kw-2">&amp;mut </span>null_bits, <span class="number">8</span>);
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type =
-            DataType::LargeList(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        </span><span class="kw">let </span>list_data_type = DataType::new_large_list(DataType::Int32, <span class="bool-val">false</span>);
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">9</span>)
             .add_buffer(value_offsets)
@@ -2166,7 +2130,7 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;index out of bounds: the len is 10 but the index is 11&quot;</span>)]
+    #[should_panic(expected = <span class="string">"index out of bounds: the len is 10 but the index is 11"</span>)]
     </span><span class="kw">fn </span>test_list_array_index_out_of_bound() {
         <span class="comment">// Construct a value array
         </span><span class="kw">let </span>value_data = ArrayData::builder(DataType::Int32)
@@ -2187,8 +2151,7 @@
         bit_util::set_bit(<span class="kw-2">&amp;mut </span>null_bits, <span class="number">8</span>);
 
         <span class="comment">// Construct a list array from the above two
-        </span><span class="kw">let </span>list_data_type =
-            DataType::LargeList(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        </span><span class="kw">let </span>list_data_type = DataType::new_large_list(DataType::Int32, <span class="bool-val">false</span>);
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">9</span>)
             .add_buffer(value_offsets)
@@ -2202,12 +2165,10 @@
         list_array.value(<span class="number">10</span>);
     }
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;ListArray data should contain a single buffer only (value offsets)&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"ListArray data should contain a single buffer only (value offsets)"</span>)]
     </span><span class="comment">// Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;force_validate&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"force_validate"</span>))]
     </span><span class="kw">fn </span>test_list_array_invalid_buffer_len() {
         <span class="kw">let </span>value_data = <span class="kw">unsafe </span>{
             ArrayData::builder(DataType::Int32)
@@ -2215,8 +2176,7 @@
                 .add_buffer(Buffer::from_slice_ref([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]))
                 .build_unchecked()
         };
-        <span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        <span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = <span class="kw">unsafe </span>{
             ArrayData::builder(list_data_type)
                 .len(<span class="number">3</span>)
@@ -2227,16 +2187,13 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;ListArray should contain a single child array (values array)&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"ListArray should contain a single child array (values array)"</span>)]
     </span><span class="comment">// Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;force_validate&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"force_validate"</span>))]
     </span><span class="kw">fn </span>test_list_array_invalid_child_array_len() {
         <span class="kw">let </span>value_offsets = Buffer::from_slice_ref([<span class="number">0</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">7</span>]);
-        <span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        <span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = <span class="kw">unsafe </span>{
             ArrayData::builder(list_data_type)
                 .len(<span class="number">3</span>)
@@ -2247,9 +2204,7 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;[Large]ListArray&#39;s datatype must be [Large]ListArray(). It is List&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"[Large]ListArray's datatype must be [Large]ListArray(). It is List"</span>)]
     </span><span class="kw">fn </span>test_from_array_data_validation() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ListBuilder::new(Int32Builder::new());
         builder.values().append_value(<span class="number">1</span>);
@@ -2268,8 +2223,7 @@
 
         <span class="kw">let </span>value_offsets = Buffer::from_slice_ref([<span class="number">2</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">7</span>]);
 
-        <span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        <span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = ArrayData::builder(list_data_type)
             .len(<span class="number">3</span>)
             .add_buffer(value_offsets)
@@ -2284,12 +2238,10 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;Memory pointer is not aligned with the specified scalar type&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"Memory pointer is not aligned with the specified scalar type"</span>)]
     </span><span class="comment">// Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;force_validate&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"force_validate"</span>))]
     </span><span class="kw">fn </span>test_primitive_array_alignment() {
         <span class="kw">let </span>buf = Buffer::from_slice_ref([<span class="number">0_u64</span>]);
         <span class="kw">let </span>buf2 = buf.slice(<span class="number">1</span>);
@@ -2302,12 +2254,10 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;Memory pointer is not aligned with the specified scalar type&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"Memory pointer is not aligned with the specified scalar type"</span>)]
     </span><span class="comment">// Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;force_validate&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"force_validate"</span>))]
     </span><span class="kw">fn </span>test_list_array_alignment() {
         <span class="kw">let </span>buf = Buffer::from_slice_ref([<span class="number">0_u64</span>]);
         <span class="kw">let </span>buf2 = buf.slice(<span class="number">1</span>);
@@ -2319,8 +2269,7 @@
                 .build_unchecked()
         };
 
-        <span class="kw">let </span>list_data_type =
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)));
+        <span class="kw">let </span>list_data_type = DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>)));
         <span class="kw">let </span>list_data = <span class="kw">unsafe </span>{
             ArrayData::builder(list_data_type)
                 .add_buffer(buf2)
@@ -2404,7 +2353,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_empty_offsets() {
-        <span class="kw">let </span>f = Arc::new(Field::new(<span class="string">&quot;element&quot;</span>, DataType::Int32, <span class="bool-val">true</span>));
+        <span class="kw">let </span>f = Arc::new(Field::new(<span class="string">"element"</span>, DataType::Int32, <span class="bool-val">true</span>));
         <span class="kw">let </span>string = ListArray::from(
             ArrayData::builder(DataType::List(f.clone()))
                 .buffers(<span class="macro">vec!</span>[Buffer::from(<span class="kw-2">&amp;</span>[])])
@@ -2430,7 +2379,7 @@
         <span class="kw">let </span>values = Int32Array::new(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>].into(), <span class="prelude-val">None</span>);
         <span class="kw">let </span>values = Arc::new(values) <span class="kw">as </span>ArrayRef;
 
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;element&quot;</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"element"</span>, DataType::Int32, <span class="bool-val">false</span>));
         ListArray::new(field.clone(), offsets.clone(), values.clone(), <span class="prelude-val">None</span>);
 
         <span class="kw">let </span>nulls = NullBuffer::new_null(<span class="number">3</span>);
@@ -2438,47 +2387,44 @@
 
         <span class="kw">let </span>nulls = NullBuffer::new_null(<span class="number">3</span>);
         <span class="kw">let </span>offsets = OffsetBuffer::new(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">5</span>].into());
-        <span class="kw">let </span>err =
-            LargeListArray::try_new(field, offsets.clone(), values.clone(), <span class="prelude-val">Some</span>(nulls))
-                .unwrap_err();
+        <span class="kw">let </span>err = LargeListArray::try_new(field, offsets.clone(), values.clone(), <span class="prelude-val">Some</span>(nulls))
+            .unwrap_err();
 
         <span class="macro">assert_eq!</span>(
             err.to_string(),
-            <span class="string">&quot;Invalid argument error: Incorrect length of null buffer for LargeListArray, expected 4 got 3&quot;
+            <span class="string">"Invalid argument error: Incorrect length of null buffer for LargeListArray, expected 4 got 3"
         </span>);
 
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;element&quot;</span>, DataType::Int64, <span class="bool-val">false</span>));
-        <span class="kw">let </span>err =
-            LargeListArray::try_new(field.clone(), offsets.clone(), values.clone(), <span class="prelude-val">None</span>)
-                .unwrap_err();
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"element"</span>, DataType::Int64, <span class="bool-val">false</span>));
+        <span class="kw">let </span>err = LargeListArray::try_new(field.clone(), offsets.clone(), values.clone(), <span class="prelude-val">None</span>)
+            .unwrap_err();
 
         <span class="macro">assert_eq!</span>(
             err.to_string(),
-            <span class="string">&quot;Invalid argument error: LargeListArray expected data type Int64 got Int32 for \&quot;element\&quot;&quot;
+            <span class="string">"Invalid argument error: LargeListArray expected data type Int64 got Int32 for \"element\""
         </span>);
 
         <span class="kw">let </span>nulls = NullBuffer::new_null(<span class="number">7</span>);
         <span class="kw">let </span>values = Int64Array::new(<span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">7</span>].into(), <span class="prelude-val">Some</span>(nulls));
         <span class="kw">let </span>values = Arc::new(values);
 
-        <span class="kw">let </span>err = LargeListArray::try_new(field, offsets.clone(), values.clone(), <span class="prelude-val">None</span>)
-            .unwrap_err();
+        <span class="kw">let </span>err =
+            LargeListArray::try_new(field, offsets.clone(), values.clone(), <span class="prelude-val">None</span>).unwrap_err();
 
         <span class="macro">assert_eq!</span>(
             err.to_string(),
-            <span class="string">&quot;Invalid argument error: Non-nullable field of LargeListArray \&quot;element\&quot; cannot contain nulls&quot;
+            <span class="string">"Invalid argument error: Non-nullable field of LargeListArray \"element\" cannot contain nulls"
         </span>);
 
-        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">&quot;element&quot;</span>, DataType::Int64, <span class="bool-val">true</span>));
+        <span class="kw">let </span>field = Arc::new(Field::new(<span class="string">"element"</span>, DataType::Int64, <span class="bool-val">true</span>));
         LargeListArray::new(field.clone(), offsets.clone(), values, <span class="prelude-val">None</span>);
 
         <span class="kw">let </span>values = Int64Array::new(<span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">2</span>].into(), <span class="prelude-val">None</span>);
-        <span class="kw">let </span>err =
-            LargeListArray::try_new(field, offsets, Arc::new(values), <span class="prelude-val">None</span>).unwrap_err();
+        <span class="kw">let </span>err = LargeListArray::try_new(field, offsets, Arc::new(values), <span class="prelude-val">None</span>).unwrap_err();
 
         <span class="macro">assert_eq!</span>(
             err.to_string(),
-            <span class="string">&quot;Invalid argument error: Max offset of 5 exceeds length of values 2&quot;
+            <span class="string">"Invalid argument error: Max offset of 5 exceeds length of values 2"
         </span>);
     }
 

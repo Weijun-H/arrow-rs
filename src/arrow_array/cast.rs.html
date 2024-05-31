@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/cast.rs`."><title>cast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_array/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/cast.rs`."><title>cast.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -978,19 +978,44 @@
 <a href="#978" id="978">978</a>
 <a href="#979" id="979">979</a>
 <a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
+<a href="#993" id="993">993</a>
+<a href="#994" id="994">994</a>
+<a href="#995" id="995">995</a>
+<a href="#996" id="996">996</a>
+<a href="#997" id="997">997</a>
+<a href="#998" id="998">998</a>
+<a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
+<a href="#1001" id="1001">1001</a>
+<a href="#1002" id="1002">1002</a>
+<a href="#1003" id="1003">1003</a>
+<a href="#1004" id="1004">1004</a>
+<a href="#1005" id="1005">1005</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -1004,7 +1029,7 @@
 <span class="doccomment">/// Repeats the provided pattern based on the number of comma separated identifiers
 </span><span class="attr">#[doc(hidden)]
 #[macro_export]
-</span><span class="macro">macro_rules! </span>repeat_pat {
+</span><span class="macro">macro_rules!</span> repeat_pat {
     (<span class="macro-nonterminal">$e</span>:pat, <span class="macro-nonterminal">$v_</span>:expr) =&gt; {
         <span class="macro-nonterminal">$e
     </span>};
@@ -1043,7 +1068,7 @@
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_integer {
+</span><span class="macro">macro_rules!</span> downcast_integer {
     ($(<span class="macro-nonterminal">$data_type</span>:expr),+ =&gt; (<span class="macro-nonterminal">$m</span>:path $(, <span class="macro-nonterminal">$args</span>:tt)<span class="kw-2">*</span>), $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="kw">match </span>($(<span class="macro-nonterminal">$data_type</span>),+) {
             <span class="macro-nonterminal">$</span><span class="macro">crate::repeat_pat!</span>(<span class="macro-nonterminal">arrow_schema::DataType::Int8</span>, $(<span class="macro-nonterminal">$data_type</span>),+) =&gt; {
@@ -1099,14 +1124,14 @@
 ///     }
 /// }
 ///
-/// assert_eq!(run_end_index_size(&amp;DataType::RunEndEncoded(Arc::new(Field::new(&quot;a&quot;, DataType::Int32, false)), Arc::new(Field::new(&quot;b&quot;, DataType::Utf8, true)))), 4);
-/// assert_eq!(run_end_index_size(&amp;DataType::RunEndEncoded(Arc::new(Field::new(&quot;a&quot;, DataType::Int64, false)), Arc::new(Field::new(&quot;b&quot;, DataType::Utf8, true)))), 8);
-/// assert_eq!(run_end_index_size(&amp;DataType::RunEndEncoded(Arc::new(Field::new(&quot;a&quot;, DataType::Int16, false)), Arc::new(Field::new(&quot;b&quot;, DataType::Utf8, true)))), 2);
+/// assert_eq!(run_end_index_size(&amp;DataType::RunEndEncoded(Arc::new(Field::new("a", DataType::Int32, false)), Arc::new(Field::new("b", DataType::Utf8, true)))), 4);
+/// assert_eq!(run_end_index_size(&amp;DataType::RunEndEncoded(Arc::new(Field::new("a", DataType::Int64, false)), Arc::new(Field::new("b", DataType::Utf8, true)))), 8);
+/// assert_eq!(run_end_index_size(&amp;DataType::RunEndEncoded(Arc::new(Field::new("a", DataType::Int16, false)), Arc::new(Field::new("b", DataType::Utf8, true)))), 2);
 /// ```
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_run_end_index {
+</span><span class="macro">macro_rules!</span> downcast_run_end_index {
     ($(<span class="macro-nonterminal">$data_type</span>:expr),+ =&gt; (<span class="macro-nonterminal">$m</span>:path $(, <span class="macro-nonterminal">$args</span>:tt)<span class="kw-2">*</span>), $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="kw">match </span>($(<span class="macro-nonterminal">$data_type</span>),+) {
             <span class="macro-nonterminal">$</span><span class="macro">crate::repeat_pat!</span>(<span class="macro-nonterminal">arrow_schema::DataType::Int16</span>, $(<span class="macro-nonterminal">$data_type</span>),+) =&gt; {
@@ -1149,7 +1174,7 @@
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_temporal {
+</span><span class="macro">macro_rules!</span> downcast_temporal {
     ($(<span class="macro-nonterminal">$data_type</span>:expr),+ =&gt; (<span class="macro-nonterminal">$m</span>:path $(, <span class="macro-nonterminal">$args</span>:tt)<span class="kw-2">*</span>), $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="kw">match </span>($(<span class="macro-nonterminal">$data_type</span>),+) {
             <span class="macro-nonterminal">$</span><span class="macro">crate::repeat_pat!</span>(<span class="macro-nonterminal">arrow_schema::DataType::Time32</span>(arrow_schema::TimeUnit::Second), $(<span class="macro-nonterminal">$data_type</span>),+) =&gt; {
@@ -1198,22 +1223,22 @@
 ///     downcast_temporal_array!(
 ///         array =&gt; {
 ///             for v in array {
-///                 println!(&quot;{:?}&quot;, v);
+///                 println!("{:?}", v);
 ///             }
 ///         }
 ///         DataType::Utf8 =&gt; {
 ///             for v in as_string_array(array) {
-///                 println!(&quot;{:?}&quot;, v);
+///                 println!("{:?}", v);
 ///             }
 ///         }
-///         t =&gt; println!(&quot;Unsupported datatype {}&quot;, t)
+///         t =&gt; println!("Unsupported datatype {}", t)
 ///     )
 /// }
 /// ```
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_temporal_array {
+</span><span class="macro">macro_rules!</span> downcast_temporal_array {
     (<span class="macro-nonterminal">$values</span>:ident =&gt; <span class="macro-nonterminal">$e</span>:expr, $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_temporal_array!</span>(<span class="macro-nonterminal">$values </span>=&gt; {<span class="macro-nonterminal">$e</span>} $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>)<span class="kw-2">*</span>)
     };
@@ -1260,9 +1285,9 @@
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_primitive {
+</span><span class="macro">macro_rules!</span> downcast_primitive {
     ($(<span class="macro-nonterminal">$data_type</span>:expr),+ =&gt; (<span class="macro-nonterminal">$m</span>:path $(, <span class="macro-nonterminal">$args</span>:tt)<span class="kw-2">*</span>), $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_integer! </span>{
+        <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_integer!</span> {
             $(<span class="macro-nonterminal">$data_type</span>),+ =&gt; (<span class="macro-nonterminal">$m </span>$(, <span class="macro-nonterminal">$args</span>)<span class="kw-2">*</span>),
             <span class="macro-nonterminal">$</span><span class="macro">crate::repeat_pat!</span>(<span class="macro-nonterminal">arrow_schema::DataType::Float16</span>, $(<span class="macro-nonterminal">$data_type</span>),+) =&gt; {
                 <span class="macro-nonterminal">$</span><span class="macro">m!</span>(<span class="macro-nonterminal">$crate::types::Float16Type </span>$(, <span class="macro-nonterminal">$args</span>)<span class="kw-2">*</span>)
@@ -1301,7 +1326,7 @@
                 <span class="macro-nonterminal">$</span><span class="macro">m!</span>(<span class="macro-nonterminal">$crate::types::DurationNanosecondType </span>$(, <span class="macro-nonterminal">$args</span>)<span class="kw-2">*</span>)
             }
             <span class="kw">_ </span>=&gt; {
-                <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_temporal! </span>{
+                <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_temporal!</span> {
                     $(<span class="macro-nonterminal">$data_type</span>),+ =&gt; (<span class="macro-nonterminal">$m </span>$(, <span class="macro-nonterminal">$args</span>)<span class="kw-2">*</span>),
                     $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>,)*
                 }
@@ -1312,7 +1337,7 @@
 
 <span class="attr">#[macro_export]
 #[doc(hidden)]
-</span><span class="macro">macro_rules! </span>downcast_primitive_array_helper {
+</span><span class="macro">macro_rules!</span> downcast_primitive_array_helper {
     (<span class="macro-nonterminal">$t</span>:ty, $(<span class="macro-nonterminal">$values</span>:ident),+, <span class="macro-nonterminal">$e</span>:block) =&gt; {{
         $(<span class="kw">let </span><span class="macro-nonterminal">$values </span>= <span class="macro-nonterminal">$crate::cast::as_primitive_array</span>::&lt;<span class="macro-nonterminal">$t</span>&gt;(<span class="macro-nonterminal">$values</span>);)+
         <span class="macro-nonterminal">$e
@@ -1330,22 +1355,22 @@
 ///     downcast_primitive_array!(
 ///         array =&gt; {
 ///             for v in array {
-///                 println!(&quot;{:?}&quot;, v);
+///                 println!("{:?}", v);
 ///             }
 ///         }
 ///         DataType::Utf8 =&gt; {
 ///             for v in as_string_array(array) {
-///                 println!(&quot;{:?}&quot;, v);
+///                 println!("{:?}", v);
 ///             }
 ///         }
-///         t =&gt; println!(&quot;Unsupported datatype {}&quot;, t)
+///         t =&gt; println!("Unsupported datatype {}", t)
 ///     )
 /// }
 /// ```
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_primitive_array {
+</span><span class="macro">macro_rules!</span> downcast_primitive_array {
     (<span class="macro-nonterminal">$values</span>:ident =&gt; <span class="macro-nonterminal">$e</span>:expr, $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_primitive_array!</span>(<span class="macro-nonterminal">$values </span>=&gt; {<span class="macro-nonterminal">$e</span>} $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>)<span class="kw-2">*</span>)
     };
@@ -1364,7 +1389,7 @@
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`], to
-/// [`PrimitiveArray&lt;T&gt;`], panic&#39;ing on failure.
+/// [`PrimitiveArray&lt;T&gt;`], panic'ing on failure.
 ///
 /// # Example
 ///
@@ -1395,12 +1420,12 @@
 {
     arr.as_any()
         .downcast_ref::&lt;PrimitiveArray&lt;T&gt;&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to primitive array&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to primitive array"</span>)
 }
 
 <span class="attr">#[macro_export]
 #[doc(hidden)]
-</span><span class="macro">macro_rules! </span>downcast_dictionary_array_helper {
+</span><span class="macro">macro_rules!</span> downcast_dictionary_array_helper {
     (<span class="macro-nonterminal">$t</span>:ty, $(<span class="macro-nonterminal">$values</span>:ident),+, <span class="macro-nonterminal">$e</span>:block) =&gt; {{
         $(<span class="kw">let </span><span class="macro-nonterminal">$values </span>= <span class="macro-nonterminal">$crate::cast::as_dictionary_array</span>::&lt;<span class="macro-nonterminal">$t</span>&gt;(<span class="macro-nonterminal">$values</span>);)+
         <span class="macro-nonterminal">$e
@@ -1419,24 +1444,24 @@
 ///         array =&gt; match array.values().data_type() {
 ///             DataType::Utf8 =&gt; {
 ///                 for v in array.downcast_dict::&lt;StringArray&gt;().unwrap() {
-///                     println!(&quot;{:?}&quot;, v);
+///                     println!("{:?}", v);
 ///                 }
 ///             }
-///             t =&gt; println!(&quot;Unsupported dictionary value type {}&quot;, t),
+///             t =&gt; println!("Unsupported dictionary value type {}", t),
 ///         },
 ///         DataType::Utf8 =&gt; {
 ///             for v in as_string_array(array) {
-///                 println!(&quot;{:?}&quot;, v);
+///                 println!("{:?}", v);
 ///             }
 ///         }
-///         t =&gt; println!(&quot;Unsupported datatype {}&quot;, t)
+///         t =&gt; println!("Unsupported datatype {}", t)
 ///     )
 /// }
 /// ```
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_dictionary_array {
+</span><span class="macro">macro_rules!</span> downcast_dictionary_array {
     (<span class="macro-nonterminal">$values</span>:ident =&gt; <span class="macro-nonterminal">$e</span>:expr, $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="macro">downcast_dictionary_array!</span>(<span class="macro-nonterminal">$values </span>=&gt; {<span class="macro-nonterminal">$e</span>} $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>)<span class="kw-2">*</span>)
     };
@@ -1444,9 +1469,9 @@
     (<span class="macro-nonterminal">$values</span>:ident =&gt; <span class="macro-nonterminal">$e</span>:block $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="kw">match </span><span class="macro-nonterminal">$values</span>.data_type() {
             arrow_schema::DataType::Dictionary(k, <span class="kw">_</span>) =&gt; {
-                <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_integer! </span>{
+                <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_integer!</span> {
                     <span class="macro-nonterminal">k</span>.as_ref() =&gt; (<span class="macro-nonterminal">$crate::downcast_dictionary_array_helper</span>, <span class="macro-nonterminal">$values</span>, <span class="macro-nonterminal">$e</span>),
-                    k =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;unsupported dictionary key type: {}&quot;</span>, k)
+                    k =&gt; <span class="macro">unreachable!</span>(<span class="string">"unsupported dictionary key type: {}"</span>, k)
                 }
             }
             $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>,)*
@@ -1455,7 +1480,7 @@
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
-/// [`DictionaryArray&lt;T&gt;`], panic&#39;ing on failure.
+/// [`DictionaryArray&lt;T&gt;`], panic'ing on failure.
 ///
 /// # Example
 ///
@@ -1464,7 +1489,7 @@
 /// # use arrow_array::cast::as_dictionary_array;
 /// # use arrow_array::types::Int32Type;
 ///
-/// let arr: DictionaryArray&lt;Int32Type&gt; = vec![Some(&quot;foo&quot;)].into_iter().collect();
+/// let arr: DictionaryArray&lt;Int32Type&gt; = vec![Some("foo")].into_iter().collect();
 /// let arr: ArrayRef = std::sync::Arc::new(arr);
 /// let dict_array: &amp;DictionaryArray&lt;Int32Type&gt; = as_dictionary_array::&lt;Int32Type&gt;(&amp;arr);
 /// ```
@@ -1474,11 +1499,11 @@
 {
     arr.as_any()
         .downcast_ref::&lt;DictionaryArray&lt;T&gt;&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to dictionary array&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to dictionary array"</span>)
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
-/// [`RunArray&lt;T&gt;`], panic&#39;ing on failure.
+/// [`RunArray&lt;T&gt;`], panic'ing on failure.
 ///
 /// # Example
 ///
@@ -1487,7 +1512,7 @@
 /// # use arrow_array::cast::as_run_array;
 /// # use arrow_array::types::Int32Type;
 ///
-/// let arr: RunArray&lt;Int32Type&gt; = vec![Some(&quot;foo&quot;)].into_iter().collect();
+/// let arr: RunArray&lt;Int32Type&gt; = vec![Some("foo")].into_iter().collect();
 /// let arr: ArrayRef = std::sync::Arc::new(arr);
 /// let run_array: &amp;RunArray&lt;Int32Type&gt; = as_run_array::&lt;Int32Type&gt;(&amp;arr);
 /// ```
@@ -1497,12 +1522,12 @@
 {
     arr.as_any()
         .downcast_ref::&lt;RunArray&lt;T&gt;&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to run array&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to run array"</span>)
 }
 
 <span class="attr">#[macro_export]
 #[doc(hidden)]
-</span><span class="macro">macro_rules! </span>downcast_run_array_helper {
+</span><span class="macro">macro_rules!</span> downcast_run_array_helper {
     (<span class="macro-nonterminal">$t</span>:ty, $(<span class="macro-nonterminal">$values</span>:ident),+, <span class="macro-nonterminal">$e</span>:block) =&gt; {{
         $(<span class="kw">let </span><span class="macro-nonterminal">$values </span>= <span class="macro-nonterminal">$crate::cast::as_run_array</span>::&lt;<span class="macro-nonterminal">$t</span>&gt;(<span class="macro-nonterminal">$values</span>);)+
         <span class="macro-nonterminal">$e
@@ -1521,24 +1546,24 @@
 ///         array =&gt; match array.values().data_type() {
 ///             DataType::Utf8 =&gt; {
 ///                 for v in array.downcast::&lt;StringArray&gt;().unwrap() {
-///                     println!(&quot;{:?}&quot;, v);
+///                     println!("{:?}", v);
 ///                 }
 ///             }
-///             t =&gt; println!(&quot;Unsupported run array value type {}&quot;, t),
+///             t =&gt; println!("Unsupported run array value type {}", t),
 ///         },
 ///         DataType::Utf8 =&gt; {
 ///             for v in as_string_array(array) {
-///                 println!(&quot;{:?}&quot;, v);
+///                 println!("{:?}", v);
 ///             }
 ///         }
-///         t =&gt; println!(&quot;Unsupported datatype {}&quot;, t)
+///         t =&gt; println!("Unsupported datatype {}", t)
 ///     )
 /// }
 /// ```
 ///
 /// [`DataType`]: arrow_schema::DataType
 </span><span class="attr">#[macro_export]
-</span><span class="macro">macro_rules! </span>downcast_run_array {
+</span><span class="macro">macro_rules!</span> downcast_run_array {
     (<span class="macro-nonterminal">$values</span>:ident =&gt; <span class="macro-nonterminal">$e</span>:expr, $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="macro">downcast_run_array!</span>(<span class="macro-nonterminal">$values </span>=&gt; {<span class="macro-nonterminal">$e</span>} $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>)<span class="kw-2">*</span>)
     };
@@ -1546,9 +1571,9 @@
     (<span class="macro-nonterminal">$values</span>:ident =&gt; <span class="macro-nonterminal">$e</span>:block $(<span class="macro-nonterminal">$p</span>:pat =&gt; <span class="macro-nonterminal">$fallback</span>:expr $(,)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {
         <span class="kw">match </span><span class="macro-nonterminal">$values</span>.data_type() {
             arrow_schema::DataType::RunEndEncoded(k, <span class="kw">_</span>) =&gt; {
-                <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_run_end_index! </span>{
+                <span class="macro-nonterminal">$</span><span class="macro">crate::downcast_run_end_index!</span> {
                     <span class="macro-nonterminal">k</span>.data_type() =&gt; (<span class="macro-nonterminal">$crate::downcast_run_array_helper</span>, <span class="macro-nonterminal">$values</span>, <span class="macro-nonterminal">$e</span>),
-                    k =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;unsupported run end index type: {}&quot;</span>, k)
+                    k =&gt; <span class="macro">unreachable!</span>(<span class="string">"unsupported run end index type: {}"</span>, k)
                 }
             }
             $(<span class="macro-nonterminal">$p </span>=&gt; <span class="macro-nonterminal">$fallback</span>,)*
@@ -1558,12 +1583,10 @@
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
 /// [`GenericListArray&lt;T&gt;`], panicking on failure.
-</span><span class="kw">pub fn </span>as_generic_list_array&lt;S: OffsetSizeTrait&gt;(
-    arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array,
-) -&gt; <span class="kw-2">&amp;</span>GenericListArray&lt;S&gt; {
+</span><span class="kw">pub fn </span>as_generic_list_array&lt;S: OffsetSizeTrait&gt;(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span>GenericListArray&lt;S&gt; {
     arr.as_any()
         .downcast_ref::&lt;GenericListArray&lt;S&gt;&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to list array&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to list array"</span>)
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
@@ -1579,7 +1602,7 @@
 </span><span class="kw">pub fn </span>as_fixed_size_list_array(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span>FixedSizeListArray {
     arr.as_any()
         .downcast_ref::&lt;FixedSizeListArray&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to fixed size list array&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to fixed size list array"</span>)
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
@@ -1592,12 +1615,10 @@
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
 /// [`GenericBinaryArray&lt;S&gt;`], panicking on failure.
 </span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>as_generic_binary_array&lt;S: OffsetSizeTrait&gt;(
-    arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array,
-) -&gt; <span class="kw-2">&amp;</span>GenericBinaryArray&lt;S&gt; {
+</span><span class="kw">pub fn </span>as_generic_binary_array&lt;S: OffsetSizeTrait&gt;(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span>GenericBinaryArray&lt;S&gt; {
     arr.as_any()
         .downcast_ref::&lt;GenericBinaryArray&lt;S&gt;&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to binary array&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to binary array"</span>)
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
@@ -1610,13 +1631,13 @@
 /// # use arrow_array::cast::as_string_array;
 /// # use arrow_array::{ArrayRef, StringArray};
 ///
-/// let arr: ArrayRef = Arc::new(StringArray::from_iter(vec![Some(&quot;foo&quot;)]));
+/// let arr: ArrayRef = Arc::new(StringArray::from_iter(vec![Some("foo")]));
 /// let string_array = as_string_array(&amp;arr);
 /// ```
 </span><span class="kw">pub fn </span>as_string_array(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span>StringArray {
     arr.as_any()
         .downcast_ref::&lt;StringArray&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to StringArray&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to StringArray"</span>)
 }
 
 <span class="doccomment">/// Force downcast of an [`Array`], such as an [`ArrayRef`] to
@@ -1635,16 +1656,16 @@
 </span><span class="kw">pub fn </span>as_boolean_array(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span>BooleanArray {
     arr.as_any()
         .downcast_ref::&lt;BooleanArray&gt;()
-        .expect(<span class="string">&quot;Unable to downcast to BooleanArray&quot;</span>)
+        .expect(<span class="string">"Unable to downcast to BooleanArray"</span>)
 }
 
-<span class="macro">macro_rules! </span>array_downcast_fn {
+<span class="macro">macro_rules!</span> array_downcast_fn {
     (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$arrty</span>: ty, <span class="macro-nonterminal">$arrty_str</span>:expr) =&gt; {
-        <span class="attr">#[doc = <span class="string">&quot;Force downcast of an [`Array`], such as an [`ArrayRef`] to &quot;</span>]
+        <span class="attr">#[doc = <span class="string">"Force downcast of an [`Array`], such as an [`ArrayRef`] to "</span>]
         #[doc = <span class="macro-nonterminal">$arrty_str</span>]
         </span><span class="kw">pub fn </span><span class="macro-nonterminal">$name</span>(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$arrty </span>{
             arr.as_any().downcast_ref::&lt;<span class="macro-nonterminal">$arrty</span>&gt;().expect(<span class="macro">concat!</span>(
-                <span class="string">&quot;Unable to downcast to typed array through &quot;</span>,
+                <span class="string">"Unable to downcast to typed array through "</span>,
                 <span class="macro">stringify!</span>(<span class="macro-nonterminal">$name</span>)
             ))
         }
@@ -1655,7 +1676,7 @@
         <span class="macro">array_downcast_fn!</span>(
             <span class="macro-nonterminal">$name</span>,
             <span class="macro-nonterminal">$arrty</span>,
-            <span class="macro">concat!</span>(<span class="string">&quot;[`&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$arrty</span>), <span class="string">&quot;`], panicking on failure.&quot;</span>)
+            <span class="macro">concat!</span>(<span class="string">"[`"</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$arrty</span>), <span class="string">"`], panicking on failure."</span>)
         );
     };
 }
@@ -1667,7 +1688,7 @@
 <span class="macro">array_downcast_fn!</span>(as_map_array, MapArray);
 
 <span class="doccomment">/// Force downcast of an Array, such as an ArrayRef to Decimal128Array, panic’ing on failure.
-</span><span class="attr">#[deprecated(note = <span class="string">&quot;please use `as_primitive_array::&lt;Decimal128Type&gt;` instead&quot;</span>)]
+</span><span class="attr">#[deprecated(note = <span class="string">"please use `as_primitive_array::&lt;Decimal128Type&gt;` instead"</span>)]
 </span><span class="kw">pub fn </span>as_decimal_array(arr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array) -&gt; <span class="kw-2">&amp;</span>PrimitiveArray&lt;Decimal128Type&gt; {
     as_primitive_array::&lt;Decimal128Type&gt;(arr)
 }
@@ -1724,7 +1745,7 @@
 
     <span class="doccomment">/// Downcast this to a [`BooleanArray`] panicking if not possible
     </span><span class="kw">fn </span>as_boolean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BooleanArray {
-        <span class="self">self</span>.as_boolean_opt().expect(<span class="string">&quot;boolean array&quot;</span>)
+        <span class="self">self</span>.as_boolean_opt().expect(<span class="string">"boolean array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`PrimitiveArray`] returning `None` if not possible
@@ -1732,7 +1753,7 @@
 
     <span class="doccomment">/// Downcast this to a [`PrimitiveArray`] panicking if not possible
     </span><span class="kw">fn </span>as_primitive&lt;T: ArrowPrimitiveType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>PrimitiveArray&lt;T&gt; {
-        <span class="self">self</span>.as_primitive_opt().expect(<span class="string">&quot;primitive array&quot;</span>)
+        <span class="self">self</span>.as_primitive_opt().expect(<span class="string">"primitive array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`GenericByteArray`] returning `None` if not possible
@@ -1740,7 +1761,7 @@
 
     <span class="doccomment">/// Downcast this to a [`GenericByteArray`] panicking if not possible
     </span><span class="kw">fn </span>as_bytes&lt;T: ByteArrayType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GenericByteArray&lt;T&gt; {
-        <span class="self">self</span>.as_bytes_opt().expect(<span class="string">&quot;byte array&quot;</span>)
+        <span class="self">self</span>.as_bytes_opt().expect(<span class="string">"byte array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`GenericStringArray`] returning `None` if not possible
@@ -1750,7 +1771,7 @@
 
     <span class="doccomment">/// Downcast this to a [`GenericStringArray`] panicking if not possible
     </span><span class="kw">fn </span>as_string&lt;O: OffsetSizeTrait&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GenericStringArray&lt;O&gt; {
-        <span class="self">self</span>.as_bytes_opt().expect(<span class="string">&quot;string array&quot;</span>)
+        <span class="self">self</span>.as_bytes_opt().expect(<span class="string">"string array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`GenericBinaryArray`] returning `None` if not possible
@@ -1760,15 +1781,43 @@
 
     <span class="doccomment">/// Downcast this to a [`GenericBinaryArray`] panicking if not possible
     </span><span class="kw">fn </span>as_binary&lt;O: OffsetSizeTrait&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GenericBinaryArray&lt;O&gt; {
-        <span class="self">self</span>.as_bytes_opt().expect(<span class="string">&quot;binary array&quot;</span>)
+        <span class="self">self</span>.as_bytes_opt().expect(<span class="string">"binary array"</span>)
     }
+
+    <span class="doccomment">/// Downcast this to a [`StringViewArray`] returning `None` if not possible
+    </span><span class="kw">fn </span>as_string_view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>StringViewArray {
+        <span class="self">self</span>.as_byte_view_opt().expect(<span class="string">"string view array"</span>)
+    }
+
+    <span class="doccomment">/// Downcast this to a [`StringViewArray`] returning `None` if not possible
+    </span><span class="kw">fn </span>as_string_view_opt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>StringViewArray&gt; {
+        <span class="self">self</span>.as_byte_view_opt()
+    }
+
+    <span class="doccomment">/// Downcast this to a [`StringViewArray`] returning `None` if not possible
+    </span><span class="kw">fn </span>as_binary_view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BinaryViewArray {
+        <span class="self">self</span>.as_byte_view_opt().expect(<span class="string">"binary view array"</span>)
+    }
+
+    <span class="doccomment">/// Downcast this to a [`BinaryViewArray`] returning `None` if not possible
+    </span><span class="kw">fn </span>as_binary_view_opt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>BinaryViewArray&gt; {
+        <span class="self">self</span>.as_byte_view_opt()
+    }
+
+    <span class="doccomment">/// Downcast this to a [`GenericByteViewArray`] returning `None` if not possible
+    </span><span class="kw">fn </span>as_byte_view&lt;T: ByteViewType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GenericByteViewArray&lt;T&gt; {
+        <span class="self">self</span>.as_byte_view_opt().expect(<span class="string">"byte view array"</span>)
+    }
+
+    <span class="doccomment">/// Downcast this to a [`GenericByteViewArray`] returning `None` if not possible
+    </span><span class="kw">fn </span>as_byte_view_opt&lt;T: ByteViewType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GenericByteViewArray&lt;T&gt;&gt;;
 
     <span class="doccomment">/// Downcast this to a [`StructArray`] returning `None` if not possible
     </span><span class="kw">fn </span>as_struct_opt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>StructArray&gt;;
 
     <span class="doccomment">/// Downcast this to a [`StructArray`] panicking if not possible
     </span><span class="kw">fn </span>as_struct(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>StructArray {
-        <span class="self">self</span>.as_struct_opt().expect(<span class="string">&quot;struct array&quot;</span>)
+        <span class="self">self</span>.as_struct_opt().expect(<span class="string">"struct array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`GenericListArray`] returning `None` if not possible
@@ -1776,7 +1825,7 @@
 
     <span class="doccomment">/// Downcast this to a [`GenericListArray`] panicking if not possible
     </span><span class="kw">fn </span>as_list&lt;O: OffsetSizeTrait&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GenericListArray&lt;O&gt; {
-        <span class="self">self</span>.as_list_opt().expect(<span class="string">&quot;list array&quot;</span>)
+        <span class="self">self</span>.as_list_opt().expect(<span class="string">"list array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`FixedSizeBinaryArray`] returning `None` if not possible
@@ -1785,7 +1834,7 @@
     <span class="doccomment">/// Downcast this to a [`FixedSizeBinaryArray`] panicking if not possible
     </span><span class="kw">fn </span>as_fixed_size_binary(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FixedSizeBinaryArray {
         <span class="self">self</span>.as_fixed_size_binary_opt()
-            .expect(<span class="string">&quot;fixed size binary array&quot;</span>)
+            .expect(<span class="string">"fixed size binary array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`FixedSizeListArray`] returning `None` if not possible
@@ -1794,7 +1843,7 @@
     <span class="doccomment">/// Downcast this to a [`FixedSizeListArray`] panicking if not possible
     </span><span class="kw">fn </span>as_fixed_size_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FixedSizeListArray {
         <span class="self">self</span>.as_fixed_size_list_opt()
-            .expect(<span class="string">&quot;fixed size list array&quot;</span>)
+            .expect(<span class="string">"fixed size list array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`MapArray`] returning `None` if not possible
@@ -1802,16 +1851,15 @@
 
     <span class="doccomment">/// Downcast this to a [`MapArray`] panicking if not possible
     </span><span class="kw">fn </span>as_map(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>MapArray {
-        <span class="self">self</span>.as_map_opt().expect(<span class="string">&quot;map array&quot;</span>)
+        <span class="self">self</span>.as_map_opt().expect(<span class="string">"map array"</span>)
     }
 
     <span class="doccomment">/// Downcast this to a [`DictionaryArray`] returning `None` if not possible
-    </span><span class="kw">fn </span>as_dictionary_opt&lt;K: ArrowDictionaryKeyType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>)
-        -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt;&gt;;
+    </span><span class="kw">fn </span>as_dictionary_opt&lt;K: ArrowDictionaryKeyType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt;&gt;;
 
     <span class="doccomment">/// Downcast this to a [`DictionaryArray`] panicking if not possible
     </span><span class="kw">fn </span>as_dictionary&lt;K: ArrowDictionaryKeyType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt; {
-        <span class="self">self</span>.as_dictionary_opt().expect(<span class="string">&quot;dictionary array&quot;</span>)
+        <span class="self">self</span>.as_dictionary_opt().expect(<span class="string">"dictionary array"</span>)
     }
 
     <span class="doccomment">/// Downcasts this to a [`AnyDictionaryArray`] returning `None` if not possible
@@ -1819,12 +1867,12 @@
 
     <span class="doccomment">/// Downcasts this to a [`AnyDictionaryArray`] panicking if not possible
     </span><span class="kw">fn </span>as_any_dictionary(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>AnyDictionaryArray {
-        <span class="self">self</span>.as_any_dictionary_opt().expect(<span class="string">&quot;any dictionary array&quot;</span>)
+        <span class="self">self</span>.as_any_dictionary_opt().expect(<span class="string">"any dictionary array"</span>)
     }
 }
 
-<span class="kw">impl </span>private::Sealed <span class="kw">for dyn </span>Array + <span class="lifetime">&#39;_ </span>{}
-<span class="kw">impl </span>AsArray <span class="kw">for dyn </span>Array + <span class="lifetime">&#39;_ </span>{
+<span class="kw">impl </span>private::Sealed <span class="kw">for dyn </span>Array + <span class="lifetime">'_ </span>{}
+<span class="kw">impl </span>AsArray <span class="kw">for dyn </span>Array + <span class="lifetime">'_ </span>{
     <span class="kw">fn </span>as_boolean_opt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>BooleanArray&gt; {
         <span class="self">self</span>.as_any().downcast_ref()
     }
@@ -1834,6 +1882,10 @@
     }
 
     <span class="kw">fn </span>as_bytes_opt&lt;T: ByteArrayType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GenericByteArray&lt;T&gt;&gt; {
+        <span class="self">self</span>.as_any().downcast_ref()
+    }
+
+    <span class="kw">fn </span>as_byte_view_opt&lt;T: ByteViewType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GenericByteViewArray&lt;T&gt;&gt; {
         <span class="self">self</span>.as_any().downcast_ref()
     }
 
@@ -1857,15 +1909,13 @@
         <span class="self">self</span>.as_any().downcast_ref()
     }
 
-    <span class="kw">fn </span>as_dictionary_opt&lt;K: ArrowDictionaryKeyType&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt;&gt; {
+    <span class="kw">fn </span>as_dictionary_opt&lt;K: ArrowDictionaryKeyType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt;&gt; {
         <span class="self">self</span>.as_any().downcast_ref()
     }
 
     <span class="kw">fn </span>as_any_dictionary_opt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="kw">dyn </span>AnyDictionaryArray&gt; {
         <span class="kw">let </span>array = <span class="self">self</span>;
-        <span class="macro">downcast_dictionary_array! </span>{
+        <span class="macro">downcast_dictionary_array!</span> {
             array =&gt; <span class="prelude-val">Some</span>(array),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None
         </span>}
@@ -1884,6 +1934,10 @@
 
     <span class="kw">fn </span>as_bytes_opt&lt;T: ByteArrayType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GenericByteArray&lt;T&gt;&gt; {
         <span class="self">self</span>.as_ref().as_bytes_opt()
+    }
+
+    <span class="kw">fn </span>as_byte_view_opt&lt;T: ByteViewType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GenericByteViewArray&lt;T&gt;&gt; {
+        <span class="self">self</span>.as_ref().as_byte_view_opt()
     }
 
     <span class="kw">fn </span>as_struct_opt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>StructArray&gt; {
@@ -1906,9 +1960,7 @@
         <span class="self">self</span>.as_any().downcast_ref()
     }
 
-    <span class="kw">fn </span>as_dictionary_opt&lt;K: ArrowDictionaryKeyType&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt;&gt; {
+    <span class="kw">fn </span>as_dictionary_opt&lt;K: ArrowDictionaryKeyType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DictionaryArray&lt;K&gt;&gt; {
         <span class="self">self</span>.as_ref().as_dictionary_opt()
     }
 
@@ -1936,7 +1988,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_as_string_array_ref() {
-        <span class="kw">let </span>array: StringArray = <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>].into_iter().map(<span class="prelude-val">Some</span>).collect();
+        <span class="kw">let </span>array: StringArray = <span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>].into_iter().map(<span class="prelude-val">Some</span>).collect();
         <span class="macro">assert!</span>(!as_string_array(<span class="kw-2">&amp;</span>array).is_empty());
 
         <span class="comment">// should also work when wrapped in an Arc
@@ -1952,9 +2004,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_decimal256array() {
-        <span class="kw">let </span>a = Decimal256Array::from_iter_values(
-            [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">5</span>].into_iter().map(i256::from_i128),
-        );
+        <span class="kw">let </span>a = Decimal256Array::from_iter_values([<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">5</span>].into_iter().map(i256::from_i128));
         <span class="macro">assert!</span>(!as_primitive_array::&lt;Decimal256Type&gt;(<span class="kw-2">&amp;</span>a).is_empty());
     }
 }

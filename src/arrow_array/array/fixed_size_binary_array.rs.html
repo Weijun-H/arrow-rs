@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/fixed_size_binary_array.rs`."><title>fixed_size_binary_array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/fixed_size_binary_array.rs`."><title>fixed_size_binary_array.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -971,26 +971,30 @@
 <a href="#971" id="971">971</a>
 <a href="#972" id="972">972</a>
 <a href="#973" id="973">973</a>
+<a href="#974" id="974">974</a>
+<a href="#975" id="975">975</a>
+<a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::array::print_long_array;
 <span class="kw">use </span><span class="kw">crate</span>::iterator::FixedSizeBinaryIter;
-<span class="kw">use crate</span>::{Array, ArrayAccessor, ArrayRef, FixedSizeListArray};
+<span class="kw">use crate</span>::{Array, ArrayAccessor, ArrayRef, FixedSizeListArray, Scalar};
 <span class="kw">use </span>arrow_buffer::buffer::NullBuffer;
 <span class="kw">use </span>arrow_buffer::{bit_util, ArrowNativeType, BooleanBuffer, Buffer, MutableBuffer};
 <span class="kw">use </span>arrow_data::{ArrayData, ArrayDataBuilder};
@@ -1041,6 +1045,12 @@
         <span class="self">Self</span>::try_new(size, values, nulls).unwrap()
     }
 
+    <span class="doccomment">/// Create a new [`Scalar`] from `value`
+    </span><span class="kw">pub fn </span>new_scalar(value: <span class="kw">impl </span>AsRef&lt;[u8]&gt;) -&gt; Scalar&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>v = value.as_ref();
+        Scalar::new(<span class="self">Self</span>::new(v.len() <span class="kw">as _</span>, Buffer::from(v), <span class="prelude-val">None</span>))
+    }
+
     <span class="doccomment">/// Create a new [`FixedSizeBinaryArray`] from the provided parts, returning an error on failure
     ///
     /// # Errors
@@ -1054,17 +1064,14 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>data_type = DataType::FixedSizeBinary(size);
         <span class="kw">let </span>s = size.to_usize().ok_or_else(|| {
-            ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Size cannot be negative, got {}&quot;</span>,
-                size
-            ))
+            ArrowError::InvalidArgumentError(<span class="macro">format!</span>(<span class="string">"Size cannot be negative, got {}"</span>, size))
         })<span class="question-mark">?</span>;
 
         <span class="kw">let </span>len = values.len() / s;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = nulls.as_ref() {
             <span class="kw">if </span>n.len() != len {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Incorrect length of null buffer for FixedSizeBinaryArray, expected {} got {}&quot;</span>,
+                    <span class="string">"Incorrect length of null buffer for FixedSizeBinaryArray, expected {} got {}"</span>,
                     len,
                     n.len(),
                 )));
@@ -1110,7 +1117,7 @@
     </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, i: usize) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="macro">assert!</span>(
             i &lt; <span class="self">self</span>.len(),
-            <span class="string">&quot;Trying to access an element at index {} from a FixedSizeBinaryArray of length {}&quot;</span>,
+            <span class="string">"Trying to access an element at index {} from a FixedSizeBinaryArray of length {}"</span>,
             i,
             <span class="self">self</span>.len()
         );
@@ -1138,7 +1145,7 @@
 
     <span class="doccomment">/// Returns the offset for the element at index `i`.
     ///
-    /// Note this doesn&#39;t do any bound checking, for performance reason.
+    /// Note this doesn't do any bound checking, for performance reason.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>value_offset(<span class="kw-2">&amp;</span><span class="self">self</span>, i: usize) -&gt; i32 {
         <span class="self">self</span>.value_offset_at(<span class="self">self</span>.offset() + i)
@@ -1152,16 +1159,25 @@
         <span class="self">self</span>.value_length
     }
 
-    <span class="doccomment">/// Returns a clone of the value data buffer
-    </span><span class="kw">pub fn </span>value_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Buffer {
-        <span class="self">self</span>.value_data.clone()
+    <span class="doccomment">/// Returns the values of this array.
+    ///
+    /// Unlike [`Self::value_data`] this returns the [`Buffer`]
+    /// allowing for zero-copy cloning.
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Buffer {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.value_data
+    }
+
+    <span class="doccomment">/// Returns the raw value data.
+    </span><span class="kw">pub fn </span>value_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
+        <span class="self">self</span>.value_data.as_slice()
     }
 
     <span class="doccomment">/// Returns a zero-copy slice of this array with the indicated offset and length.
     </span><span class="kw">pub fn </span>slice(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: usize, len: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(
             offset.saturating_add(len) &lt;= <span class="self">self</span>.len,
-            <span class="string">&quot;the length + offset of the sliced FixedSizeBinaryArray cannot exceed the existing length&quot;
+            <span class="string">"the length + offset of the sliced FixedSizeBinaryArray cannot exceed the existing length"
         </span>);
 
         <span class="kw">let </span>size = <span class="self">self</span>.value_length <span class="kw">as </span>usize;
@@ -1196,9 +1212,9 @@
     ///
     /// # Errors
     ///
-    /// Returns error if argument has length zero, or sizes of nested slices don&#39;t match.
+    /// Returns error if argument has length zero, or sizes of nested slices don't match.
     </span><span class="attr">#[deprecated(
-        note = <span class="string">&quot;This function will fail if the iterator produces only None values; prefer `try_from_sparse_iter_with_size`&quot;
+        note = <span class="string">"This function will fail if the iterator produces only None values; prefer `try_from_sparse_iter_with_size`"
     </span>)]
     </span><span class="kw">pub fn </span>try_from_sparse_iter&lt;T, U&gt;(<span class="kw-2">mut </span>iter: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt;
     <span class="kw">where
@@ -1227,7 +1243,7 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = size {
                     <span class="kw">if </span>size != slice.len() {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                            <span class="string">&quot;Nested array size mismatch: one is {}, and the other is {}&quot;</span>,
+                            <span class="string">"Nested array size mismatch: one is {}, and the other is {}"</span>,
                             size,
                             slice.len()
                         )));
@@ -1256,7 +1272,7 @@
 
         <span class="kw">if </span>len == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                <span class="string">&quot;Input iterable argument has no data&quot;</span>.to_owned(),
+                <span class="string">"Input iterable argument has no data"</span>.to_owned(),
             ));
         }
 
@@ -1296,11 +1312,8 @@
     ///
     /// # Errors
     ///
-    /// Returns error if argument has length zero, or sizes of nested slices don&#39;t match.
-    </span><span class="kw">pub fn </span>try_from_sparse_iter_with_size&lt;T, U&gt;(
-        <span class="kw-2">mut </span>iter: T,
-        size: i32,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt;
+    /// Returns error if argument has length zero, or sizes of nested slices don't match.
+    </span><span class="kw">pub fn </span>try_from_sparse_iter_with_size&lt;T, U&gt;(<span class="kw-2">mut </span>iter: T, size: i32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt;
     <span class="kw">where
         </span>T: Iterator&lt;Item = <span class="prelude-ty">Option</span>&lt;U&gt;&gt;,
         U: AsRef&lt;[u8]&gt;,
@@ -1324,7 +1337,7 @@
                 <span class="kw">let </span>slice = slice.as_ref();
                 <span class="kw">if </span>size <span class="kw">as </span>usize != slice.len() {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                        <span class="string">&quot;Nested array size mismatch: one is {}, and the other is {}&quot;</span>,
+                        <span class="string">"Nested array size mismatch: one is {}, and the other is {}"</span>,
                         size,
                         slice.len()
                     )));
@@ -1369,7 +1382,7 @@
     ///
     /// # Errors
     ///
-    /// Returns error if argument has length zero, or sizes of nested slices don&#39;t match.
+    /// Returns error if argument has length zero, or sizes of nested slices don't match.
     </span><span class="kw">pub fn </span>try_from_iter&lt;T, U&gt;(<span class="kw-2">mut </span>iter: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt;
     <span class="kw">where
         </span>T: Iterator&lt;Item = U&gt;,
@@ -1385,7 +1398,7 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = size {
                 <span class="kw">if </span>size != slice.len() {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                        <span class="string">&quot;Nested array size mismatch: one is {}, and the other is {}&quot;</span>,
+                        <span class="string">"Nested array size mismatch: one is {}, and the other is {}"</span>,
                         size,
                         slice.len()
                     )));
@@ -1405,7 +1418,7 @@
 
         <span class="kw">if </span>len == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                <span class="string">&quot;Input iterable argument has no data&quot;</span>.to_owned(),
+                <span class="string">"Input iterable argument has no data"</span>.to_owned(),
             ));
         }
 
@@ -1425,7 +1438,7 @@
     }
 
     <span class="doccomment">/// constructs a new iterator
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FixedSizeBinaryIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FixedSizeBinaryIter&lt;<span class="lifetime">'_</span>&gt; {
         FixedSizeBinaryIter::new(<span class="self">self</span>)
     }
 }
@@ -1435,11 +1448,11 @@
         <span class="macro">assert_eq!</span>(
             data.buffers().len(),
             <span class="number">1</span>,
-            <span class="string">&quot;FixedSizeBinaryArray data should contain 1 buffer only (values)&quot;
+            <span class="string">"FixedSizeBinaryArray data should contain 1 buffer only (values)"
         </span>);
         <span class="kw">let </span>value_length = <span class="kw">match </span>data.data_type() {
             DataType::FixedSizeBinary(len) =&gt; <span class="kw-2">*</span>len,
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expected data type to be FixedSizeBinary&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Expected data type to be FixedSizeBinary"</span>),
         };
 
         <span class="kw">let </span>size = value_length <span class="kw">as </span>usize;
@@ -1475,26 +1488,26 @@
         <span class="macro">assert_eq!</span>(
             v.child_data().len(),
             <span class="number">1</span>,
-            <span class="string">&quot;FixedSizeBinaryArray can only be created from list array of u8 values \
-             (i.e. FixedSizeList&lt;PrimitiveArray&lt;u8&gt;&gt;).&quot;
+            <span class="string">"FixedSizeBinaryArray can only be created from list array of u8 values \
+             (i.e. FixedSizeList&lt;PrimitiveArray&lt;u8&gt;&gt;)."
         </span>);
         <span class="kw">let </span>child_data = <span class="kw-2">&amp;</span>v.child_data()[<span class="number">0</span>];
 
         <span class="macro">assert_eq!</span>(
             child_data.child_data().len(),
             <span class="number">0</span>,
-            <span class="string">&quot;FixedSizeBinaryArray can only be created from list array of u8 values \
-             (i.e. FixedSizeList&lt;PrimitiveArray&lt;u8&gt;&gt;).&quot;
+            <span class="string">"FixedSizeBinaryArray can only be created from list array of u8 values \
+             (i.e. FixedSizeList&lt;PrimitiveArray&lt;u8&gt;&gt;)."
         </span>);
         <span class="macro">assert_eq!</span>(
             child_data.data_type(),
             <span class="kw-2">&amp;</span>DataType::UInt8,
-            <span class="string">&quot;FixedSizeBinaryArray can only be created from FixedSizeList&lt;u8&gt; arrays, mismatched data types.&quot;
+            <span class="string">"FixedSizeBinaryArray can only be created from FixedSizeList&lt;u8&gt; arrays, mismatched data types."
         </span>);
         <span class="macro">assert_eq!</span>(
             child_data.null_count(),
             <span class="number">0</span>,
-            <span class="string">&quot;The child array cannot contain null values.&quot;
+            <span class="string">"The child array cannot contain null values."
         </span>);
 
         <span class="kw">let </span>builder = ArrayData::builder(DataType::FixedSizeBinary(value_len))
@@ -1521,13 +1534,19 @@
     }
 }
 
+<span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; From&lt;Vec&lt;<span class="kw-2">&amp;</span>[u8; N]&gt;&gt; <span class="kw">for </span>FixedSizeBinaryArray {
+    <span class="kw">fn </span>from(v: Vec&lt;<span class="kw-2">&amp;</span>[u8; N]&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::try_from_iter(v.into_iter()).unwrap()
+    }
+}
+
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>FixedSizeBinaryArray {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;FixedSizeBinaryArray&lt;{}&gt;\n[\n&quot;</span>, <span class="self">self</span>.value_length())<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"FixedSizeBinaryArray&lt;{}&gt;\n[\n"</span>, <span class="self">self</span>.value_length())<span class="question-mark">?</span>;
         print_long_array(<span class="self">self</span>, f, |array, index, f| {
             std::fmt::Debug::fmt(<span class="kw-2">&amp;</span>array.value(index), f)
         })<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(f, <span class="string">&quot;]&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"]"</span>)
     }
 }
 
@@ -1581,8 +1600,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ArrayAccessor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FixedSizeBinaryArray {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8];
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ArrayAccessor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>FixedSizeBinaryArray {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8];
 
     <span class="kw">fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="self">Self</span>::Item {
         FixedSizeBinaryArray::value(<span class="self">self</span>, index)
@@ -1593,12 +1612,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FixedSizeBinaryArray {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;;
-    <span class="kw">type </span>IntoIter = FixedSizeBinaryIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>FixedSizeBinaryArray {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;;
+    <span class="kw">type </span>IntoIter = FixedSizeBinaryIter&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
-        FixedSizeBinaryIter::&lt;<span class="lifetime">&#39;a</span>&gt;::new(<span class="self">self</span>)
+        FixedSizeBinaryIter::&lt;<span class="lifetime">'a</span>&gt;::new(<span class="self">self</span>)
     }
 }
 
@@ -1606,13 +1625,12 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">crate</span>::RecordBatch;
     <span class="kw">use </span>arrow_schema::{Field, Schema};
-    <span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_fixed_size_binary_array() {
-        <span class="kw">let </span>values: [u8; <span class="number">15</span>] = <span class="kw-2">*</span><span class="string">b&quot;hellotherearrow&quot;</span>;
+        <span class="kw">let </span>values: [u8; <span class="number">15</span>] = <span class="kw-2">*</span><span class="string">b"hellotherearrow"</span>;
 
         <span class="kw">let </span>array_data = ArrayData::builder(DataType::FixedSizeBinary(<span class="number">5</span>))
             .len(<span class="number">3</span>)
@@ -1623,15 +1641,15 @@
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, fixed_size_binary_array.len());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, fixed_size_binary_array.null_count());
         <span class="macro">assert_eq!</span>(
-            [<span class="string">b&#39;h&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;l&#39;</span>, <span class="string">b&#39;l&#39;</span>, <span class="string">b&#39;o&#39;</span>],
+            [<span class="string">b'h'</span>, <span class="string">b'e'</span>, <span class="string">b'l'</span>, <span class="string">b'l'</span>, <span class="string">b'o'</span>],
             fixed_size_binary_array.value(<span class="number">0</span>)
         );
         <span class="macro">assert_eq!</span>(
-            [<span class="string">b&#39;t&#39;</span>, <span class="string">b&#39;h&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;e&#39;</span>],
+            [<span class="string">b't'</span>, <span class="string">b'h'</span>, <span class="string">b'e'</span>, <span class="string">b'r'</span>, <span class="string">b'e'</span>],
             fixed_size_binary_array.value(<span class="number">1</span>)
         );
         <span class="macro">assert_eq!</span>(
-            [<span class="string">b&#39;a&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;o&#39;</span>, <span class="string">b&#39;w&#39;</span>],
+            [<span class="string">b'a'</span>, <span class="string">b'r'</span>, <span class="string">b'r'</span>, <span class="string">b'o'</span>, <span class="string">b'w'</span>],
             fixed_size_binary_array.value(<span class="number">2</span>)
         );
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, fixed_size_binary_array.value_length());
@@ -1650,11 +1668,11 @@
             .unwrap();
         <span class="kw">let </span>fixed_size_binary_array = FixedSizeBinaryArray::from(array_data);
         <span class="macro">assert_eq!</span>(
-            [<span class="string">b&#39;t&#39;</span>, <span class="string">b&#39;h&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;e&#39;</span>],
+            [<span class="string">b't'</span>, <span class="string">b'h'</span>, <span class="string">b'e'</span>, <span class="string">b'r'</span>, <span class="string">b'e'</span>],
             fixed_size_binary_array.value(<span class="number">0</span>)
         );
         <span class="macro">assert_eq!</span>(
-            [<span class="string">b&#39;a&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;o&#39;</span>, <span class="string">b&#39;w&#39;</span>],
+            [<span class="string">b'a'</span>, <span class="string">b'r'</span>, <span class="string">b'r'</span>, <span class="string">b'o'</span>, <span class="string">b'w'</span>],
             fixed_size_binary_array.value(<span class="number">1</span>)
         );
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, fixed_size_binary_array.len());
@@ -1675,7 +1693,7 @@
         <span class="comment">// [null, [10, 11, 12, 13]]
         </span><span class="kw">let </span>array_data = <span class="kw">unsafe </span>{
             ArrayData::builder(DataType::FixedSizeList(
-                Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"item"</span>, DataType::UInt8, <span class="bool-val">false</span>)),
                 <span class="number">4</span>,
             ))
             .len(<span class="number">2</span>)
@@ -1696,11 +1714,11 @@
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;FixedSizeBinaryArray can only be created from FixedSizeList&lt;u8&gt; arrays&quot;
+        expected = <span class="string">"FixedSizeBinaryArray can only be created from FixedSizeList&lt;u8&gt; arrays"
     </span>)]
     </span><span class="comment">// Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;force_validate&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"force_validate"</span>))]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_incorrect_fixed_size_list_array() {
         <span class="kw">let </span>values: [u32; <span class="number">12</span>] = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>];
         <span class="kw">let </span>values_data = ArrayData::builder(DataType::UInt32)
@@ -1711,7 +1729,7 @@
 
         <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{
             ArrayData::builder(DataType::FixedSizeList(
-                Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Binary, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"item"</span>, DataType::Binary, <span class="bool-val">false</span>)),
                 <span class="number">4</span>,
             ))
             .len(<span class="number">3</span>)
@@ -1723,7 +1741,7 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;The child array cannot contain null values.&quot;</span>)]
+    #[should_panic(expected = <span class="string">"The child array cannot contain null values."</span>)]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_fixed_size_list_array_with_child_nulls_failed() {
         <span class="kw">let </span>values = [<span class="number">0_u8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>];
         <span class="kw">let </span>values_data = ArrayData::builder(DataType::UInt8)
@@ -1735,7 +1753,7 @@
 
         <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{
             ArrayData::builder(DataType::FixedSizeList(
-                Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"item"</span>, DataType::UInt8, <span class="bool-val">false</span>)),
                 <span class="number">4</span>,
             ))
             .len(<span class="number">3</span>)
@@ -1748,7 +1766,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_fmt_debug() {
-        <span class="kw">let </span>values: [u8; <span class="number">15</span>] = <span class="kw-2">*</span><span class="string">b&quot;hellotherearrow&quot;</span>;
+        <span class="kw">let </span>values: [u8; <span class="number">15</span>] = <span class="kw-2">*</span><span class="string">b"hellotherearrow"</span>;
 
         <span class="kw">let </span>array_data = ArrayData::builder(DataType::FixedSizeBinary(<span class="number">5</span>))
             .len(<span class="number">3</span>)
@@ -1757,8 +1775,8 @@
             .unwrap();
         <span class="kw">let </span>arr = FixedSizeBinaryArray::from(array_data);
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;FixedSizeBinaryArray&lt;5&gt;\n[\n  [104, 101, 108, 108, 111],\n  [116, 104, 101, 114, 101],\n  [97, 114, 114, 111, 119],\n]&quot;</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;{arr:?}&quot;</span>)
+            <span class="string">"FixedSizeBinaryArray&lt;5&gt;\n[\n  [104, 101, 108, 108, 111],\n  [116, 104, 101, 114, 101],\n  [97, 114, 114, 111, 119],\n]"</span>,
+            <span class="macro">format!</span>(<span class="string">"{arr:?}"</span>)
         );
     }
 
@@ -1776,8 +1794,7 @@
         <span class="kw">let </span>none_option: <span class="prelude-ty">Option</span>&lt;[u8; <span class="number">32</span>]&gt; = <span class="prelude-val">None</span>;
         <span class="kw">let </span>input_arg = <span class="macro">vec!</span>[none_option, none_option, none_option];
         <span class="attr">#[allow(deprecated)]
-        </span><span class="kw">let </span>arr =
-            FixedSizeBinaryArray::try_from_sparse_iter(input_arg.into_iter()).unwrap();
+        </span><span class="kw">let </span>arr = FixedSizeBinaryArray::try_from_sparse_iter(input_arg.into_iter()).unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, arr.value_length());
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, arr.len())
     }
@@ -1792,16 +1809,12 @@
             <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">13</span>, <span class="number">14</span>]),
         ];
         <span class="attr">#[allow(deprecated)]
-        </span><span class="kw">let </span>arr = FixedSizeBinaryArray::try_from_sparse_iter(input_arg.iter().cloned())
-            .unwrap();
+        </span><span class="kw">let </span>arr = FixedSizeBinaryArray::try_from_sparse_iter(input_arg.iter().cloned()).unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, arr.value_length());
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, arr.len());
 
-        <span class="kw">let </span>arr = FixedSizeBinaryArray::try_from_sparse_iter_with_size(
-            input_arg.into_iter(),
-            <span class="number">2</span>,
-        )
-        .unwrap();
+        <span class="kw">let </span>arr =
+            FixedSizeBinaryArray::try_from_sparse_iter_with_size(input_arg.into_iter(), <span class="number">2</span>).unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, arr.value_length());
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, arr.len());
     }
@@ -1810,25 +1823,22 @@
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_sparse_iter_with_size_all_none() {
         <span class="kw">let </span>input_arg = <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>] <span class="kw">as </span>Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;;
 
-        <span class="kw">let </span>arr = FixedSizeBinaryArray::try_from_sparse_iter_with_size(
-            input_arg.into_iter(),
-            <span class="number">16</span>,
-        )
-        .unwrap();
+        <span class="kw">let </span>arr = FixedSizeBinaryArray::try_from_sparse_iter_with_size(input_arg.into_iter(), <span class="number">16</span>)
+            .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">16</span>, arr.value_length());
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, arr.len())
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_vec() {
-        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="string">&quot;one&quot;</span>.as_bytes(), <span class="string">b&quot;two&quot;</span>, <span class="string">b&quot;six&quot;</span>, <span class="string">b&quot;ten&quot;</span>];
+        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="string">"one"</span>.as_bytes(), <span class="string">b"two"</span>, <span class="string">b"six"</span>, <span class="string">b"ten"</span>];
         <span class="kw">let </span>array = FixedSizeBinaryArray::from(values);
         <span class="macro">assert_eq!</span>(array.len(), <span class="number">4</span>);
         <span class="macro">assert_eq!</span>(array.null_count(), <span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">0</span>), <span class="string">b&quot;one&quot;</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">1</span>), <span class="string">b&quot;two&quot;</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">2</span>), <span class="string">b&quot;six&quot;</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">3</span>), <span class="string">b&quot;ten&quot;</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">0</span>), <span class="string">b"one"</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">1</span>), <span class="string">b"two"</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">2</span>), <span class="string">b"six"</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">3</span>), <span class="string">b"ten"</span>);
         <span class="macro">assert!</span>(!array.is_null(<span class="number">0</span>));
         <span class="macro">assert!</span>(!array.is_null(<span class="number">1</span>));
         <span class="macro">assert!</span>(!array.is_null(<span class="number">2</span>));
@@ -1836,27 +1846,27 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Nested array size mismatch: one is 3, and the other is 5&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Nested array size mismatch: one is 3, and the other is 5"</span>)]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_vec_incorrect_length() {
-        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="string">&quot;one&quot;</span>.as_bytes(), <span class="string">b&quot;two&quot;</span>, <span class="string">b&quot;three&quot;</span>, <span class="string">b&quot;four&quot;</span>];
+        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="string">"one"</span>.as_bytes(), <span class="string">b"two"</span>, <span class="string">b"three"</span>, <span class="string">b"four"</span>];
         <span class="kw">let _ </span>= FixedSizeBinaryArray::from(values);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_opt_vec() {
         <span class="kw">let </span>values = <span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="string">&quot;one&quot;</span>.as_bytes()),
-            <span class="prelude-val">Some</span>(<span class="string">b&quot;two&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">"one"</span>.as_bytes()),
+            <span class="prelude-val">Some</span>(<span class="string">b"two"</span>),
             <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(<span class="string">b&quot;six&quot;</span>),
-            <span class="prelude-val">Some</span>(<span class="string">b&quot;ten&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">b"six"</span>),
+            <span class="prelude-val">Some</span>(<span class="string">b"ten"</span>),
         ];
         <span class="kw">let </span>array = FixedSizeBinaryArray::from(values);
         <span class="macro">assert_eq!</span>(array.len(), <span class="number">5</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">0</span>), <span class="string">b&quot;one&quot;</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">1</span>), <span class="string">b&quot;two&quot;</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">3</span>), <span class="string">b&quot;six&quot;</span>);
-        <span class="macro">assert_eq!</span>(array.value(<span class="number">4</span>), <span class="string">b&quot;ten&quot;</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">0</span>), <span class="string">b"one"</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">1</span>), <span class="string">b"two"</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">3</span>), <span class="string">b"six"</span>);
+        <span class="macro">assert_eq!</span>(array.value(<span class="number">4</span>), <span class="string">b"ten"</span>);
         <span class="macro">assert!</span>(!array.is_null(<span class="number">0</span>));
         <span class="macro">assert!</span>(!array.is_null(<span class="number">1</span>));
         <span class="macro">assert!</span>(array.is_null(<span class="number">2</span>));
@@ -1865,14 +1875,14 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Nested array size mismatch: one is 3, and the other is 5&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Nested array size mismatch: one is 3, and the other is 5"</span>)]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_from_opt_vec_incorrect_length() {
         <span class="kw">let </span>values = <span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="string">&quot;one&quot;</span>.as_bytes()),
-            <span class="prelude-val">Some</span>(<span class="string">b&quot;two&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">"one"</span>.as_bytes()),
+            <span class="prelude-val">Some</span>(<span class="string">b"two"</span>),
             <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(<span class="string">b&quot;three&quot;</span>),
-            <span class="prelude-val">Some</span>(<span class="string">b&quot;four&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">b"three"</span>),
+            <span class="prelude-val">Some</span>(<span class="string">b"four"</span>),
         ];
         <span class="kw">let _ </span>= FixedSizeBinaryArray::from(values);
     }
@@ -1881,19 +1891,17 @@
     </span><span class="kw">fn </span>fixed_size_binary_array_all_null() {
         <span class="kw">let </span>data = <span class="macro">vec!</span>[<span class="prelude-val">None</span>] <span class="kw">as </span>Vec&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt;;
         <span class="kw">let </span>array =
-            FixedSizeBinaryArray::try_from_sparse_iter_with_size(data.into_iter(), <span class="number">0</span>)
-                .unwrap();
+            FixedSizeBinaryArray::try_from_sparse_iter_with_size(data.into_iter(), <span class="number">0</span>).unwrap();
         array
             .into_data()
             .validate_full()
-            .expect(<span class="string">&quot;All null array has valid array data&quot;</span>);
+            .expect(<span class="string">"All null array has valid array data"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="comment">// Test for https://github.com/apache/arrow-rs/issues/1390
     </span><span class="kw">fn </span>fixed_size_binary_array_all_null_in_batch_with_schema() {
-        <span class="kw">let </span>schema =
-            Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::FixedSizeBinary(<span class="number">2</span>), <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::FixedSizeBinary(<span class="number">2</span>), <span class="bool-val">true</span>)]);
 
         <span class="kw">let </span>none_option: <span class="prelude-ty">Option</span>&lt;[u8; <span class="number">2</span>]&gt; = <span class="prelude-val">None</span>;
         <span class="kw">let </span>item = FixedSizeBinaryArray::try_from_sparse_iter_with_size(
@@ -1908,10 +1916,10 @@
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Trying to access an element at index 4 from a FixedSizeBinaryArray of length 3&quot;
+        expected = <span class="string">"Trying to access an element at index 4 from a FixedSizeBinaryArray of length 3"
     </span>)]
     </span><span class="kw">fn </span>test_fixed_size_binary_array_get_value_index_out_of_bound() {
-        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">&quot;one&quot;</span>.as_bytes()), <span class="prelude-val">Some</span>(<span class="string">b&quot;two&quot;</span>), <span class="prelude-val">None</span>];
+        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">"one"</span>.as_bytes()), <span class="prelude-val">Some</span>(<span class="string">b"two"</span>), <span class="prelude-val">None</span>];
         <span class="kw">let </span>array = FixedSizeBinaryArray::from(values);
 
         array.value(<span class="number">4</span>);
@@ -1936,12 +1944,12 @@
 
         <span class="macro">assert_eq!</span>(
             err.to_string(),
-            <span class="string">&quot;Invalid argument error: Size cannot be negative, got -1&quot;
+            <span class="string">"Invalid argument error: Size cannot be negative, got -1"
         </span>);
 
         <span class="kw">let </span>nulls = NullBuffer::new_null(<span class="number">3</span>);
         <span class="kw">let </span>err = FixedSizeBinaryArray::try_new(<span class="number">2</span>, buffer, <span class="prelude-val">Some</span>(nulls)).unwrap_err();
-        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">&quot;Invalid argument error: Incorrect length of null buffer for FixedSizeBinaryArray, expected 5 got 3&quot;</span>);
+        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">"Invalid argument error: Incorrect length of null buffer for FixedSizeBinaryArray, expected 5 got 3"</span>);
     }
 }
 </code></pre></div></section></main></body></html>

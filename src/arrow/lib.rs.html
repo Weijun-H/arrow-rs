@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow/src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -382,19 +382,23 @@
 <a href="#382" id="382">382</a>
 <a href="#383" id="383">383</a>
 <a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -458,7 +462,7 @@
 //! }
 //!
 //! assert_eq!(min(&amp;Int32Array::from(vec![4, 2, 1, 6])), Some(1));
-//! assert_eq!(min(&amp;StringArray::from(vec![&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])), Some(&quot;a&quot;));
+//! assert_eq!(min(&amp;StringArray::from(vec!["b", "a", "c"])), Some("a"));
 //! ```
 //!
 //! **For more examples, and details consult the [arrow_array] docs.**
@@ -517,18 +521,18 @@
 //! # use arrow::datatypes::{ArrowPrimitiveType, DataType, Int32Type, UInt32Type};
 //! # use arrow::compute::cast;
 //! #
-//! fn parse_to_primitive&lt;&#39;a, T, I&gt;(iter: I) -&gt; PrimitiveArray&lt;T&gt;
+//! fn parse_to_primitive&lt;'a, T, I&gt;(iter: I) -&gt; PrimitiveArray&lt;T&gt;
 //! where
 //!     T: ArrowPrimitiveType,
 //!     T::Native: FromStr,
-//!     I: IntoIterator&lt;Item=&amp;&#39;a str&gt;,
+//!     I: IntoIterator&lt;Item=&amp;'a str&gt;,
 //! {
 //!     PrimitiveArray::from_iter(iter.into_iter().map(|val| T::Native::from_str(val).ok()))
 //! }
 //!
-//! fn parse_strings&lt;&#39;a, I&gt;(iter: I, to_data_type: DataType) -&gt; ArrayRef
+//! fn parse_strings&lt;'a, I&gt;(iter: I, to_data_type: DataType) -&gt; ArrayRef
 //! where
-//!     I: IntoIterator&lt;Item=&amp;&#39;a str&gt;,
+//!     I: IntoIterator&lt;Item=&amp;'a str&gt;,
 //! {
 //!    match to_data_type {
 //!        DataType::Int32 =&gt; Arc::new(parse_to_primitive::&lt;Int32Type, _&gt;(iter)) as _,
@@ -537,7 +541,7 @@
 //!    }
 //! }
 //!
-//! let array = parse_strings([&quot;1&quot;, &quot;2&quot;, &quot;3&quot;], DataType::Int32);
+//! let array = parse_strings(["1", "2", "3"], DataType::Int32);
 //! let integers = array.as_any().downcast_ref::&lt;Int32Array&gt;().unwrap();
 //! assert_eq!(integers.values(), &amp;[1, 2, 3])
 //! ```
@@ -553,15 +557,15 @@
 //! # use arrow::array::{ArrayRef, StringArray, UInt32Array};
 //! # use arrow::datatypes::DataType;
 //! #
-//! fn parse_strings&lt;&#39;a, I&gt;(iter: I, to_data_type: &amp;DataType) -&gt; Result&lt;ArrayRef&gt;
+//! fn parse_strings&lt;'a, I&gt;(iter: I, to_data_type: &amp;DataType) -&gt; Result&lt;ArrayRef&gt;
 //! where
-//!     I: IntoIterator&lt;Item=&amp;&#39;a str&gt;,
+//!     I: IntoIterator&lt;Item=&amp;'a str&gt;,
 //! {
 //!     let array = StringArray::from_iter(iter.into_iter().map(Some));
 //!     arrow::compute::cast(&amp;array, to_data_type)
 //! }
 //!
-//! let array = parse_strings([&quot;1&quot;, &quot;2&quot;, &quot;3&quot;], &amp;DataType::UInt32).unwrap();
+//! let array = parse_strings(["1", "2", "3"], &amp;DataType::UInt32).unwrap();
 //! let integers = array.as_any().downcast_ref::&lt;UInt32Array&gt;().unwrap();
 //! assert_eq!(integers.values(), &amp;[1, 2, 3])
 //! ```
@@ -569,7 +573,7 @@
 //! This module also implements many common vertical operations:
 //!
 //! * All mathematical binary operators, such as [`sub`](compute::kernels::numeric::sub)
-//! * All boolean binary operators such as [`equality`](compute::kernels::comparison::eq)
+//! * All boolean binary operators such as [`equality`](compute::kernels::cmp::eq)
 //! * [`cast`](compute::kernels::cast::cast)
 //! * [`filter`](compute::kernels::filter::filter)
 //! * [`take`](compute::kernels::take::take)
@@ -577,13 +581,17 @@
 //! * some string operators such as [`substring`](compute::kernels::substring::substring) and [`length`](compute::kernels::length::length)
 //!
 //! ```
-//! # use arrow::compute::gt_scalar;
+//! # use arrow::compute::kernels::cmp::gt;
 //! # use arrow_array::cast::AsArray;
 //! # use arrow_array::Int32Array;
 //! # use arrow_array::types::Int32Type;
 //! # use arrow_select::filter::filter;
 //! let array = Int32Array::from_iter(0..100);
-//! let predicate = gt_scalar(&amp;array, 60).unwrap();
+//! // Create a 32-bit integer scalar (single) value:
+//! let scalar = Int32Array::new_scalar(60);
+//! // find all rows in the array that are greater than 60
+//! let predicate = gt(&amp;array, &amp;scalar).unwrap();
+//! // copy all matching rows into a new array
 //! let filtered = filter(&amp;array, &amp;predicate).unwrap();
 //!
 //! let expected = Int32Array::from_iter(61..100);
@@ -610,7 +618,7 @@
 //! let col_1 = Arc::new(Int32Array::from_iter([1, 2, 3])) as _;
 //! let col_2 = Arc::new(Float32Array::from_iter([1., 6.3, 4.])) as _;
 //!
-//! let batch = RecordBatch::try_from_iter([(&quot;col1&quot;, col_1), (&quot;col_2&quot;, col_2)]).unwrap();
+//! let batch = RecordBatch::try_from_iter([("col1", col_1), ("col_2", col_2)]).unwrap();
 //! ```
 //!
 //! # IO
@@ -646,13 +654,13 @@
 //! }
 //!
 //! let schema = Schema::new(vec![
-//!     Field::new(&quot;int32&quot;, DataType::Int32, false),
-//!     Field::new(&quot;string&quot;, DataType::Utf8, false),
+//!     Field::new("int32", DataType::Int32, false),
+//!     Field::new("string", DataType::Utf8, false),
 //! ]);
 //!
 //! let rows = vec![
-//!     MyStruct{ int32: 5, string: &quot;bar&quot;.to_string() },
-//!     MyStruct{ int32: 8, string: &quot;foo&quot;.to_string() },
+//!     MyStruct{ int32: 5, string: "bar".to_string() },
+//!     MyStruct{ int32: 8, string: "foo".to_string() },
 //! ];
 //!
 //! let mut decoder = ReaderBuilder::new(Arc::new(schema)).build_decoder().unwrap();
@@ -665,8 +673,8 @@
 //! assert_eq!(int32.values(), &amp;[5, 8]);
 //!
 //! let string = batch.column(1).as_string::&lt;i32&gt;();
-//! assert_eq!(string.value(0), &quot;bar&quot;);
-//! assert_eq!(string.value(1), &quot;foo&quot;);
+//! assert_eq!(string.value(0), "bar");
+//! assert_eq!(string.value(1), "foo");
 //! ```
 //!
 //! # Crate Topology
@@ -706,14 +714,14 @@
 //!
 //! If you think you have found an instance where this is possible, please file
 //! a ticket in our [issue tracker] and it will be triaged and fixed. For more information on
-//! arrow&#39;s use of unsafe, see [here](https://github.com/apache/arrow-rs/tree/master/arrow#safety).
+//! arrow's use of unsafe, see [here](https://github.com/apache/arrow-rs/tree/master/arrow#safety).
 //!
 //! # Higher-level Processing
 //!
 //! This crate aims to provide reusable, low-level primitives for operating on columnar data. For
 //! more sophisticated query processing workloads, consider checking out [DataFusion]. This
 //! orchestrates the primitives exported by this crate into an embeddable query engine, with
-//! SQL and DataFrame frontends, and heavily influences this crate&#39;s roadmap.
+//! SQL and DataFrame frontends, and heavily influences this crate's roadmap.
 //!
 //! [`arrow`]: https://github.com/apache/arrow-rs
 //! [`array`]: mod@array
@@ -742,24 +750,24 @@
 
 <span class="kw">pub mod </span>array;
 <span class="kw">pub mod </span>compute;
-<span class="attr">#[cfg(feature = <span class="string">&quot;csv&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"csv"</span>)]
 </span><span class="kw">pub use </span>arrow_csv <span class="kw">as </span>csv;
 <span class="kw">pub mod </span>datatypes;
 <span class="kw">pub mod </span>error;
-<span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
-</span><span class="kw">pub mod </span>ffi;
-<span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
-</span><span class="kw">pub mod </span>ffi_stream;
-<span class="attr">#[cfg(feature = <span class="string">&quot;ipc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
+</span><span class="kw">pub use </span>arrow_array::ffi;
+<span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
+</span><span class="kw">pub use </span>arrow_array::ffi_stream;
+<span class="attr">#[cfg(feature = <span class="string">"ipc"</span>)]
 </span><span class="kw">pub use </span>arrow_ipc <span class="kw">as </span>ipc;
-<span class="attr">#[cfg(feature = <span class="string">&quot;json&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"json"</span>)]
 </span><span class="kw">pub use </span>arrow_json <span class="kw">as </span>json;
-<span class="attr">#[cfg(feature = <span class="string">&quot;pyarrow&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"pyarrow"</span>)]
 </span><span class="kw">pub mod </span>pyarrow;
 
 <span class="kw">pub mod </span>record_batch {
     <span class="kw">pub use </span>arrow_array::{
-        RecordBatch, RecordBatchOptions, RecordBatchReader, RecordBatchWriter,
+        RecordBatch, RecordBatchIterator, RecordBatchOptions, RecordBatchReader, RecordBatchWriter,
     };
 }
 <span class="kw">pub use </span>arrow_array::temporal_conversions;

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/record_batch.rs`."><title>record_batch.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_array/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/record_batch.rs`."><title>record_batch.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1140,19 +1140,95 @@
 <a href="#1140" id="1140">1140</a>
 <a href="#1141" id="1141">1141</a>
 <a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
+<a href="#1144" id="1144">1144</a>
+<a href="#1145" id="1145">1145</a>
+<a href="#1146" id="1146">1146</a>
+<a href="#1147" id="1147">1147</a>
+<a href="#1148" id="1148">1148</a>
+<a href="#1149" id="1149">1149</a>
+<a href="#1150" id="1150">1150</a>
+<a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
+<a href="#1157" id="1157">1157</a>
+<a href="#1158" id="1158">1158</a>
+<a href="#1159" id="1159">1159</a>
+<a href="#1160" id="1160">1160</a>
+<a href="#1161" id="1161">1161</a>
+<a href="#1162" id="1162">1162</a>
+<a href="#1163" id="1163">1163</a>
+<a href="#1164" id="1164">1164</a>
+<a href="#1165" id="1165">1165</a>
+<a href="#1166" id="1166">1166</a>
+<a href="#1167" id="1167">1167</a>
+<a href="#1168" id="1168">1168</a>
+<a href="#1169" id="1169">1169</a>
+<a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -1165,20 +1241,20 @@
 <span class="kw">use </span>std::ops::Index;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="doccomment">/// Trait for types that can read `RecordBatch`&#39;s.
+<span class="doccomment">/// Trait for types that can read `RecordBatch`'s.
 ///
 /// To create from an iterator, see [RecordBatchIterator].
 </span><span class="kw">pub trait </span>RecordBatchReader: Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;RecordBatch, ArrowError&gt;&gt; {
     <span class="doccomment">/// Returns the schema of this `RecordBatchReader`.
     ///
-    /// Implementation of this trait should guarantee that all `RecordBatch`&#39;s returned by this
+    /// Implementation of this trait should guarantee that all `RecordBatch`'s returned by this
     /// reader should have the same schema as returned from this method.
     </span><span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SchemaRef;
 
     <span class="doccomment">/// Reads the next `RecordBatch`.
     </span><span class="attr">#[deprecated(
-        since = <span class="string">&quot;2.0.0&quot;</span>,
-        note = <span class="string">&quot;This method is deprecated in favour of `next` from the trait Iterator.&quot;
+        since = <span class="string">"2.0.0"</span>,
+        note = <span class="string">"This method is deprecated in favour of `next` from the trait Iterator."
     </span>)]
     </span><span class="kw">fn </span>next_batch(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RecordBatch&gt;, ArrowError&gt; {
         <span class="self">self</span>.next().transpose()
@@ -1191,7 +1267,7 @@
     }
 }
 
-<span class="doccomment">/// Trait for types that can write `RecordBatch`&#39;s.
+<span class="doccomment">/// Trait for types that can write `RecordBatch`'s.
 </span><span class="kw">pub trait </span>RecordBatchWriter {
     <span class="doccomment">/// Write a single batch to the writer.
     </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;</span>RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt;;
@@ -1241,7 +1317,7 @@
     ///
     /// let id_array = Int32Array::from(vec![1, 2, 3, 4, 5]);
     /// let schema = Schema::new(vec![
-    ///     Field::new(&quot;id&quot;, DataType::Int32, false)
+    ///     Field::new("id", DataType::Int32, false)
     /// ]);
     ///
     /// let batch = RecordBatch::try_new(
@@ -1249,10 +1325,7 @@
     ///     vec![Arc::new(id_array)]
     /// ).unwrap();
     /// ```
-    </span><span class="kw">pub fn </span>try_new(
-        schema: SchemaRef,
-        columns: Vec&lt;ArrayRef&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
+    </span><span class="kw">pub fn </span>try_new(schema: SchemaRef, columns: Vec&lt;ArrayRef&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>options = RecordBatchOptions::new();
         <span class="self">Self</span>::try_new_impl(schema, columns, <span class="kw-2">&amp;</span>options)
     }
@@ -1294,7 +1367,7 @@
         <span class="comment">// check that number of fields in schema match column length
         </span><span class="kw">if </span>schema.fields().len() != columns.len() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;number of columns({}) must match number of fields({}) in schema&quot;</span>,
+                <span class="string">"number of columns({}) must match number of fields({}) in schema"</span>,
                 columns.len(),
                 schema.fields().len(),
             )));
@@ -1305,14 +1378,14 @@
             .or_else(|| columns.first().map(|col| col.len()))
             .ok_or_else(|| {
                 ArrowError::InvalidArgumentError(
-                    <span class="string">&quot;must either specify a row count or at least one column&quot;</span>.to_string(),
+                    <span class="string">"must either specify a row count or at least one column"</span>.to_string(),
                 )
             })<span class="question-mark">?</span>;
 
         <span class="kw">for </span>(c, f) <span class="kw">in </span>columns.iter().zip(<span class="kw-2">&amp;</span>schema.fields) {
             <span class="kw">if </span>!f.is_nullable() &amp;&amp; c.null_count() &gt; <span class="number">0 </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Column &#39;{}&#39; is declared as non-nullable but contains null values&quot;</span>,
+                    <span class="string">"Column '{}' is declared as non-nullable but contains null values"</span>,
                     f.name()
                 )));
             }
@@ -1321,10 +1394,8 @@
         <span class="comment">// check that all columns have the same row count
         </span><span class="kw">if </span>columns.iter().any(|c| c.len() != row_count) {
             <span class="kw">let </span>err = <span class="kw">match </span>options.row_count {
-                <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="string">&quot;all columns in a record batch must have the specified row count&quot;
-                </span>}
-                <span class="prelude-val">None </span>=&gt; <span class="string">&quot;all columns in a record batch must have the same length&quot;</span>,
+                <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="string">"all columns in a record batch must have the specified row count"</span>,
+                <span class="prelude-val">None </span>=&gt; <span class="string">"all columns in a record batch must have the same length"</span>,
             };
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(err.to_string()));
         }
@@ -1332,9 +1403,7 @@
         <span class="comment">// function for comparing column type and field type
         // return true if 2 types are not matched
         </span><span class="kw">let </span>type_not_match = <span class="kw">if </span>options.match_field_names {
-            |(<span class="kw">_</span>, (col_type, field_type)): <span class="kw-2">&amp;</span>(usize, (<span class="kw-2">&amp;</span>DataType, <span class="kw-2">&amp;</span>DataType))| {
-                col_type != field_type
-            }
+            |(<span class="kw">_</span>, (col_type, field_type)): <span class="kw-2">&amp;</span>(usize, (<span class="kw-2">&amp;</span>DataType, <span class="kw-2">&amp;</span>DataType))| col_type != field_type
         } <span class="kw">else </span>{
             |(<span class="kw">_</span>, (col_type, field_type)): <span class="kw-2">&amp;</span>(usize, (<span class="kw-2">&amp;</span>DataType, <span class="kw-2">&amp;</span>DataType))| {
                 !col_type.equals_datatype(field_type)
@@ -1351,7 +1420,7 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>((i, (col_type, field_type))) = not_match {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;column types must match schema types, expected {field_type:?} but found {col_type:?} at column index {i}&quot;</span>)));
+                <span class="string">"column types must match schema types, expected {field_type:?} but found {col_type:?} at column index {i}"</span>)));
         }
 
         <span class="prelude-val">Ok</span>(RecordBatch {
@@ -1368,7 +1437,7 @@
     </span><span class="kw">pub fn </span>with_schema(<span class="self">self</span>, schema: SchemaRef) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">if </span>!schema.contains(<span class="self">self</span>.schema.as_ref()) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::SchemaError(<span class="macro">format!</span>(
-                <span class="string">&quot;{schema} is not a superset of {}&quot;</span>,
+                <span class="string">"target schema is not superset of current schema target={schema} current={}"</span>,
                 <span class="self">self</span>.schema
             )));
         }
@@ -1385,6 +1454,11 @@
         <span class="self">self</span>.schema.clone()
     }
 
+    <span class="doccomment">/// Returns a reference to the [`Schema`] of the record batch.
+    </span><span class="kw">pub fn </span>schema_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SchemaRef {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.schema
+    }
+
     <span class="doccomment">/// Projects the schema onto the specified columns
     </span><span class="kw">pub fn </span>project(<span class="kw-2">&amp;</span><span class="self">self</span>, indices: <span class="kw-2">&amp;</span>[usize]) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch, ArrowError&gt; {
         <span class="kw">let </span>projected_schema = <span class="self">self</span>.schema.project(indices)<span class="question-mark">?</span>;
@@ -1393,7 +1467,7 @@
             .map(|f| {
                 <span class="self">self</span>.columns.get(<span class="kw-2">*</span>f).cloned().ok_or_else(|| {
                     ArrowError::SchemaError(<span class="macro">format!</span>(
-                        <span class="string">&quot;project index {} out of bounds, max field {}&quot;</span>,
+                        <span class="string">"project index {} out of bounds, max field {}"</span>,
                         f,
                         <span class="self">self</span>.columns.len()
                     ))
@@ -1422,7 +1496,7 @@
     ///
     /// let id_array = Int32Array::from(vec![1, 2, 3, 4, 5]);
     /// let schema = Schema::new(vec![
-    ///     Field::new(&quot;id&quot;, DataType::Int32, false)
+    ///     Field::new("id", DataType::Int32, false)
     /// ]);
     ///
     /// let batch = RecordBatch::try_new(Arc::new(schema), vec![Arc::new(id_array)]).unwrap();
@@ -1444,7 +1518,7 @@
     ///
     /// let id_array = Int32Array::from(vec![1, 2, 3, 4, 5]);
     /// let schema = Schema::new(vec![
-    ///     Field::new(&quot;id&quot;, DataType::Int32, false)
+    ///     Field::new("id", DataType::Int32, false)
     /// ]);
     ///
     /// let batch = RecordBatch::try_new(Arc::new(schema), vec![Arc::new(id_array)]).unwrap();
@@ -1455,7 +1529,7 @@
         <span class="self">self</span>.row_count
     }
 
-    <span class="doccomment">/// Get a reference to a column&#39;s array by index.
+    <span class="doccomment">/// Get a reference to a column's array by index.
     ///
     /// # Panics
     ///
@@ -1464,7 +1538,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.columns[index]
     }
 
-    <span class="doccomment">/// Get a reference to a column&#39;s array by name.
+    <span class="doccomment">/// Get a reference to a column's array by name.
     </span><span class="kw">pub fn </span>column_by_name(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ArrayRef&gt; {
         <span class="self">self</span>.schema()
             .column_with_name(name)
@@ -1474,6 +1548,40 @@
     <span class="doccomment">/// Get a reference to all columns in the record batch.
     </span><span class="kw">pub fn </span>columns(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[ArrayRef] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.columns[..]
+    }
+
+    <span class="doccomment">/// Remove column by index and return it.
+    ///
+    /// Return the `ArrayRef` if the column is removed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index`` out of bounds.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::sync::Arc;
+    /// use arrow_array::{BooleanArray, Int32Array, RecordBatch};
+    /// use arrow_schema::{DataType, Field, Schema};
+    /// let id_array = Int32Array::from(vec![1, 2, 3, 4, 5]);
+    /// let bool_array = BooleanArray::from(vec![true, false, false, true, true]);
+    /// let schema = Schema::new(vec![
+    ///     Field::new("id", DataType::Int32, false),
+    ///     Field::new("bool", DataType::Boolean, false),
+    /// ]);
+    ///
+    /// let mut batch = RecordBatch::try_new(Arc::new(schema), vec![Arc::new(id_array), Arc::new(bool_array)]).unwrap();
+    ///
+    /// let removed_column = batch.remove_column(0);
+    /// assert_eq!(removed_column.as_any().downcast_ref::&lt;Int32Array&gt;().unwrap(), &amp;Int32Array::from(vec![1, 2, 3, 4, 5]));
+    /// assert_eq!(batch.num_columns(), 1);
+    /// ```
+    </span><span class="kw">pub fn </span>remove_column(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; ArrayRef {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = SchemaBuilder::from(<span class="self">self</span>.schema.as_ref());
+        builder.remove(index);
+        <span class="self">self</span>.schema = Arc::new(builder.finish());
+        <span class="self">self</span>.columns.remove(index)
     }
 
     <span class="doccomment">/// Return a new RecordBatch where each column is sliced
@@ -1514,11 +1622,11 @@
     /// # use arrow_array::{ArrayRef, Int32Array, RecordBatch, StringArray};
     ///
     /// let a: ArrayRef = Arc::new(Int32Array::from(vec![1, 2]));
-    /// let b: ArrayRef = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;]));
+    /// let b: ArrayRef = Arc::new(StringArray::from(vec!["a", "b"]));
     ///
     /// let record_batch = RecordBatch::try_from_iter(vec![
-    ///   (&quot;a&quot;, a),
-    ///   (&quot;b&quot;, b),
+    ///   ("a", a),
+    ///   ("b", b),
     /// ]);
     /// ```
     </span><span class="kw">pub fn </span>try_from_iter&lt;I, F&gt;(value: I) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt;
@@ -1549,13 +1657,13 @@
     /// # use arrow_array::{ArrayRef, Int32Array, RecordBatch, StringArray};
     ///
     /// let a: ArrayRef = Arc::new(Int32Array::from(vec![1, 2]));
-    /// let b: ArrayRef = Arc::new(StringArray::from(vec![Some(&quot;a&quot;), Some(&quot;b&quot;)]));
+    /// let b: ArrayRef = Arc::new(StringArray::from(vec![Some("a"), Some("b")]));
     ///
     /// // Note neither `a` nor `b` has any actual nulls, but we mark
     /// // b an nullable
     /// let record_batch = RecordBatch::try_from_iter_with_nullable(vec![
-    ///   (&quot;a&quot;, a, false),
-    ///   (&quot;b&quot;, b, true),
+    ///   ("a", a, false),
+    ///   ("b", b, true),
     /// ]);
     /// ```
     </span><span class="kw">pub fn </span>try_from_iter_with_nullable&lt;I, F&gt;(value: I) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt;
@@ -1626,7 +1734,11 @@
     <span class="kw">fn </span>from(value: StructArray) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>row_count = value.len();
         <span class="kw">let </span>(fields, columns, nulls) = value.into_parts();
-        <span class="macro">assert_eq!</span>(nulls.map(|n| n.null_count()).unwrap_or_default(), <span class="number">0</span>, <span class="string">&quot;Cannot convert nullable StructArray to RecordBatch, see StructArray documentation&quot;</span>);
+        <span class="macro">assert_eq!</span>(
+            nulls.map(|n| n.null_count()).unwrap_or_default(),
+            <span class="number">0</span>,
+            <span class="string">"Cannot convert nullable StructArray to RecordBatch, see StructArray documentation"
+        </span>);
 
         RecordBatch {
             schema: Arc::new(Schema::new(fields)),
@@ -1645,7 +1757,7 @@
 <span class="kw">impl </span>Index&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>RecordBatch {
     <span class="kw">type </span>Output = ArrayRef;
 
-    <span class="doccomment">/// Get a reference to a column&#39;s array by name.
+    <span class="doccomment">/// Get a reference to a column's array by name.
     ///
     /// # Panics
     ///
@@ -1664,11 +1776,11 @@
 /// # use arrow_array::{ArrayRef, Int32Array, RecordBatch, StringArray, RecordBatchIterator, RecordBatchReader};
 /// #
 /// let a: ArrayRef = Arc::new(Int32Array::from(vec![1, 2]));
-/// let b: ArrayRef = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;]));
+/// let b: ArrayRef = Arc::new(StringArray::from(vec!["a", "b"]));
 ///
 /// let record_batch = RecordBatch::try_from_iter(vec![
-///   (&quot;a&quot;, a),
-///   (&quot;b&quot;, b),
+///   ("a", a),
+///   ("b", b),
 /// ]).unwrap();
 ///
 /// let batches: Vec&lt;RecordBatch&gt; = vec![record_batch.clone(), record_batch.clone()];
@@ -1729,9 +1841,11 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>std::collections::HashMap;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use crate</span>::{
-        BooleanArray, Int32Array, Int64Array, Int8Array, ListArray, StringArray,
+        BooleanArray, Int32Array, Int64Array, Int8Array, ListArray, StringArray, StringViewArray,
     };
     <span class="kw">use </span>arrow_buffer::{Buffer, ToByteSlice};
     <span class="kw">use </span>arrow_data::{ArrayData, ArrayDataBuilder};
@@ -1740,32 +1854,54 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>create_record_batch() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
-        <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]);
+        <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]);
 
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap();
         check_batch(record_batch, <span class="number">5</span>)
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>create_string_view_record_batch() {
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8View, <span class="bool-val">false</span>),
+        ]);
+
+        <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
+        <span class="kw">let </span>b = StringViewArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]);
+
+        <span class="kw">let </span>record_batch =
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap();
+
+        <span class="macro">assert_eq!</span>(<span class="number">5</span>, record_batch.num_rows());
+        <span class="macro">assert_eq!</span>(<span class="number">2</span>, record_batch.num_columns());
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>DataType::Int32, record_batch.schema().field(<span class="number">0</span>).data_type());
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">&amp;</span>DataType::Utf8View,
+            record_batch.schema().field(<span class="number">1</span>).data_type()
+        );
+        <span class="macro">assert_eq!</span>(<span class="number">5</span>, record_batch.column(<span class="number">0</span>).len());
+        <span class="macro">assert_eq!</span>(<span class="number">5</span>, record_batch.column(<span class="number">1</span>).len());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>byte_size_should_not_regress() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
-        <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]);
+        <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]);
 
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap();
         <span class="macro">assert_eq!</span>(record_batch.get_array_memory_size(), <span class="number">364</span>);
     }
 
@@ -1779,20 +1915,19 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;assertion failed: (offset + length) &lt;= self.num_rows()&quot;</span>)]
+    #[should_panic(expected = <span class="string">"assertion failed: (offset + length) &lt;= self.num_rows()"</span>)]
     </span><span class="kw">fn </span>create_record_batch_slice() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>),
         ]);
         <span class="kw">let </span>expected_schema = schema.clone();
 
         <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
-        <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>, <span class="string">&quot;f&quot;</span>, <span class="string">&quot;h&quot;</span>, <span class="string">&quot;i&quot;</span>]);
+        <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>, <span class="string">"f"</span>, <span class="string">"h"</span>, <span class="string">"i"</span>]);
 
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap();
 
         <span class="kw">let </span>offset = <span class="number">2</span>;
         <span class="kw">let </span>length = <span class="number">5</span>;
@@ -1814,7 +1949,7 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;assertion failed: (offset + length) &lt;= self.num_rows()&quot;</span>)]
+    #[should_panic(expected = <span class="string">"assertion failed: (offset + length) &lt;= self.num_rows()"</span>)]
     </span><span class="kw">fn </span>create_record_batch_slice_empty_batch() {
         <span class="kw">let </span>schema = Schema::empty();
 
@@ -1839,14 +1974,14 @@
             <span class="prelude-val">Some</span>(<span class="number">4</span>),
             <span class="prelude-val">Some</span>(<span class="number">5</span>),
         ]));
-        <span class="kw">let </span>b: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]));
+        <span class="kw">let </span>b: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]));
 
-        <span class="kw">let </span>record_batch = RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">&quot;a&quot;</span>, a), (<span class="string">&quot;b&quot;</span>, b)])
-            .expect(<span class="string">&quot;valid conversion&quot;</span>);
+        <span class="kw">let </span>record_batch =
+            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">"a"</span>, a), (<span class="string">"b"</span>, b)]).expect(<span class="string">"valid conversion"</span>);
 
         <span class="kw">let </span>expected_schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>),
         ]);
         <span class="macro">assert_eq!</span>(record_batch.schema().as_ref(), <span class="kw-2">&amp;</span>expected_schema);
         check_batch(record_batch, <span class="number">5</span>);
@@ -1855,18 +1990,16 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>create_record_batch_try_from_iter_with_nullable() {
         <span class="kw">let </span>a: ArrayRef = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]));
-        <span class="kw">let </span>b: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]));
+        <span class="kw">let </span>b: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]));
 
         <span class="comment">// Note there are no nulls in a or b, but we specify that b is nullable
-        </span><span class="kw">let </span>record_batch = RecordBatch::try_from_iter_with_nullable(<span class="macro">vec!</span>[
-            (<span class="string">&quot;a&quot;</span>, a, <span class="bool-val">false</span>),
-            (<span class="string">&quot;b&quot;</span>, b, <span class="bool-val">true</span>),
-        ])
-        .expect(<span class="string">&quot;valid conversion&quot;</span>);
+        </span><span class="kw">let </span>record_batch =
+            RecordBatch::try_from_iter_with_nullable(<span class="macro">vec!</span>[(<span class="string">"a"</span>, a, <span class="bool-val">false</span>), (<span class="string">"b"</span>, b, <span class="bool-val">true</span>)])
+                .expect(<span class="string">"valid conversion"</span>);
 
         <span class="kw">let </span>expected_schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">true</span>),
         ]);
         <span class="macro">assert_eq!</span>(record_batch.schema().as_ref(), <span class="kw-2">&amp;</span>expected_schema);
         check_batch(record_batch, <span class="number">5</span>);
@@ -1874,7 +2007,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>create_record_batch_schema_mismatch() {
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
 
         <span class="kw">let </span>a = Int64Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
 
@@ -1885,15 +2018,15 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>create_record_batch_field_name_mismatch() {
         <span class="kw">let </span>fields = <span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a1&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new_list(<span class="string">&quot;a2&quot;</span>, Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int8, <span class="bool-val">false</span>), <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a1"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new_list(<span class="string">"a2"</span>, Field::new(<span class="string">"item"</span>, DataType::Int8, <span class="bool-val">false</span>), <span class="bool-val">false</span>),
         ];
-        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new_struct(<span class="string">&quot;a&quot;</span>, fields, <span class="bool-val">true</span>)]));
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new_struct(<span class="string">"a"</span>, fields, <span class="bool-val">true</span>)]));
 
         <span class="kw">let </span>a1: ArrayRef = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]));
         <span class="kw">let </span>a2_child = Int8Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>a2 = ArrayDataBuilder::new(DataType::List(Arc::new(Field::new(
-            <span class="string">&quot;array&quot;</span>,
+            <span class="string">"array"</span>,
             DataType::Int8,
             <span class="bool-val">false</span>,
         ))))
@@ -1904,8 +2037,8 @@
         .unwrap();
         <span class="kw">let </span>a2: ArrayRef = Arc::new(ListArray::from(a2));
         <span class="kw">let </span>a = ArrayDataBuilder::new(DataType::Struct(Fields::from(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;aa1&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;a2&quot;</span>, a2.data_type().clone(), <span class="bool-val">false</span>),
+            Field::new(<span class="string">"aa1"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a2"</span>, a2.data_type().clone(), <span class="bool-val">false</span>),
         ])))
         .add_child_data(a1.into_data())
         .add_child_data(a2.into_data())
@@ -1929,13 +2062,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>create_record_batch_record_mismatch() {
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
 
         <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
         <span class="kw">let </span>b = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
 
-        <span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]);
+        <span class="kw">let </span>batch = RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]);
         <span class="macro">assert!</span>(batch.is_err());
     }
 
@@ -1945,11 +2077,11 @@
         <span class="kw">let </span>int = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">42</span>, <span class="number">28</span>, <span class="number">19</span>, <span class="number">31</span>]));
         <span class="kw">let </span>struct_array = StructArray::from(<span class="macro">vec!</span>[
             (
-                Arc::new(Field::new(<span class="string">&quot;b&quot;</span>, DataType::Boolean, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"b"</span>, DataType::Boolean, <span class="bool-val">false</span>)),
                 boolean.clone() <span class="kw">as </span>ArrayRef,
             ),
             (
-                Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>)),
                 int.clone() <span class="kw">as </span>ArrayRef,
             ),
         ]);
@@ -1970,15 +2102,15 @@
         <span class="kw">let </span>id_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>id_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>batch1 = RecordBatch::try_new(
@@ -1996,23 +2128,20 @@
         <span class="macro">assert_eq!</span>(batch1, batch2);
     }
 
-    <span class="doccomment">/// validates if the record batch can be accessed using `column_name` as index i.e. `record_batch[&quot;column_name&quot;]`
+    <span class="doccomment">/// validates if the record batch can be accessed using `column_name` as index i.e. `record_batch["column_name"]`
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>record_batch_index_access() {
         <span class="kw">let </span>id_arr = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]));
         <span class="kw">let </span>val_arr = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]));
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
-        <span class="kw">let </span>record_batch = RecordBatch::try_new(
-            Arc::new(schema1),
-            <span class="macro">vec!</span>[id_arr.clone(), val_arr.clone()],
-        )
-        .unwrap();
+        <span class="kw">let </span>record_batch =
+            RecordBatch::try_new(Arc::new(schema1), <span class="macro">vec!</span>[id_arr.clone(), val_arr.clone()]).unwrap();
 
-        <span class="macro">assert_eq!</span>(record_batch[<span class="string">&quot;id&quot;</span>].as_ref(), id_arr.as_ref());
-        <span class="macro">assert_eq!</span>(record_batch[<span class="string">&quot;val&quot;</span>].as_ref(), val_arr.as_ref());
+        <span class="macro">assert_eq!</span>(record_batch[<span class="string">"id"</span>].as_ref(), id_arr.as_ref());
+        <span class="macro">assert_eq!</span>(record_batch[<span class="string">"val"</span>].as_ref(), val_arr.as_ref());
     }
 
     <span class="attr">#[test]
@@ -2020,15 +2149,15 @@
         <span class="kw">let </span>id_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>id_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>batch1 = RecordBatch::try_new(
@@ -2051,15 +2180,15 @@
         <span class="kw">let </span>id_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>id_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;num&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"num"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>batch1 = RecordBatch::try_new(
@@ -2082,17 +2211,17 @@
         <span class="kw">let </span>id_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>id_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>num_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;num&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"num"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>batch1 = RecordBatch::try_new(
@@ -2115,15 +2244,15 @@
         <span class="kw">let </span>id_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
         <span class="kw">let </span>val_arr1 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;val&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"val"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>id_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="kw">let </span>val_arr2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>]);
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;id&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;num&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"num"</span>, DataType::Int32, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>batch1 = RecordBatch::try_new(
@@ -2144,28 +2273,25 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>project() {
         <span class="kw">let </span>a: ArrayRef = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">3</span>)]));
-        <span class="kw">let </span>b: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>]));
-        <span class="kw">let </span>c: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>, <span class="string">&quot;f&quot;</span>]));
+        <span class="kw">let </span>b: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>]));
+        <span class="kw">let </span>c: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"d"</span>, <span class="string">"e"</span>, <span class="string">"f"</span>]));
 
-        <span class="kw">let </span>record_batch = RecordBatch::try_from_iter(<span class="macro">vec!</span>[
-            (<span class="string">&quot;a&quot;</span>, a.clone()),
-            (<span class="string">&quot;b&quot;</span>, b.clone()),
-            (<span class="string">&quot;c&quot;</span>, c.clone()),
-        ])
-        .expect(<span class="string">&quot;valid conversion&quot;</span>);
+        <span class="kw">let </span>record_batch =
+            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">"a"</span>, a.clone()), (<span class="string">"b"</span>, b.clone()), (<span class="string">"c"</span>, c.clone())])
+                .expect(<span class="string">"valid conversion"</span>);
 
-        <span class="kw">let </span>expected = RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">&quot;a&quot;</span>, a), (<span class="string">&quot;c&quot;</span>, c)])
-            .expect(<span class="string">&quot;valid conversion&quot;</span>);
+        <span class="kw">let </span>expected =
+            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">"a"</span>, a), (<span class="string">"c"</span>, c)]).expect(<span class="string">"valid conversion"</span>);
 
         <span class="macro">assert_eq!</span>(expected, record_batch.project(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">2</span>]).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>project_empty() {
-        <span class="kw">let </span>c: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>, <span class="string">&quot;f&quot;</span>]));
+        <span class="kw">let </span>c: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"d"</span>, <span class="string">"e"</span>, <span class="string">"f"</span>]));
 
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">&quot;c&quot;</span>, c.clone())]).expect(<span class="string">&quot;valid conversion&quot;</span>);
+            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">"c"</span>, c.clone())]).expect(<span class="string">"valid conversion"</span>);
 
         <span class="kw">let </span>expected = RecordBatch::try_new_with_options(
             Arc::new(Schema::empty()),
@@ -2175,7 +2301,7 @@
                 row_count: <span class="prelude-val">Some</span>(<span class="number">3</span>),
             },
         )
-        .expect(<span class="string">&quot;valid conversion&quot;</span>);
+        .expect(<span class="string">"valid conversion"</span>);
 
         <span class="macro">assert_eq!</span>(expected, record_batch.project(<span class="kw-2">&amp;</span>[]).unwrap());
     }
@@ -2187,12 +2313,11 @@
         <span class="kw">let </span>err = RecordBatch::try_new(schema.clone(), <span class="macro">vec!</span>[]).unwrap_err();
         <span class="macro">assert!</span>(err
             .to_string()
-            .contains(<span class="string">&quot;must either specify a row count or at least one column&quot;</span>));
+            .contains(<span class="string">"must either specify a row count or at least one column"</span>));
 
         <span class="kw">let </span>options = RecordBatchOptions::new().with_row_count(<span class="prelude-val">Some</span>(<span class="number">10</span>));
 
-        <span class="kw">let </span>ok =
-            RecordBatch::try_new_with_options(schema.clone(), <span class="macro">vec!</span>[], <span class="kw-2">&amp;</span>options).unwrap();
+        <span class="kw">let </span>ok = RecordBatch::try_new_with_options(schema.clone(), <span class="macro">vec!</span>[], <span class="kw-2">&amp;</span>options).unwrap();
         <span class="macro">assert_eq!</span>(ok.num_rows(), <span class="number">10</span>);
 
         <span class="kw">let </span>a = ok.slice(<span class="number">2</span>, <span class="number">5</span>);
@@ -2207,12 +2332,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_nulls_in_non_nullable_field() {
-        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]));
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]));
         <span class="kw">let </span>maybe_batch = RecordBatch::try_new(
             schema,
             <span class="macro">vec!</span>[Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>]))],
         );
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;Invalid argument error: Column &#39;a&#39; is declared as non-nullable but contains null values&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, maybe_batch.err().unwrap()));
+        <span class="macro">assert_eq!</span>(<span class="string">"Invalid argument error: Column 'a' is declared as non-nullable but contains null values"</span>, <span class="macro">format!</span>(<span class="string">"{}"</span>, maybe_batch.err().unwrap()));
     }
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_record_batch_options() {
@@ -2224,11 +2349,11 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Cannot convert nullable StructArray to RecordBatch&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Cannot convert nullable StructArray to RecordBatch"</span>)]
     </span><span class="kw">fn </span>test_from_struct() {
         <span class="kw">let </span>s = StructArray::from(ArrayData::new_null(
             <span class="comment">// Note child is not nullable
-            </span><span class="kw-2">&amp;</span>DataType::Struct(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;foo&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)].into()),
+            </span><span class="kw-2">&amp;</span>DataType::Struct(<span class="macro">vec!</span>[Field::new(<span class="string">"foo"</span>, DataType::Int32, <span class="bool-val">false</span>)].into()),
             <span class="number">2</span>,
         ));
         <span class="kw">let _ </span>= RecordBatch::from(s);
@@ -2236,9 +2361,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_with_schema() {
-        <span class="kw">let </span>required_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>required_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
         <span class="kw">let </span>required_schema = Arc::new(required_schema);
-        <span class="kw">let </span>nullable_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>nullable_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>nullable_schema = Arc::new(nullable_schema);
 
         <span class="kw">let </span>batch = RecordBatch::try_new(
@@ -2254,7 +2379,7 @@
         </span>batch.clone().with_schema(required_schema).unwrap_err();
 
         <span class="comment">// Can add metadata
-        </span><span class="kw">let </span>metadata = <span class="macro">vec!</span>[(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+        </span><span class="kw">let </span>metadata = <span class="macro">vec!</span>[(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
             .into_iter()
             .collect();
         <span class="kw">let </span>metadata_schema = nullable_schema.as_ref().clone().with_metadata(metadata);
@@ -2268,7 +2393,7 @@
     </span><span class="kw">fn </span>test_boxed_reader() {
         <span class="comment">// Make sure we can pass a boxed reader to a function generic over
         // RecordBatchReader.
-        </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
         <span class="kw">let </span>schema = Arc::new(schema);
 
         <span class="kw">let </span>reader = RecordBatchIterator::new(std::iter::empty(), schema);
@@ -2280,6 +2405,33 @@
 
         <span class="kw">let </span>size = get_size(reader);
         <span class="macro">assert_eq!</span>(size, <span class="number">0</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_remove_column_maintains_schema_metadata() {
+        <span class="kw">let </span>id_array = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
+        <span class="kw">let </span>bool_array = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>metadata = HashMap::new();
+        metadata.insert(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string());
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
+            Field::new(<span class="string">"id"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"bool"</span>, DataType::Boolean, <span class="bool-val">false</span>),
+        ])
+        .with_metadata(metadata);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>batch = RecordBatch::try_new(
+            Arc::new(schema),
+            <span class="macro">vec!</span>[Arc::new(id_array), Arc::new(bool_array)],
+        )
+        .unwrap();
+
+        <span class="kw">let </span>_removed_column = batch.remove_column(<span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(batch.schema().metadata().len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(
+            batch.schema().metadata().get(<span class="string">"foo"</span>).unwrap().as_str(),
+            <span class="string">"bar"
+        </span>);
     }
 }
 </code></pre></div></section></main></body></html>

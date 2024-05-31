@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-ipc/src/writer.rs`."><title>writer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_ipc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_ipc/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-ipc/src/writer.rs`."><title>writer.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_ipc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2162,19 +2162,369 @@
 <a href="#2162" id="2162">2162</a>
 <a href="#2163" id="2163">2163</a>
 <a href="#2164" id="2164">2164</a>
+<a href="#2165" id="2165">2165</a>
+<a href="#2166" id="2166">2166</a>
+<a href="#2167" id="2167">2167</a>
+<a href="#2168" id="2168">2168</a>
+<a href="#2169" id="2169">2169</a>
+<a href="#2170" id="2170">2170</a>
+<a href="#2171" id="2171">2171</a>
+<a href="#2172" id="2172">2172</a>
+<a href="#2173" id="2173">2173</a>
+<a href="#2174" id="2174">2174</a>
+<a href="#2175" id="2175">2175</a>
+<a href="#2176" id="2176">2176</a>
+<a href="#2177" id="2177">2177</a>
+<a href="#2178" id="2178">2178</a>
+<a href="#2179" id="2179">2179</a>
+<a href="#2180" id="2180">2180</a>
+<a href="#2181" id="2181">2181</a>
+<a href="#2182" id="2182">2182</a>
+<a href="#2183" id="2183">2183</a>
+<a href="#2184" id="2184">2184</a>
+<a href="#2185" id="2185">2185</a>
+<a href="#2186" id="2186">2186</a>
+<a href="#2187" id="2187">2187</a>
+<a href="#2188" id="2188">2188</a>
+<a href="#2189" id="2189">2189</a>
+<a href="#2190" id="2190">2190</a>
+<a href="#2191" id="2191">2191</a>
+<a href="#2192" id="2192">2192</a>
+<a href="#2193" id="2193">2193</a>
+<a href="#2194" id="2194">2194</a>
+<a href="#2195" id="2195">2195</a>
+<a href="#2196" id="2196">2196</a>
+<a href="#2197" id="2197">2197</a>
+<a href="#2198" id="2198">2198</a>
+<a href="#2199" id="2199">2199</a>
+<a href="#2200" id="2200">2200</a>
+<a href="#2201" id="2201">2201</a>
+<a href="#2202" id="2202">2202</a>
+<a href="#2203" id="2203">2203</a>
+<a href="#2204" id="2204">2204</a>
+<a href="#2205" id="2205">2205</a>
+<a href="#2206" id="2206">2206</a>
+<a href="#2207" id="2207">2207</a>
+<a href="#2208" id="2208">2208</a>
+<a href="#2209" id="2209">2209</a>
+<a href="#2210" id="2210">2210</a>
+<a href="#2211" id="2211">2211</a>
+<a href="#2212" id="2212">2212</a>
+<a href="#2213" id="2213">2213</a>
+<a href="#2214" id="2214">2214</a>
+<a href="#2215" id="2215">2215</a>
+<a href="#2216" id="2216">2216</a>
+<a href="#2217" id="2217">2217</a>
+<a href="#2218" id="2218">2218</a>
+<a href="#2219" id="2219">2219</a>
+<a href="#2220" id="2220">2220</a>
+<a href="#2221" id="2221">2221</a>
+<a href="#2222" id="2222">2222</a>
+<a href="#2223" id="2223">2223</a>
+<a href="#2224" id="2224">2224</a>
+<a href="#2225" id="2225">2225</a>
+<a href="#2226" id="2226">2226</a>
+<a href="#2227" id="2227">2227</a>
+<a href="#2228" id="2228">2228</a>
+<a href="#2229" id="2229">2229</a>
+<a href="#2230" id="2230">2230</a>
+<a href="#2231" id="2231">2231</a>
+<a href="#2232" id="2232">2232</a>
+<a href="#2233" id="2233">2233</a>
+<a href="#2234" id="2234">2234</a>
+<a href="#2235" id="2235">2235</a>
+<a href="#2236" id="2236">2236</a>
+<a href="#2237" id="2237">2237</a>
+<a href="#2238" id="2238">2238</a>
+<a href="#2239" id="2239">2239</a>
+<a href="#2240" id="2240">2240</a>
+<a href="#2241" id="2241">2241</a>
+<a href="#2242" id="2242">2242</a>
+<a href="#2243" id="2243">2243</a>
+<a href="#2244" id="2244">2244</a>
+<a href="#2245" id="2245">2245</a>
+<a href="#2246" id="2246">2246</a>
+<a href="#2247" id="2247">2247</a>
+<a href="#2248" id="2248">2248</a>
+<a href="#2249" id="2249">2249</a>
+<a href="#2250" id="2250">2250</a>
+<a href="#2251" id="2251">2251</a>
+<a href="#2252" id="2252">2252</a>
+<a href="#2253" id="2253">2253</a>
+<a href="#2254" id="2254">2254</a>
+<a href="#2255" id="2255">2255</a>
+<a href="#2256" id="2256">2256</a>
+<a href="#2257" id="2257">2257</a>
+<a href="#2258" id="2258">2258</a>
+<a href="#2259" id="2259">2259</a>
+<a href="#2260" id="2260">2260</a>
+<a href="#2261" id="2261">2261</a>
+<a href="#2262" id="2262">2262</a>
+<a href="#2263" id="2263">2263</a>
+<a href="#2264" id="2264">2264</a>
+<a href="#2265" id="2265">2265</a>
+<a href="#2266" id="2266">2266</a>
+<a href="#2267" id="2267">2267</a>
+<a href="#2268" id="2268">2268</a>
+<a href="#2269" id="2269">2269</a>
+<a href="#2270" id="2270">2270</a>
+<a href="#2271" id="2271">2271</a>
+<a href="#2272" id="2272">2272</a>
+<a href="#2273" id="2273">2273</a>
+<a href="#2274" id="2274">2274</a>
+<a href="#2275" id="2275">2275</a>
+<a href="#2276" id="2276">2276</a>
+<a href="#2277" id="2277">2277</a>
+<a href="#2278" id="2278">2278</a>
+<a href="#2279" id="2279">2279</a>
+<a href="#2280" id="2280">2280</a>
+<a href="#2281" id="2281">2281</a>
+<a href="#2282" id="2282">2282</a>
+<a href="#2283" id="2283">2283</a>
+<a href="#2284" id="2284">2284</a>
+<a href="#2285" id="2285">2285</a>
+<a href="#2286" id="2286">2286</a>
+<a href="#2287" id="2287">2287</a>
+<a href="#2288" id="2288">2288</a>
+<a href="#2289" id="2289">2289</a>
+<a href="#2290" id="2290">2290</a>
+<a href="#2291" id="2291">2291</a>
+<a href="#2292" id="2292">2292</a>
+<a href="#2293" id="2293">2293</a>
+<a href="#2294" id="2294">2294</a>
+<a href="#2295" id="2295">2295</a>
+<a href="#2296" id="2296">2296</a>
+<a href="#2297" id="2297">2297</a>
+<a href="#2298" id="2298">2298</a>
+<a href="#2299" id="2299">2299</a>
+<a href="#2300" id="2300">2300</a>
+<a href="#2301" id="2301">2301</a>
+<a href="#2302" id="2302">2302</a>
+<a href="#2303" id="2303">2303</a>
+<a href="#2304" id="2304">2304</a>
+<a href="#2305" id="2305">2305</a>
+<a href="#2306" id="2306">2306</a>
+<a href="#2307" id="2307">2307</a>
+<a href="#2308" id="2308">2308</a>
+<a href="#2309" id="2309">2309</a>
+<a href="#2310" id="2310">2310</a>
+<a href="#2311" id="2311">2311</a>
+<a href="#2312" id="2312">2312</a>
+<a href="#2313" id="2313">2313</a>
+<a href="#2314" id="2314">2314</a>
+<a href="#2315" id="2315">2315</a>
+<a href="#2316" id="2316">2316</a>
+<a href="#2317" id="2317">2317</a>
+<a href="#2318" id="2318">2318</a>
+<a href="#2319" id="2319">2319</a>
+<a href="#2320" id="2320">2320</a>
+<a href="#2321" id="2321">2321</a>
+<a href="#2322" id="2322">2322</a>
+<a href="#2323" id="2323">2323</a>
+<a href="#2324" id="2324">2324</a>
+<a href="#2325" id="2325">2325</a>
+<a href="#2326" id="2326">2326</a>
+<a href="#2327" id="2327">2327</a>
+<a href="#2328" id="2328">2328</a>
+<a href="#2329" id="2329">2329</a>
+<a href="#2330" id="2330">2330</a>
+<a href="#2331" id="2331">2331</a>
+<a href="#2332" id="2332">2332</a>
+<a href="#2333" id="2333">2333</a>
+<a href="#2334" id="2334">2334</a>
+<a href="#2335" id="2335">2335</a>
+<a href="#2336" id="2336">2336</a>
+<a href="#2337" id="2337">2337</a>
+<a href="#2338" id="2338">2338</a>
+<a href="#2339" id="2339">2339</a>
+<a href="#2340" id="2340">2340</a>
+<a href="#2341" id="2341">2341</a>
+<a href="#2342" id="2342">2342</a>
+<a href="#2343" id="2343">2343</a>
+<a href="#2344" id="2344">2344</a>
+<a href="#2345" id="2345">2345</a>
+<a href="#2346" id="2346">2346</a>
+<a href="#2347" id="2347">2347</a>
+<a href="#2348" id="2348">2348</a>
+<a href="#2349" id="2349">2349</a>
+<a href="#2350" id="2350">2350</a>
+<a href="#2351" id="2351">2351</a>
+<a href="#2352" id="2352">2352</a>
+<a href="#2353" id="2353">2353</a>
+<a href="#2354" id="2354">2354</a>
+<a href="#2355" id="2355">2355</a>
+<a href="#2356" id="2356">2356</a>
+<a href="#2357" id="2357">2357</a>
+<a href="#2358" id="2358">2358</a>
+<a href="#2359" id="2359">2359</a>
+<a href="#2360" id="2360">2360</a>
+<a href="#2361" id="2361">2361</a>
+<a href="#2362" id="2362">2362</a>
+<a href="#2363" id="2363">2363</a>
+<a href="#2364" id="2364">2364</a>
+<a href="#2365" id="2365">2365</a>
+<a href="#2366" id="2366">2366</a>
+<a href="#2367" id="2367">2367</a>
+<a href="#2368" id="2368">2368</a>
+<a href="#2369" id="2369">2369</a>
+<a href="#2370" id="2370">2370</a>
+<a href="#2371" id="2371">2371</a>
+<a href="#2372" id="2372">2372</a>
+<a href="#2373" id="2373">2373</a>
+<a href="#2374" id="2374">2374</a>
+<a href="#2375" id="2375">2375</a>
+<a href="#2376" id="2376">2376</a>
+<a href="#2377" id="2377">2377</a>
+<a href="#2378" id="2378">2378</a>
+<a href="#2379" id="2379">2379</a>
+<a href="#2380" id="2380">2380</a>
+<a href="#2381" id="2381">2381</a>
+<a href="#2382" id="2382">2382</a>
+<a href="#2383" id="2383">2383</a>
+<a href="#2384" id="2384">2384</a>
+<a href="#2385" id="2385">2385</a>
+<a href="#2386" id="2386">2386</a>
+<a href="#2387" id="2387">2387</a>
+<a href="#2388" id="2388">2388</a>
+<a href="#2389" id="2389">2389</a>
+<a href="#2390" id="2390">2390</a>
+<a href="#2391" id="2391">2391</a>
+<a href="#2392" id="2392">2392</a>
+<a href="#2393" id="2393">2393</a>
+<a href="#2394" id="2394">2394</a>
+<a href="#2395" id="2395">2395</a>
+<a href="#2396" id="2396">2396</a>
+<a href="#2397" id="2397">2397</a>
+<a href="#2398" id="2398">2398</a>
+<a href="#2399" id="2399">2399</a>
+<a href="#2400" id="2400">2400</a>
+<a href="#2401" id="2401">2401</a>
+<a href="#2402" id="2402">2402</a>
+<a href="#2403" id="2403">2403</a>
+<a href="#2404" id="2404">2404</a>
+<a href="#2405" id="2405">2405</a>
+<a href="#2406" id="2406">2406</a>
+<a href="#2407" id="2407">2407</a>
+<a href="#2408" id="2408">2408</a>
+<a href="#2409" id="2409">2409</a>
+<a href="#2410" id="2410">2410</a>
+<a href="#2411" id="2411">2411</a>
+<a href="#2412" id="2412">2412</a>
+<a href="#2413" id="2413">2413</a>
+<a href="#2414" id="2414">2414</a>
+<a href="#2415" id="2415">2415</a>
+<a href="#2416" id="2416">2416</a>
+<a href="#2417" id="2417">2417</a>
+<a href="#2418" id="2418">2418</a>
+<a href="#2419" id="2419">2419</a>
+<a href="#2420" id="2420">2420</a>
+<a href="#2421" id="2421">2421</a>
+<a href="#2422" id="2422">2422</a>
+<a href="#2423" id="2423">2423</a>
+<a href="#2424" id="2424">2424</a>
+<a href="#2425" id="2425">2425</a>
+<a href="#2426" id="2426">2426</a>
+<a href="#2427" id="2427">2427</a>
+<a href="#2428" id="2428">2428</a>
+<a href="#2429" id="2429">2429</a>
+<a href="#2430" id="2430">2430</a>
+<a href="#2431" id="2431">2431</a>
+<a href="#2432" id="2432">2432</a>
+<a href="#2433" id="2433">2433</a>
+<a href="#2434" id="2434">2434</a>
+<a href="#2435" id="2435">2435</a>
+<a href="#2436" id="2436">2436</a>
+<a href="#2437" id="2437">2437</a>
+<a href="#2438" id="2438">2438</a>
+<a href="#2439" id="2439">2439</a>
+<a href="#2440" id="2440">2440</a>
+<a href="#2441" id="2441">2441</a>
+<a href="#2442" id="2442">2442</a>
+<a href="#2443" id="2443">2443</a>
+<a href="#2444" id="2444">2444</a>
+<a href="#2445" id="2445">2445</a>
+<a href="#2446" id="2446">2446</a>
+<a href="#2447" id="2447">2447</a>
+<a href="#2448" id="2448">2448</a>
+<a href="#2449" id="2449">2449</a>
+<a href="#2450" id="2450">2450</a>
+<a href="#2451" id="2451">2451</a>
+<a href="#2452" id="2452">2452</a>
+<a href="#2453" id="2453">2453</a>
+<a href="#2454" id="2454">2454</a>
+<a href="#2455" id="2455">2455</a>
+<a href="#2456" id="2456">2456</a>
+<a href="#2457" id="2457">2457</a>
+<a href="#2458" id="2458">2458</a>
+<a href="#2459" id="2459">2459</a>
+<a href="#2460" id="2460">2460</a>
+<a href="#2461" id="2461">2461</a>
+<a href="#2462" id="2462">2462</a>
+<a href="#2463" id="2463">2463</a>
+<a href="#2464" id="2464">2464</a>
+<a href="#2465" id="2465">2465</a>
+<a href="#2466" id="2466">2466</a>
+<a href="#2467" id="2467">2467</a>
+<a href="#2468" id="2468">2468</a>
+<a href="#2469" id="2469">2469</a>
+<a href="#2470" id="2470">2470</a>
+<a href="#2471" id="2471">2471</a>
+<a href="#2472" id="2472">2472</a>
+<a href="#2473" id="2473">2473</a>
+<a href="#2474" id="2474">2474</a>
+<a href="#2475" id="2475">2475</a>
+<a href="#2476" id="2476">2476</a>
+<a href="#2477" id="2477">2477</a>
+<a href="#2478" id="2478">2478</a>
+<a href="#2479" id="2479">2479</a>
+<a href="#2480" id="2480">2480</a>
+<a href="#2481" id="2481">2481</a>
+<a href="#2482" id="2482">2482</a>
+<a href="#2483" id="2483">2483</a>
+<a href="#2484" id="2484">2484</a>
+<a href="#2485" id="2485">2485</a>
+<a href="#2486" id="2486">2486</a>
+<a href="#2487" id="2487">2487</a>
+<a href="#2488" id="2488">2488</a>
+<a href="#2489" id="2489">2489</a>
+<a href="#2490" id="2490">2490</a>
+<a href="#2491" id="2491">2491</a>
+<a href="#2492" id="2492">2492</a>
+<a href="#2493" id="2493">2493</a>
+<a href="#2494" id="2494">2494</a>
+<a href="#2495" id="2495">2495</a>
+<a href="#2496" id="2496">2496</a>
+<a href="#2497" id="2497">2497</a>
+<a href="#2498" id="2498">2498</a>
+<a href="#2499" id="2499">2499</a>
+<a href="#2500" id="2500">2500</a>
+<a href="#2501" id="2501">2501</a>
+<a href="#2502" id="2502">2502</a>
+<a href="#2503" id="2503">2503</a>
+<a href="#2504" id="2504">2504</a>
+<a href="#2505" id="2505">2505</a>
+<a href="#2506" id="2506">2506</a>
+<a href="#2507" id="2507">2507</a>
+<a href="#2508" id="2508">2508</a>
+<a href="#2509" id="2509">2509</a>
+<a href="#2510" id="2510">2510</a>
+<a href="#2511" id="2511">2511</a>
+<a href="#2512" id="2512">2512</a>
+<a href="#2513" id="2513">2513</a>
+<a href="#2514" id="2514">2514</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -2187,6 +2537,7 @@
 </span><span class="kw">use </span>std::cmp::min;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::io::{BufWriter, Write};
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>flatbuffers::FlatBufferBuilder;
 
@@ -2206,8 +2557,8 @@
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>IpcWriteOptions {
     <span class="doccomment">/// Write padding after memory buffers to this multiple of bytes.
-    /// Generally 8 or 64, defaults to 64
-    </span>alignment: usize,
+    /// Must be 8, 16, 32, or 64 - defaults to 64.
+    </span>alignment: u8,
     <span class="doccomment">/// The legacy format is for releases before 0.15.0, and uses metadata V4
     </span>write_legacy_ipc_format: bool,
     <span class="doccomment">/// The metadata version to write. The Rust IPC writer supports V4+
@@ -2239,7 +2590,7 @@
             &amp;&amp; <span class="self">self</span>.metadata_version &lt; <span class="kw">crate</span>::MetadataVersion::V5
         {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                <span class="string">&quot;Compression only supported in metadata v5 and above&quot;</span>.to_string(),
+                <span class="string">"Compression only supported in metadata v5 and above"</span>.to_string(),
             ));
         }
         <span class="prelude-val">Ok</span>(<span class="self">self</span>)
@@ -2250,16 +2601,19 @@
         write_legacy_ipc_format: bool,
         metadata_version: <span class="kw">crate</span>::MetadataVersion,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
-        <span class="kw">if </span>alignment == <span class="number">0 </span>|| alignment % <span class="number">8 </span>!= <span class="number">0 </span>{
+        <span class="kw">let </span>is_alignment_valid =
+            alignment == <span class="number">8 </span>|| alignment == <span class="number">16 </span>|| alignment == <span class="number">32 </span>|| alignment == <span class="number">64</span>;
+        <span class="kw">if </span>!is_alignment_valid {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                <span class="string">&quot;Alignment should be greater than 0 and be a multiple of 8&quot;</span>.to_string(),
+                <span class="string">"Alignment should be 8, 16, 32, or 64."</span>.to_string(),
             ));
         }
+        <span class="kw">let </span>alignment: u8 = u8::try_from(alignment).expect(<span class="string">"range already checked"</span>);
         <span class="kw">match </span>metadata_version {
             <span class="kw">crate</span>::MetadataVersion::V1
             | <span class="kw">crate</span>::MetadataVersion::V2
             | <span class="kw">crate</span>::MetadataVersion::V3 =&gt; <span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                <span class="string">&quot;Writing IPC metadata version 3 and lower not supported&quot;</span>.to_string(),
+                <span class="string">"Writing IPC metadata version 3 and lower not supported"</span>.to_string(),
             )),
             <span class="kw">crate</span>::MetadataVersion::V4 =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
                 alignment,
@@ -2270,8 +2624,7 @@
             <span class="kw">crate</span>::MetadataVersion::V5 =&gt; {
                 <span class="kw">if </span>write_legacy_ipc_format {
                     <span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                        <span class="string">&quot;Legacy IPC format only supported on metadata version 4&quot;
-                            </span>.to_string(),
+                        <span class="string">"Legacy IPC format only supported on metadata version 4"</span>.to_string(),
                     ))
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -2283,7 +2636,7 @@
                 }
             }
             z =&gt; <span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Unsupported crate::MetadataVersion {z:?}&quot;
+                <span class="string">"Unsupported crate::MetadataVersion {z:?}"
             </span>))),
         }
     }
@@ -2314,7 +2667,7 @@
 ///
 /// // Create a record batch
 /// let batch = RecordBatch::try_from_iter(vec![
-///  (&quot;col2&quot;, Arc::new(UInt64Array::from_iter([10, 23, 33])) as _)
+///  ("col2", Arc::new(UInt64Array::from_iter([10, 23, 33])) as _)
 /// ]).unwrap();
 ///
 /// // Error of dictionary ids are replaced.
@@ -2336,11 +2689,7 @@
 </span><span class="kw">pub struct </span>IpcDataGenerator {}
 
 <span class="kw">impl </span>IpcDataGenerator {
-    <span class="kw">pub fn </span>schema_to_bytes(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        schema: <span class="kw-2">&amp;</span>Schema,
-        write_options: <span class="kw-2">&amp;</span>IpcWriteOptions,
-    ) -&gt; EncodedData {
+    <span class="kw">pub fn </span>schema_to_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, schema: <span class="kw-2">&amp;</span>Schema, write_options: <span class="kw-2">&amp;</span>IpcWriteOptions) -&gt; EncodedData {
         <span class="kw">let </span><span class="kw-2">mut </span>fbb = FlatBufferBuilder::new();
         <span class="kw">let </span>schema = {
             <span class="kw">let </span>fb = <span class="kw">crate</span>::convert::schema_to_fb_offset(<span class="kw-2">&amp;mut </span>fbb, schema);
@@ -2387,7 +2736,7 @@
                 <span class="kw">let </span>data = column.to_data();
                 <span class="kw">if </span>data.child_data().len() != <span class="number">2 </span>{
                     <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                        <span class="string">&quot;The run encoded array should have exactly two child arrays. Found {}&quot;</span>,
+                        <span class="string">"The run encoded array should have exactly two child arrays. Found {}"</span>,
                         data.child_data().len()
                     )));
                 }
@@ -2426,7 +2775,7 @@
                 <span class="kw">let </span>list = column
                     .as_any()
                     .downcast_ref::&lt;FixedSizeListArray&gt;()
-                    .expect(<span class="string">&quot;Unable to downcast to fixed size list array&quot;</span>);
+                    .expect(<span class="string">"Unable to downcast to fixed size list array"</span>);
                 <span class="self">self</span>.encode_dictionaries(
                     field,
                     list.values(),
@@ -2439,10 +2788,8 @@
                 <span class="kw">let </span>map_array = as_map_array(column);
 
                 <span class="kw">let </span>(keys, values) = <span class="kw">match </span>field.data_type() {
-                    DataType::Struct(fields) <span class="kw">if </span>fields.len() == <span class="number">2 </span>=&gt; {
-                        (<span class="kw-2">&amp;</span>fields[<span class="number">0</span>], <span class="kw-2">&amp;</span>fields[<span class="number">1</span>])
-                    }
-                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Incorrect field data type {:?}&quot;</span>, field.data_type()),
+                    DataType::Struct(fields) <span class="kw">if </span>fields.len() == <span class="number">2 </span>=&gt; (<span class="kw-2">&amp;</span>fields[<span class="number">0</span>], <span class="kw-2">&amp;</span>fields[<span class="number">1</span>]),
+                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Incorrect field data type {:?}"</span>, field.data_type()),
                 };
 
                 <span class="comment">// keys
@@ -2494,7 +2841,7 @@
             DataType::Dictionary(_key_type, _value_type) =&gt; {
                 <span class="kw">let </span>dict_id = field
                     .dict_id()
-                    .expect(<span class="string">&quot;All Dictionary types have `dict_id`&quot;</span>);
+                    .expect(<span class="string">"All Dictionary types have `dict_id`"</span>);
                 <span class="kw">let </span>dict_data = column.to_data();
                 <span class="kw">let </span>dict_values = <span class="kw-2">&amp;</span>dict_data.child_data()[<span class="number">0</span>];
 
@@ -2556,7 +2903,7 @@
     }
 
     <span class="doccomment">/// Write a `RecordBatch` into two sets of bytes, one for the header (crate::Message) and the
-    /// other for the batch&#39;s data
+    /// other for the batch's data
     </span><span class="kw">fn </span>record_batch_to_bytes(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         batch: <span class="kw-2">&amp;</span>RecordBatch,
@@ -2582,6 +2929,8 @@
         <span class="kw">let </span>compression_codec: <span class="prelude-ty">Option</span>&lt;CompressionCodec&gt; =
             batch_compression_type.map(TryInto::try_into).transpose()<span class="question-mark">?</span>;
 
+        <span class="kw">let </span><span class="kw-2">mut </span>variadic_buffer_counts = <span class="macro">vec!</span>[];
+
         <span class="kw">for </span>array <span class="kw">in </span>batch.columns() {
             <span class="kw">let </span>array_data = array.to_data();
             offset = write_array_data(
@@ -2595,15 +2944,23 @@
                 compression_codec,
                 write_options,
             )<span class="question-mark">?</span>;
+
+            append_variadic_buffer_counts(<span class="kw-2">&amp;mut </span>variadic_buffer_counts, <span class="kw-2">&amp;</span>array_data);
         }
         <span class="comment">// pad the tail of body data
         </span><span class="kw">let </span>len = arrow_data.len();
-        <span class="kw">let </span>pad_len = pad_to_8(len <span class="kw">as </span>u32);
-        arrow_data.extend_from_slice(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">0u8</span>; pad_len][..]);
+        <span class="kw">let </span>pad_len = pad_to_alignment(write_options.alignment, len);
+        arrow_data.extend_from_slice(<span class="kw-2">&amp;</span>PADDING[..pad_len]);
 
         <span class="comment">// write data
         </span><span class="kw">let </span>buffers = fbb.create_vector(<span class="kw-2">&amp;</span>buffers);
         <span class="kw">let </span>nodes = fbb.create_vector(<span class="kw-2">&amp;</span>nodes);
+        <span class="kw">let </span>variadic_buffer = <span class="kw">if </span>variadic_buffer_counts.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(fbb.create_vector(<span class="kw-2">&amp;</span>variadic_buffer_counts))
+        };
+
         <span class="kw">let </span>root = {
             <span class="kw">let </span><span class="kw-2">mut </span>batch_builder = <span class="kw">crate</span>::RecordBatchBuilder::new(<span class="kw-2">&amp;mut </span>fbb);
             batch_builder.add_length(batch.num_rows() <span class="kw">as </span>i64);
@@ -2611,6 +2968,10 @@
             batch_builder.add_buffers(buffers);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = compression {
                 batch_builder.add_compression(c);
+            }
+
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = variadic_buffer {
+                batch_builder.add_variadicBufferCounts(v);
             }
             <span class="kw">let </span>b = batch_builder.finish();
             b.as_union_value()
@@ -2671,14 +3032,22 @@
             write_options,
         )<span class="question-mark">?</span>;
 
+        <span class="kw">let </span><span class="kw-2">mut </span>variadic_buffer_counts = <span class="macro">vec!</span>[];
+        append_variadic_buffer_counts(<span class="kw-2">&amp;mut </span>variadic_buffer_counts, array_data);
+
         <span class="comment">// pad the tail of body data
         </span><span class="kw">let </span>len = arrow_data.len();
-        <span class="kw">let </span>pad_len = pad_to_8(len <span class="kw">as </span>u32);
-        arrow_data.extend_from_slice(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">0u8</span>; pad_len][..]);
+        <span class="kw">let </span>pad_len = pad_to_alignment(write_options.alignment, len);
+        arrow_data.extend_from_slice(<span class="kw-2">&amp;</span>PADDING[..pad_len]);
 
         <span class="comment">// write data
         </span><span class="kw">let </span>buffers = fbb.create_vector(<span class="kw-2">&amp;</span>buffers);
         <span class="kw">let </span>nodes = fbb.create_vector(<span class="kw-2">&amp;</span>nodes);
+        <span class="kw">let </span>variadic_buffer = <span class="kw">if </span>variadic_buffer_counts.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(fbb.create_vector(<span class="kw-2">&amp;</span>variadic_buffer_counts))
+        };
 
         <span class="kw">let </span>root = {
             <span class="kw">let </span><span class="kw-2">mut </span>batch_builder = <span class="kw">crate</span>::RecordBatchBuilder::new(<span class="kw-2">&amp;mut </span>fbb);
@@ -2687,6 +3056,9 @@
             batch_builder.add_buffers(buffers);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = compression {
                 batch_builder.add_compression(c);
+            }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = variadic_buffer {
+                batch_builder.add_variadicBufferCounts(v);
             }
             batch_builder.finish()
         };
@@ -2717,25 +3089,41 @@
     }
 }
 
+<span class="kw">fn </span>append_variadic_buffer_counts(counts: <span class="kw-2">&amp;mut </span>Vec&lt;i64&gt;, array: <span class="kw-2">&amp;</span>ArrayData) {
+    <span class="kw">match </span>array.data_type() {
+        DataType::BinaryView | DataType::Utf8View =&gt; {
+            <span class="comment">// The spec documents the counts only includes the variadic buffers, not the view/null buffers.
+            // https://arrow.apache.org/docs/format/Columnar.html#variadic-buffers
+            </span>counts.push(array.buffers().len() <span class="kw">as </span>i64 - <span class="number">1</span>);
+        }
+        DataType::Dictionary(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
+            <span class="comment">// Do nothing
+            // Dictionary types are handled in `encode_dictionaries`.
+        </span>}
+        <span class="kw">_ </span>=&gt; {
+            <span class="kw">for </span>child <span class="kw">in </span>array.child_data() {
+                append_variadic_buffer_counts(counts, child)
+            }
+        }
+    }
+}
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>unslice_run_array(arr: ArrayData) -&gt; <span class="prelude-ty">Result</span>&lt;ArrayData, ArrowError&gt; {
     <span class="kw">match </span>arr.data_type() {
         DataType::RunEndEncoded(k, <span class="kw">_</span>) =&gt; <span class="kw">match </span>k.data_type() {
-            DataType::Int16 =&gt; <span class="prelude-val">Ok</span>(into_zero_offset_run_array(
-                RunArray::&lt;Int16Type&gt;::from(arr),
-            )<span class="question-mark">?
-            </span>.into_data()),
-            DataType::Int32 =&gt; <span class="prelude-val">Ok</span>(into_zero_offset_run_array(
-                RunArray::&lt;Int32Type&gt;::from(arr),
-            )<span class="question-mark">?
-            </span>.into_data()),
-            DataType::Int64 =&gt; <span class="prelude-val">Ok</span>(into_zero_offset_run_array(
-                RunArray::&lt;Int64Type&gt;::from(arr),
-            )<span class="question-mark">?
-            </span>.into_data()),
-            d =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Unexpected data type {d}&quot;</span>),
+            DataType::Int16 =&gt; {
+                <span class="prelude-val">Ok</span>(into_zero_offset_run_array(RunArray::&lt;Int16Type&gt;::from(arr))<span class="question-mark">?</span>.into_data())
+            }
+            DataType::Int32 =&gt; {
+                <span class="prelude-val">Ok</span>(into_zero_offset_run_array(RunArray::&lt;Int32Type&gt;::from(arr))<span class="question-mark">?</span>.into_data())
+            }
+            DataType::Int64 =&gt; {
+                <span class="prelude-val">Ok</span>(into_zero_offset_run_array(RunArray::&lt;Int64Type&gt;::from(arr))<span class="question-mark">?</span>.into_data())
+            }
+            d =&gt; <span class="macro">unreachable!</span>(<span class="string">"Unexpected data type {d}"</span>),
         },
         d =&gt; <span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-            <span class="string">&quot;The given array is not a run array. Data type of given array: {d}&quot;
+            <span class="string">"The given array is not a run array. Data type of given array: {d}"
         </span>))),
     }
 }
@@ -2794,7 +3182,7 @@
 
 <span class="doccomment">/// Keeps track of dictionaries that have been written, to avoid emitting the same dictionary
 /// multiple times. Can optionally error if an update to an existing dictionary is attempted, which
-/// isn&#39;t allowed in the `FileWriter`.
+/// isn't allowed in the `FileWriter`.
 </span><span class="kw">pub struct </span>DictionaryTracker {
     written: HashMap&lt;i64, ArrayData&gt;,
     error_on_replacement: bool,
@@ -2814,17 +3202,13 @@
     <span class="doccomment">/// Keep track of the dictionary with the given ID and values. Behavior:
     ///
     /// * If this ID has been written already and has the same data, return `Ok(false)` to indicate
-    ///   that the dictionary was not actually inserted (because it&#39;s already been seen).
+    ///   that the dictionary was not actually inserted (because it's already been seen).
     /// * If this ID has been written already but with different data, and this tracker is
     ///   configured to return an error, return an error.
     /// * If the tracker has not been configured to error on replacement or this dictionary
     ///   has never been seen before, return `Ok(true)` to indicate that the dictionary was just
     ///   inserted.
-    </span><span class="kw">pub fn </span>insert(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        dict_id: i64,
-        column: <span class="kw-2">&amp;</span>ArrayRef,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ArrowError&gt; {
+    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dict_id: i64, column: <span class="kw-2">&amp;</span>ArrayRef) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ArrowError&gt; {
         <span class="kw">let </span>dict_data = column.to_data();
         <span class="kw">let </span>dict_values = <span class="kw-2">&amp;</span>dict_data.child_data()[<span class="number">0</span>];
 
@@ -2841,9 +3225,9 @@
                     </span><span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
                 }
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                    <span class="string">&quot;Dictionary replacement detected when writing IPC file format. \
+                    <span class="string">"Dictionary replacement detected when writing IPC file format. \
                      Arrow IPC files only support a single dictionary for a given field \
-                     across all batches.&quot;
+                     across all batches."
                         </span>.to_string(),
                 ));
             }
@@ -2854,13 +3238,14 @@
     }
 }
 
-<span class="kw">pub struct </span>FileWriter&lt;W: Write&gt; {
+<span class="doccomment">/// Writer for an IPC file
+</span><span class="kw">pub struct </span>FileWriter&lt;W: Write&gt; {
     <span class="doccomment">/// The object to write to
     </span>writer: BufWriter&lt;W&gt;,
     <span class="doccomment">/// IPC write options
     </span>write_options: IpcWriteOptions,
     <span class="doccomment">/// A reference to the schema, used in validating record batches
-    </span>schema: Schema,
+    </span>schema: SchemaRef,
     <span class="doccomment">/// The number of bytes between each block of bytes, as an offset for random access
     </span>block_offsets: usize,
     <span class="doccomment">/// Dictionary blocks that will be written as part of the IPC footer
@@ -2878,13 +3263,13 @@
 }
 
 <span class="kw">impl</span>&lt;W: Write&gt; FileWriter&lt;W&gt; {
-    <span class="doccomment">/// Try create a new writer, with the schema written as part of the header
+    <span class="doccomment">/// Try to create a new writer, with the schema written as part of the header
     </span><span class="kw">pub fn </span>try_new(writer: W, schema: <span class="kw-2">&amp;</span>Schema) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>write_options = IpcWriteOptions::default();
         <span class="self">Self</span>::try_new_with_options(writer, schema, write_options)
     }
 
-    <span class="doccomment">/// Try create a new writer with IpcWriteOptions
+    <span class="doccomment">/// Try to create a new writer with IpcWriteOptions
     </span><span class="kw">pub fn </span>try_new_with_options(
         writer: W,
         schema: <span class="kw-2">&amp;</span>Schema,
@@ -2892,18 +3277,18 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>data_gen = IpcDataGenerator::default();
         <span class="kw">let </span><span class="kw-2">mut </span>writer = BufWriter::new(writer);
-        <span class="comment">// write magic to header aligned on 8 byte boundary
-        </span><span class="kw">let </span>header_size = <span class="kw">super</span>::ARROW_MAGIC.len() + <span class="number">2</span>;
-        <span class="macro">assert_eq!</span>(header_size, <span class="number">8</span>);
-        writer.write_all(<span class="kw-2">&amp;</span><span class="kw">super</span>::ARROW_MAGIC[..])<span class="question-mark">?</span>;
-        writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>])<span class="question-mark">?</span>;
+        <span class="comment">// write magic to header aligned on alignment boundary
+        </span><span class="kw">let </span>pad_len = pad_to_alignment(write_options.alignment, <span class="kw">super</span>::ARROW_MAGIC.len());
+        <span class="kw">let </span>header_size = <span class="kw">super</span>::ARROW_MAGIC.len() + pad_len;
+        writer.write_all(<span class="kw-2">&amp;</span><span class="kw">super</span>::ARROW_MAGIC)<span class="question-mark">?</span>;
+        writer.write_all(<span class="kw-2">&amp;</span>PADDING[..pad_len])<span class="question-mark">?</span>;
         <span class="comment">// write the schema, set the written bytes to the schema + header
         </span><span class="kw">let </span>encoded_message = data_gen.schema_to_bytes(schema, <span class="kw-2">&amp;</span>write_options);
         <span class="kw">let </span>(meta, data) = write_message(<span class="kw-2">&amp;mut </span>writer, encoded_message, <span class="kw-2">&amp;</span>write_options)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             writer,
             write_options,
-            schema: schema.clone(),
+            schema: Arc::new(schema.clone()),
             block_offsets: meta + data + header_size,
             dictionary_blocks: <span class="macro">vec!</span>[],
             record_blocks: <span class="macro">vec!</span>[],
@@ -2922,7 +3307,7 @@
     </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;</span>RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
         <span class="kw">if </span><span class="self">self</span>.finished {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::IpcError(
-                <span class="string">&quot;Cannot write record batch to file writer as it is closed&quot;</span>.to_string(),
+                <span class="string">"Cannot write record batch to file writer as it is closed"</span>.to_string(),
             ));
         }
 
@@ -2936,14 +3321,12 @@
             <span class="kw">let </span>(meta, data) =
                 write_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>.writer, encoded_dictionary, <span class="kw-2">&amp;</span><span class="self">self</span>.write_options)<span class="question-mark">?</span>;
 
-            <span class="kw">let </span>block =
-                <span class="kw">crate</span>::Block::new(<span class="self">self</span>.block_offsets <span class="kw">as </span>i64, meta <span class="kw">as </span>i32, data <span class="kw">as </span>i64);
+            <span class="kw">let </span>block = <span class="kw">crate</span>::Block::new(<span class="self">self</span>.block_offsets <span class="kw">as </span>i64, meta <span class="kw">as </span>i32, data <span class="kw">as </span>i64);
             <span class="self">self</span>.dictionary_blocks.push(block);
             <span class="self">self</span>.block_offsets += meta + data;
         }
 
-        <span class="kw">let </span>(meta, data) =
-            write_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>.writer, encoded_message, <span class="kw-2">&amp;</span><span class="self">self</span>.write_options)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(meta, data) = write_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>.writer, encoded_message, <span class="kw-2">&amp;</span><span class="self">self</span>.write_options)<span class="question-mark">?</span>;
         <span class="comment">// add a record block for the footer
         </span><span class="kw">let </span>block = <span class="kw">crate</span>::Block::new(
             <span class="self">self</span>.block_offsets <span class="kw">as </span>i64,
@@ -2959,7 +3342,7 @@
     </span><span class="kw">pub fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
         <span class="kw">if </span><span class="self">self</span>.finished {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::IpcError(
-                <span class="string">&quot;Cannot write footer to file writer as it is closed&quot;</span>.to_string(),
+                <span class="string">"Cannot write footer to file writer as it is closed"</span>.to_string(),
             ));
         }
 
@@ -2994,6 +3377,11 @@
         <span class="self">self</span>.finished = <span class="bool-val">true</span>;
 
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Returns the arrow [`SchemaRef`] for this arrow file.
+    </span><span class="kw">pub fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SchemaRef {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.schema
     }
 
     <span class="doccomment">/// Gets a reference to the underlying writer.
@@ -3031,7 +3419,8 @@
     }
 }
 
-<span class="kw">pub struct </span>StreamWriter&lt;W: Write&gt; {
+<span class="doccomment">/// Writer for an IPC stream
+</span><span class="kw">pub struct </span>StreamWriter&lt;W: Write&gt; {
     <span class="doccomment">/// The object to write to
     </span>writer: BufWriter&lt;W&gt;,
     <span class="doccomment">/// IPC write options
@@ -3045,7 +3434,7 @@
 }
 
 <span class="kw">impl</span>&lt;W: Write&gt; StreamWriter&lt;W&gt; {
-    <span class="doccomment">/// Try create a new writer, with the schema written as part of the header
+    <span class="doccomment">/// Try to create a new writer, with the schema written as part of the header
     </span><span class="kw">pub fn </span>try_new(writer: W, schema: <span class="kw-2">&amp;</span>Schema) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>write_options = IpcWriteOptions::default();
         <span class="self">Self</span>::try_new_with_options(writer, schema, write_options)
@@ -3074,14 +3463,14 @@
     </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;</span>RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
         <span class="kw">if </span><span class="self">self</span>.finished {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::IpcError(
-                <span class="string">&quot;Cannot write record batch to stream writer as it is closed&quot;</span>.to_string(),
+                <span class="string">"Cannot write record batch to stream writer as it is closed"</span>.to_string(),
             ));
         }
 
         <span class="kw">let </span>(encoded_dictionaries, encoded_message) = <span class="self">self
             </span>.data_gen
             .encoded_batch(batch, <span class="kw-2">&amp;mut </span><span class="self">self</span>.dictionary_tracker, <span class="kw-2">&amp;</span><span class="self">self</span>.write_options)
-            .expect(<span class="string">&quot;StreamWriter is configured to not error on dictionary replacement&quot;</span>);
+            .expect(<span class="string">"StreamWriter is configured to not error on dictionary replacement"</span>);
 
         <span class="kw">for </span>encoded_dictionary <span class="kw">in </span>encoded_dictionaries {
             write_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>.writer, encoded_dictionary, <span class="kw-2">&amp;</span><span class="self">self</span>.write_options)<span class="question-mark">?</span>;
@@ -3095,7 +3484,7 @@
     </span><span class="kw">pub fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
         <span class="kw">if </span><span class="self">self</span>.finished {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::IpcError(
-                <span class="string">&quot;Cannot write footer to stream writer as it is closed&quot;</span>.to_string(),
+                <span class="string">"Cannot write footer to stream writer as it is closed"</span>.to_string(),
             ));
         }
 
@@ -3126,7 +3515,7 @@
     ///
     /// # Errors
     ///
-    /// An [&#39;Err&#39;] may be returned if an error occurs while finishing the StreamWriter
+    /// An ['Err'] may be returned if an error occurs while finishing the StreamWriter
     /// or while flushing the buffer.
     ///
     /// # Example
@@ -3182,20 +3571,20 @@
     <span class="doccomment">/// Arrow buffers to be written, should be an empty vec for schema messages
     </span><span class="kw">pub </span>arrow_data: Vec&lt;u8&gt;,
 }
-<span class="doccomment">/// Write a message&#39;s IPC data and buffers, returning metadata and buffer data lengths written
+<span class="doccomment">/// Write a message's IPC data and buffers, returning metadata and buffer data lengths written
 </span><span class="kw">pub fn </span>write_message&lt;W: Write&gt;(
     <span class="kw-2">mut </span>writer: W,
     encoded: EncodedData,
     write_options: <span class="kw-2">&amp;</span>IpcWriteOptions,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(usize, usize), ArrowError&gt; {
     <span class="kw">let </span>arrow_data_len = encoded.arrow_data.len();
-    <span class="kw">if </span>arrow_data_len % <span class="number">8 </span>!= <span class="number">0 </span>{
+    <span class="kw">if </span>arrow_data_len % usize::from(write_options.alignment) != <span class="number">0 </span>{
         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::MemoryError(
-            <span class="string">&quot;Arrow data not aligned&quot;</span>.to_string(),
+            <span class="string">"Arrow data not aligned"</span>.to_string(),
         ));
     }
 
-    <span class="kw">let </span>a = write_options.alignment - <span class="number">1</span>;
+    <span class="kw">let </span>a = usize::from(write_options.alignment - <span class="number">1</span>);
     <span class="kw">let </span>buffer = encoded.ipc_message;
     <span class="kw">let </span>flatbuf_size = buffer.len();
     <span class="kw">let </span>prefix_size = <span class="kw">if </span>write_options.write_legacy_ipc_format {
@@ -3217,11 +3606,11 @@
         writer.write_all(<span class="kw-2">&amp;</span>buffer)<span class="question-mark">?</span>;
     }
     <span class="comment">// write padding
-    </span>writer.write_all(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">0</span>; padding_bytes])<span class="question-mark">?</span>;
+    </span>writer.write_all(<span class="kw-2">&amp;</span>PADDING[..padding_bytes])<span class="question-mark">?</span>;
 
     <span class="comment">// write arrow data
     </span><span class="kw">let </span>body_len = <span class="kw">if </span>arrow_data_len &gt; <span class="number">0 </span>{
-        write_body_buffers(<span class="kw-2">&amp;mut </span>writer, <span class="kw-2">&amp;</span>encoded.arrow_data)<span class="question-mark">?
+        write_body_buffers(<span class="kw-2">&amp;mut </span>writer, <span class="kw-2">&amp;</span>encoded.arrow_data, write_options.alignment)<span class="question-mark">?
     </span>} <span class="kw">else </span>{
         <span class="number">0
     </span>};
@@ -3229,19 +3618,23 @@
     <span class="prelude-val">Ok</span>((aligned_size, body_len))
 }
 
-<span class="kw">fn </span>write_body_buffers&lt;W: Write&gt;(<span class="kw-2">mut </span>writer: W, data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize, ArrowError&gt; {
-    <span class="kw">let </span>len = data.len() <span class="kw">as </span>u32;
-    <span class="kw">let </span>pad_len = pad_to_8(len) <span class="kw">as </span>u32;
+<span class="kw">fn </span>write_body_buffers&lt;W: Write&gt;(
+    <span class="kw-2">mut </span>writer: W,
+    data: <span class="kw-2">&amp;</span>[u8],
+    alignment: u8,
+) -&gt; <span class="prelude-ty">Result</span>&lt;usize, ArrowError&gt; {
+    <span class="kw">let </span>len = data.len();
+    <span class="kw">let </span>pad_len = pad_to_alignment(alignment, len);
     <span class="kw">let </span>total_len = len + pad_len;
 
     <span class="comment">// write body buffer
     </span>writer.write_all(data)<span class="question-mark">?</span>;
     <span class="kw">if </span>pad_len &gt; <span class="number">0 </span>{
-        writer.write_all(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">0u8</span>; pad_len <span class="kw">as </span>usize][..])<span class="question-mark">?</span>;
+        writer.write_all(<span class="kw-2">&amp;</span>PADDING[..pad_len])<span class="question-mark">?</span>;
     }
 
     writer.flush()<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(total_len <span class="kw">as </span>usize)
+    <span class="prelude-val">Ok</span>(total_len)
 }
 
 <span class="doccomment">/// Write a record batch to the writer, writing the message size before the message
@@ -3255,10 +3648,8 @@
 
     <span class="comment">// the version of the writer determines whether continuation markers should be added
     </span><span class="kw">match </span>write_options.metadata_version {
-        <span class="kw">crate</span>::MetadataVersion::V1
-        | <span class="kw">crate</span>::MetadataVersion::V2
-        | <span class="kw">crate</span>::MetadataVersion::V3 =&gt; {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;Options with the metadata version cannot be created&quot;</span>)
+        <span class="kw">crate</span>::MetadataVersion::V1 | <span class="kw">crate</span>::MetadataVersion::V2 | <span class="kw">crate</span>::MetadataVersion::V3 =&gt; {
+            <span class="macro">unreachable!</span>(<span class="string">"Options with the metadata version cannot be created"</span>)
         }
         <span class="kw">crate</span>::MetadataVersion::V4 =&gt; {
             <span class="kw">if </span>!write_options.write_legacy_ipc_format {
@@ -3273,7 +3664,7 @@
             </span>writer.write_all(<span class="kw-2">&amp;</span>CONTINUATION_MARKER)<span class="question-mark">?</span>;
             writer.write_all(<span class="kw-2">&amp;</span>total_len.to_le_bytes()[..])<span class="question-mark">?</span>;
         }
-        z =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported crate::MetadataVersion {z:?}&quot;</span>),
+        z =&gt; <span class="macro">panic!</span>(<span class="string">"Unsupported crate::MetadataVersion {z:?}"</span>),
     };
 
     writer.flush()<span class="question-mark">?</span>;
@@ -3315,9 +3706,32 @@
     }
 }
 
+<span class="doccomment">/// Common functionality for re-encoding offsets. Returns the new offsets as well as
+/// original start offset and length for use in slicing child data.
+</span><span class="kw">fn </span>reencode_offsets&lt;O: OffsetSizeTrait&gt;(
+    offsets: <span class="kw-2">&amp;</span>Buffer,
+    data: <span class="kw-2">&amp;</span>ArrayData,
+) -&gt; (Buffer, usize, usize) {
+    <span class="kw">let </span>offsets_slice: <span class="kw-2">&amp;</span>[O] = offsets.typed_data::&lt;O&gt;();
+    <span class="kw">let </span>offset_slice = <span class="kw-2">&amp;</span>offsets_slice[data.offset()..data.offset() + data.len() + <span class="number">1</span>];
+
+    <span class="kw">let </span>start_offset = offset_slice.first().unwrap();
+    <span class="kw">let </span>end_offset = offset_slice.last().unwrap();
+
+    <span class="kw">let </span>offsets = <span class="kw">match </span>start_offset.as_usize() {
+        <span class="number">0 </span>=&gt; offsets.clone(),
+        <span class="kw">_ </span>=&gt; offset_slice.iter().map(|x| <span class="kw-2">*</span>x - <span class="kw-2">*</span>start_offset).collect(),
+    };
+
+    <span class="kw">let </span>start_offset = start_offset.as_usize();
+    <span class="kw">let </span>end_offset = end_offset.as_usize();
+
+    (offsets, start_offset, end_offset - start_offset)
+}
+
 <span class="doccomment">/// Returns the values and offsets [`Buffer`] for a ByteArray with offset type `O`
 ///
-/// In particular, this handles re-encoding the offsets if they don&#39;t start at `0`,
+/// In particular, this handles re-encoding the offsets if they don't start at `0`,
 /// slicing the values buffer as appropriate. This helps reduce the encoded
 /// size of sliced arrays, as values that have been sliced away are not encoded
 </span><span class="kw">fn </span>get_byte_array_buffers&lt;O: OffsetSizeTrait&gt;(data: <span class="kw-2">&amp;</span>ArrayData) -&gt; (Buffer, Buffer) {
@@ -3325,23 +3739,24 @@
         <span class="kw">return </span>(MutableBuffer::new(<span class="number">0</span>).into(), MutableBuffer::new(<span class="number">0</span>).into());
     }
 
-    <span class="kw">let </span>buffers = data.buffers();
-    <span class="kw">let </span>offsets: <span class="kw-2">&amp;</span>[O] = buffers[<span class="number">0</span>].typed_data::&lt;O&gt;();
-    <span class="kw">let </span>offset_slice = <span class="kw-2">&amp;</span>offsets[data.offset()..data.offset() + data.len() + <span class="number">1</span>];
-
-    <span class="kw">let </span>start_offset = offset_slice.first().unwrap();
-    <span class="kw">let </span>end_offset = offset_slice.last().unwrap();
-
-    <span class="kw">let </span>offsets = <span class="kw">match </span>start_offset.as_usize() {
-        <span class="number">0 </span>=&gt; buffers[<span class="number">0</span>].clone(),
-        <span class="kw">_ </span>=&gt; offset_slice.iter().map(|x| <span class="kw-2">*</span>x - <span class="kw-2">*</span>start_offset).collect(),
-    };
-
-    <span class="kw">let </span>values = buffers[<span class="number">1</span>].slice_with_length(
-        start_offset.as_usize(),
-        end_offset.as_usize() - start_offset.as_usize(),
-    );
+    <span class="kw">let </span>(offsets, original_start_offset, len) = reencode_offsets::&lt;O&gt;(<span class="kw-2">&amp;</span>data.buffers()[<span class="number">0</span>], data);
+    <span class="kw">let </span>values = data.buffers()[<span class="number">1</span>].slice_with_length(original_start_offset, len);
     (offsets, values)
+}
+
+<span class="doccomment">/// Similar logic as [`get_byte_array_buffers()`] but slices the child array instead
+/// of a values buffer.
+</span><span class="kw">fn </span>get_list_array_buffers&lt;O: OffsetSizeTrait&gt;(data: <span class="kw-2">&amp;</span>ArrayData) -&gt; (Buffer, ArrayData) {
+    <span class="kw">if </span>data.is_empty() {
+        <span class="kw">return </span>(
+            MutableBuffer::new(<span class="number">0</span>).into(),
+            data.child_data()[<span class="number">0</span>].slice(<span class="number">0</span>, <span class="number">0</span>),
+        );
+    }
+
+    <span class="kw">let </span>(offsets, original_start_offset, len) = reencode_offsets::&lt;O&gt;(<span class="kw-2">&amp;</span>data.buffers()[<span class="number">0</span>], data);
+    <span class="kw">let </span>child_data = data.child_data()[<span class="number">0</span>].slice(original_start_offset, len);
+    (offsets, child_data)
 }
 
 <span class="doccomment">/// Write array data to a vector of bytes
@@ -3361,7 +3776,7 @@
     <span class="kw">if </span>!<span class="macro">matches!</span>(array_data.data_type(), DataType::Null) {
         nodes.push(<span class="kw">crate</span>::FieldNode::new(num_rows <span class="kw">as </span>i64, null_count <span class="kw">as </span>i64));
     } <span class="kw">else </span>{
-        <span class="comment">// NullArray&#39;s null_count equals to len, but the `null_count` passed in is from ArrayData
+        <span class="comment">// NullArray's null_count equals to len, but the `null_count` passed in is from ArrayData
         // where null_count is always 0.
         </span>nodes.push(<span class="kw">crate</span>::FieldNode::new(num_rows <span class="kw">as </span>i64, num_rows <span class="kw">as </span>i64));
     }
@@ -3384,6 +3799,7 @@
             arrow_data,
             offset,
             compression_codec,
+            write_options.alignment,
         )<span class="question-mark">?</span>;
     }
 
@@ -3397,6 +3813,24 @@
                 arrow_data,
                 offset,
                 compression_codec,
+                write_options.alignment,
+            )<span class="question-mark">?</span>;
+        }
+    } <span class="kw">else if </span><span class="macro">matches!</span>(data_type, DataType::BinaryView | DataType::Utf8View) {
+        <span class="comment">// Slicing the views buffer is safe and easy,
+        // but pruning unneeded data buffers is much more nuanced since it's complicated to prove that no views reference the pruned buffers
+        //
+        // Current implementation just serialize the raw arrays as given and not try to optimize anything.
+        // If users wants to "compact" the arrays prior to sending them over IPC,
+        // they should consider the gc API suggested in #5513
+        </span><span class="kw">for </span>buffer <span class="kw">in </span>array_data.buffers() {
+            offset = write_buffer(
+                buffer.as_slice(),
+                buffers,
+                arrow_data,
+                offset,
+                compression_codec,
+                write_options.alignment,
             )<span class="question-mark">?</span>;
         }
     } <span class="kw">else if </span><span class="macro">matches!</span>(data_type, DataType::LargeBinary | DataType::LargeUtf8) {
@@ -3408,6 +3842,7 @@
                 arrow_data,
                 offset,
                 compression_codec,
+                write_options.alignment,
             )<span class="question-mark">?</span>;
         }
     } <span class="kw">else if </span>DataType::is_numeric(data_type)
@@ -3426,27 +3861,21 @@
 
         <span class="kw">let </span>byte_width = get_buffer_element_width(spec);
         <span class="kw">let </span>min_length = array_data.len() * byte_width;
-        <span class="kw">if </span>buffer_need_truncate(array_data.offset(), buffer, spec, min_length) {
+        <span class="kw">let </span>buffer_slice = <span class="kw">if </span>buffer_need_truncate(array_data.offset(), buffer, spec, min_length) {
             <span class="kw">let </span>byte_offset = array_data.offset() * byte_width;
             <span class="kw">let </span>buffer_length = min(min_length, buffer.len() - byte_offset);
-            <span class="kw">let </span>buffer_slice =
-                <span class="kw-2">&amp;</span>buffer.as_slice()[byte_offset..(byte_offset + buffer_length)];
-            offset = write_buffer(
-                buffer_slice,
-                buffers,
-                arrow_data,
-                offset,
-                compression_codec,
-            )<span class="question-mark">?</span>;
+            <span class="kw-2">&amp;</span>buffer.as_slice()[byte_offset..(byte_offset + buffer_length)]
         } <span class="kw">else </span>{
-            offset = write_buffer(
-                buffer.as_slice(),
-                buffers,
-                arrow_data,
-                offset,
-                compression_codec,
-            )<span class="question-mark">?</span>;
-        }
+            buffer.as_slice()
+        };
+        offset = write_buffer(
+            buffer_slice,
+            buffers,
+            arrow_data,
+            offset,
+            compression_codec,
+            write_options.alignment,
+        )<span class="question-mark">?</span>;
     } <span class="kw">else if </span><span class="macro">matches!</span>(data_type, DataType::Boolean) {
         <span class="comment">// Bools are special because the payload (= 1 bit) is smaller than the physical container elements (= bytes).
         // The array data may not start at the physical boundary of the underlying buffer, so we need to shift bits around.
@@ -3454,11 +3883,58 @@
 
         <span class="kw">let </span>buffer = <span class="kw-2">&amp;</span>array_data.buffers()[<span class="number">0</span>];
         <span class="kw">let </span>buffer = buffer.bit_slice(array_data.offset(), array_data.len());
-        offset = write_buffer(<span class="kw-2">&amp;</span>buffer, buffers, arrow_data, offset, compression_codec)<span class="question-mark">?</span>;
+        offset = write_buffer(
+            <span class="kw-2">&amp;</span>buffer,
+            buffers,
+            arrow_data,
+            offset,
+            compression_codec,
+            write_options.alignment,
+        )<span class="question-mark">?</span>;
+    } <span class="kw">else if </span><span class="macro">matches!</span>(
+        data_type,
+        DataType::List(<span class="kw">_</span>) | DataType::LargeList(<span class="kw">_</span>) | DataType::Map(<span class="kw">_</span>, <span class="kw">_</span>)
+    ) {
+        <span class="macro">assert_eq!</span>(array_data.buffers().len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(array_data.child_data().len(), <span class="number">1</span>);
+
+        <span class="comment">// Truncate offsets and the child data to avoid writing unnecessary data
+        </span><span class="kw">let </span>(offsets, sliced_child_data) = <span class="kw">match </span>data_type {
+            DataType::List(<span class="kw">_</span>) =&gt; get_list_array_buffers::&lt;i32&gt;(array_data),
+            DataType::Map(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; get_list_array_buffers::&lt;i32&gt;(array_data),
+            DataType::LargeList(<span class="kw">_</span>) =&gt; get_list_array_buffers::&lt;i64&gt;(array_data),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+        };
+        offset = write_buffer(
+            offsets.as_slice(),
+            buffers,
+            arrow_data,
+            offset,
+            compression_codec,
+            write_options.alignment,
+        )<span class="question-mark">?</span>;
+        offset = write_array_data(
+            <span class="kw-2">&amp;</span>sliced_child_data,
+            buffers,
+            arrow_data,
+            nodes,
+            offset,
+            sliced_child_data.len(),
+            sliced_child_data.null_count(),
+            compression_codec,
+            write_options,
+        )<span class="question-mark">?</span>;
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(offset);
     } <span class="kw">else </span>{
         <span class="kw">for </span>buffer <span class="kw">in </span>array_data.buffers() {
-            offset =
-                write_buffer(buffer, buffers, arrow_data, offset, compression_codec)<span class="question-mark">?</span>;
+            offset = write_buffer(
+                buffer,
+                buffers,
+                arrow_data,
+                offset,
+                compression_codec,
+                write_options.alignment,
+            )<span class="question-mark">?</span>;
         }
     }
 
@@ -3522,6 +3998,7 @@
     </span>arrow_data: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;,         <span class="comment">// output stream
     </span>offset: i64,                      <span class="comment">// current output stream offset
     </span>compression_codec: <span class="prelude-ty">Option</span>&lt;CompressionCodec&gt;,
+    alignment: u8,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;i64, ArrowError&gt; {
     <span class="kw">let </span>len: i64 = <span class="kw">match </span>compression_codec {
         <span class="prelude-val">Some</span>(compressor) =&gt; compressor.compress_to_vec(buffer, arrow_data)<span class="question-mark">?</span>,
@@ -3532,201 +4009,203 @@
     }
     .try_into()
     .map_err(|e| {
-        ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-            <span class="string">&quot;Could not convert compressed size to i64: {e}&quot;
-        </span>))
+        ArrowError::InvalidArgumentError(<span class="macro">format!</span>(<span class="string">"Could not convert compressed size to i64: {e}"</span>))
     })<span class="question-mark">?</span>;
 
     <span class="comment">// make new index entry
     </span>buffers.push(<span class="kw">crate</span>::Buffer::new(offset, len));
-    <span class="comment">// padding and make offset 8 bytes aligned
-    </span><span class="kw">let </span>pad_len = pad_to_8(len <span class="kw">as </span>u32) <span class="kw">as </span>i64;
-    arrow_data.extend_from_slice(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">0u8</span>; pad_len <span class="kw">as </span>usize][..]);
+    <span class="comment">// padding and make offset aligned
+    </span><span class="kw">let </span>pad_len = pad_to_alignment(alignment, len <span class="kw">as </span>usize);
+    arrow_data.extend_from_slice(<span class="kw-2">&amp;</span>PADDING[..pad_len]);
 
-    <span class="prelude-val">Ok</span>(offset + len + pad_len)
+    <span class="prelude-val">Ok</span>(offset + len + (pad_len <span class="kw">as </span>i64))
 }
 
-<span class="doccomment">/// Calculate an 8-byte boundary and return the number of bytes needed to pad to 8 bytes
+<span class="kw">const </span>PADDING: [u8; <span class="number">64</span>] = [<span class="number">0</span>; <span class="number">64</span>];
+
+<span class="doccomment">/// Calculate an alignment boundary and return the number of bytes needed to pad to the alignment boundary
 </span><span class="attr">#[inline]
-</span><span class="kw">fn </span>pad_to_8(len: u32) -&gt; usize {
-    (((len + <span class="number">7</span>) &amp; !<span class="number">7</span>) - len) <span class="kw">as </span>usize
+</span><span class="kw">fn </span>pad_to_alignment(alignment: u8, len: usize) -&gt; usize {
+    <span class="kw">let </span>a = usize::from(alignment - <span class="number">1</span>);
+    ((len + a) &amp; !a) - len
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::io::Cursor;
     <span class="kw">use </span>std::io::Seek;
-    <span class="kw">use </span>std::sync::Arc;
 
+    <span class="kw">use </span>arrow_array::builder::GenericListBuilder;
+    <span class="kw">use </span>arrow_array::builder::MapBuilder;
     <span class="kw">use </span>arrow_array::builder::UnionBuilder;
-    <span class="kw">use </span>arrow_array::builder::{ListBuilder, PrimitiveRunBuilder, UInt32Builder};
+    <span class="kw">use </span>arrow_array::builder::{PrimitiveRunBuilder, UInt32Builder};
     <span class="kw">use </span>arrow_array::types::<span class="kw-2">*</span>;
-    <span class="kw">use </span>arrow_schema::DataType;
+    <span class="kw">use </span>arrow_buffer::ScalarBuffer;
 
+    <span class="kw">use </span><span class="kw">crate</span>::convert::fb_to_schema;
     <span class="kw">use </span><span class="kw">crate</span>::reader::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::root_as_footer;
     <span class="kw">use </span><span class="kw">crate</span>::MetadataVersion;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
+    <span class="kw">fn </span>serialize_file(rb: <span class="kw-2">&amp;</span>RecordBatch) -&gt; Vec&lt;u8&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new(<span class="macro">vec!</span>[], rb.schema_ref()).unwrap();
+        writer.write(rb).unwrap();
+        writer.finish().unwrap();
+        writer.into_inner().unwrap()
+    }
+
+    <span class="kw">fn </span>deserialize_file(bytes: Vec&lt;u8&gt;) -&gt; RecordBatch {
+        <span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(Cursor::new(bytes), <span class="prelude-val">None</span>).unwrap();
+        reader.next().unwrap().unwrap()
+    }
+
+    <span class="kw">fn </span>serialize_stream(record: <span class="kw-2">&amp;</span>RecordBatch) -&gt; Vec&lt;u8&gt; {
+        <span class="comment">// Use 8-byte alignment so that the various `truncate_*` tests can be compactly written,
+        // without needing to construct a giant array to spill over the 64-byte default alignment
+        // boundary.
+        </span><span class="kw">const </span>IPC_ALIGNMENT: usize = <span class="number">8</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>stream_writer = StreamWriter::try_new_with_options(
+            <span class="macro">vec!</span>[],
+            record.schema_ref(),
+            IpcWriteOptions::try_new(IPC_ALIGNMENT, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap(),
+        )
+        .unwrap();
+        stream_writer.write(record).unwrap();
+        stream_writer.finish().unwrap();
+        stream_writer.into_inner().unwrap()
+    }
+
+    <span class="kw">fn </span>deserialize_stream(bytes: Vec&lt;u8&gt;) -&gt; RecordBatch {
+        <span class="kw">let </span><span class="kw-2">mut </span>stream_reader = StreamReader::try_new(Cursor::new(bytes), <span class="prelude-val">None</span>).unwrap();
+        stream_reader.next().unwrap().unwrap()
+    }
+
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;lz4&quot;</span>)]
+    #[cfg(feature = <span class="string">"lz4"</span>)]
     </span><span class="kw">fn </span>test_write_empty_record_batch_lz4_compression() {
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;field1&quot;</span>, DataType::Int32, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"field1"</span>, DataType::Int32, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>values: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = <span class="macro">vec!</span>[];
         <span class="kw">let </span>array = Int32Array::from(values);
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array)]).unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
 
         {
-            <span class="kw">let </span>write_option =
-                IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, <span class="kw">crate</span>::MetadataVersion::V5)
-                    .unwrap()
-                    .try_with_compression(<span class="prelude-val">Some</span>(<span class="kw">crate</span>::CompressionType::LZ4_FRAME))
-                    .unwrap();
+            <span class="kw">let </span>write_option = IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, <span class="kw">crate</span>::MetadataVersion::V5)
+                .unwrap()
+                .try_with_compression(<span class="prelude-val">Some</span>(<span class="kw">crate</span>::CompressionType::LZ4_FRAME))
+                .unwrap();
 
             <span class="kw">let </span><span class="kw-2">mut </span>writer =
-                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, write_option)
-                    .unwrap();
+                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, write_option).unwrap();
             writer.write(<span class="kw-2">&amp;</span>record_batch).unwrap();
             writer.finish().unwrap();
         }
         file.rewind().unwrap();
         {
             <span class="comment">// read file
-            </span><span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(file, <span class="prelude-val">None</span>).unwrap();
-            <span class="kw">loop </span>{
-                <span class="kw">match </span>reader.next() {
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(read_batch)) =&gt; {
-                        read_batch
-                            .columns()
-                            .iter()
-                            .zip(record_batch.columns())
-                            .for_each(|(a, b)| {
-                                <span class="macro">assert_eq!</span>(a.data_type(), b.data_type());
-                                <span class="macro">assert_eq!</span>(a.len(), b.len());
-                                <span class="macro">assert_eq!</span>(a.null_count(), b.null_count());
-                            });
-                    }
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e)) =&gt; {
-                        <span class="macro">panic!</span>(<span class="string">&quot;{}&quot;</span>, e);
-                    }
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">break</span>;
-                    }
-                }
+            </span><span class="kw">let </span>reader = FileReader::try_new(file, <span class="prelude-val">None</span>).unwrap();
+            <span class="kw">for </span>read_batch <span class="kw">in </span>reader {
+                read_batch
+                    .unwrap()
+                    .columns()
+                    .iter()
+                    .zip(record_batch.columns())
+                    .for_each(|(a, b)| {
+                        <span class="macro">assert_eq!</span>(a.data_type(), b.data_type());
+                        <span class="macro">assert_eq!</span>(a.len(), b.len());
+                        <span class="macro">assert_eq!</span>(a.null_count(), b.null_count());
+                    });
             }
         }
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;lz4&quot;</span>)]
+    #[cfg(feature = <span class="string">"lz4"</span>)]
     </span><span class="kw">fn </span>test_write_file_with_lz4_compression() {
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;field1&quot;</span>, DataType::Int32, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"field1"</span>, DataType::Int32, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>values: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">12</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>)];
         <span class="kw">let </span>array = Int32Array::from(values);
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array)]).unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
         {
-            <span class="kw">let </span>write_option =
-                IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, <span class="kw">crate</span>::MetadataVersion::V5)
-                    .unwrap()
-                    .try_with_compression(<span class="prelude-val">Some</span>(<span class="kw">crate</span>::CompressionType::LZ4_FRAME))
-                    .unwrap();
+            <span class="kw">let </span>write_option = IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, <span class="kw">crate</span>::MetadataVersion::V5)
+                .unwrap()
+                .try_with_compression(<span class="prelude-val">Some</span>(<span class="kw">crate</span>::CompressionType::LZ4_FRAME))
+                .unwrap();
 
             <span class="kw">let </span><span class="kw-2">mut </span>writer =
-                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, write_option)
-                    .unwrap();
+                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, write_option).unwrap();
             writer.write(<span class="kw-2">&amp;</span>record_batch).unwrap();
             writer.finish().unwrap();
         }
         file.rewind().unwrap();
         {
             <span class="comment">// read file
-            </span><span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(file, <span class="prelude-val">None</span>).unwrap();
-            <span class="kw">loop </span>{
-                <span class="kw">match </span>reader.next() {
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(read_batch)) =&gt; {
-                        read_batch
-                            .columns()
-                            .iter()
-                            .zip(record_batch.columns())
-                            .for_each(|(a, b)| {
-                                <span class="macro">assert_eq!</span>(a.data_type(), b.data_type());
-                                <span class="macro">assert_eq!</span>(a.len(), b.len());
-                                <span class="macro">assert_eq!</span>(a.null_count(), b.null_count());
-                            });
-                    }
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e)) =&gt; {
-                        <span class="macro">panic!</span>(<span class="string">&quot;{}&quot;</span>, e);
-                    }
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">break</span>;
-                    }
-                }
+            </span><span class="kw">let </span>reader = FileReader::try_new(file, <span class="prelude-val">None</span>).unwrap();
+            <span class="kw">for </span>read_batch <span class="kw">in </span>reader {
+                read_batch
+                    .unwrap()
+                    .columns()
+                    .iter()
+                    .zip(record_batch.columns())
+                    .for_each(|(a, b)| {
+                        <span class="macro">assert_eq!</span>(a.data_type(), b.data_type());
+                        <span class="macro">assert_eq!</span>(a.len(), b.len());
+                        <span class="macro">assert_eq!</span>(a.null_count(), b.null_count());
+                    });
             }
         }
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;zstd&quot;</span>)]
+    #[cfg(feature = <span class="string">"zstd"</span>)]
     </span><span class="kw">fn </span>test_write_file_with_zstd_compression() {
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;field1&quot;</span>, DataType::Int32, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"field1"</span>, DataType::Int32, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>values: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">12</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>)];
         <span class="kw">let </span>array = Int32Array::from(values);
         <span class="kw">let </span>record_batch =
-            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array)]).unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
         {
-            <span class="kw">let </span>write_option =
-                IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, <span class="kw">crate</span>::MetadataVersion::V5)
-                    .unwrap()
-                    .try_with_compression(<span class="prelude-val">Some</span>(<span class="kw">crate</span>::CompressionType::ZSTD))
-                    .unwrap();
+            <span class="kw">let </span>write_option = IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, <span class="kw">crate</span>::MetadataVersion::V5)
+                .unwrap()
+                .try_with_compression(<span class="prelude-val">Some</span>(<span class="kw">crate</span>::CompressionType::ZSTD))
+                .unwrap();
 
             <span class="kw">let </span><span class="kw-2">mut </span>writer =
-                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, write_option)
-                    .unwrap();
+                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, write_option).unwrap();
             writer.write(<span class="kw-2">&amp;</span>record_batch).unwrap();
             writer.finish().unwrap();
         }
         file.rewind().unwrap();
         {
             <span class="comment">// read file
-            </span><span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(file, <span class="prelude-val">None</span>).unwrap();
-            <span class="kw">loop </span>{
-                <span class="kw">match </span>reader.next() {
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(read_batch)) =&gt; {
-                        read_batch
-                            .columns()
-                            .iter()
-                            .zip(record_batch.columns())
-                            .for_each(|(a, b)| {
-                                <span class="macro">assert_eq!</span>(a.data_type(), b.data_type());
-                                <span class="macro">assert_eq!</span>(a.len(), b.len());
-                                <span class="macro">assert_eq!</span>(a.null_count(), b.null_count());
-                            });
-                    }
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e)) =&gt; {
-                        <span class="macro">panic!</span>(<span class="string">&quot;{}&quot;</span>, e);
-                    }
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">break</span>;
-                    }
-                }
+            </span><span class="kw">let </span>reader = FileReader::try_new(file, <span class="prelude-val">None</span>).unwrap();
+            <span class="kw">for </span>read_batch <span class="kw">in </span>reader {
+                read_batch
+                    .unwrap()
+                    .columns()
+                    .iter()
+                    .zip(record_batch.columns())
+                    .for_each(|(a, b)| {
+                        <span class="macro">assert_eq!</span>(a.data_type(), b.data_type());
+                        <span class="macro">assert_eq!</span>(a.len(), b.len());
+                        <span class="macro">assert_eq!</span>(a.null_count(), b.null_count());
+                    });
             }
         }
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_file() {
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;field1&quot;</span>, DataType::UInt32, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"field1"</span>, DataType::UInt32, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>values: Vec&lt;<span class="prelude-ty">Option</span>&lt;u32&gt;&gt; = <span class="macro">vec!</span>[
             <span class="prelude-val">Some</span>(<span class="number">999</span>),
             <span class="prelude-val">None</span>,
@@ -3739,11 +4218,9 @@
             <span class="prelude-val">None</span>,
         ];
         <span class="kw">let </span>array1 = UInt32Array::from(values);
-        <span class="kw">let </span>batch = RecordBatch::try_new(
-            Arc::new(schema.clone()),
-            <span class="macro">vec!</span>[Arc::new(array1) <span class="kw">as </span>ArrayRef],
-        )
-        .unwrap();
+        <span class="kw">let </span>batch =
+            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(array1) <span class="kw">as </span>ArrayRef])
+                .unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
         {
             <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema).unwrap();
@@ -3771,10 +4248,10 @@
 
     <span class="kw">fn </span>write_null_file(options: IpcWriteOptions) {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;nulls&quot;</span>, DataType::Null, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;int32s&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;nulls2&quot;</span>, DataType::Null, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;f64s&quot;</span>, DataType::Float64, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"nulls"</span>, DataType::Null, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"int32s"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"nulls2"</span>, DataType::Null, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"f64s"</span>, DataType::Float64, <span class="bool-val">false</span>),
         ]);
         <span class="kw">let </span>array1 = NullArray::new(<span class="number">32</span>);
         <span class="kw">let </span>array2 = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>; <span class="number">32</span>]);
@@ -3792,8 +4269,7 @@
         .unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
         {
-            <span class="kw">let </span><span class="kw-2">mut </span>writer =
-                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, options).unwrap();
+            <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, options).unwrap();
 
             writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
             writer.finish().unwrap();
@@ -3821,39 +4297,33 @@
     </span><span class="kw">fn </span>test_write_null_file_v4() {
         write_null_file(IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, MetadataVersion::V4).unwrap());
         write_null_file(IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">true</span>, MetadataVersion::V4).unwrap());
-        write_null_file(
-            IpcWriteOptions::try_new(<span class="number">64</span>, <span class="bool-val">false</span>, MetadataVersion::V4).unwrap(),
-        );
+        write_null_file(IpcWriteOptions::try_new(<span class="number">64</span>, <span class="bool-val">false</span>, MetadataVersion::V4).unwrap());
         write_null_file(IpcWriteOptions::try_new(<span class="number">64</span>, <span class="bool-val">true</span>, MetadataVersion::V4).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_null_file_v5() {
         write_null_file(IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap());
-        write_null_file(
-            IpcWriteOptions::try_new(<span class="number">64</span>, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap(),
-        );
+        write_null_file(IpcWriteOptions::try_new(<span class="number">64</span>, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>track_union_nested_dict() {
-        <span class="kw">let </span>inner: DictionaryArray&lt;Int32Type&gt; = <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;a&quot;</span>].into_iter().collect();
+        <span class="kw">let </span>inner: DictionaryArray&lt;Int32Type&gt; = <span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"a"</span>].into_iter().collect();
 
         <span class="kw">let </span>array = Arc::new(inner) <span class="kw">as </span>ArrayRef;
 
         <span class="comment">// Dict field with id 2
-        </span><span class="kw">let </span>dctfield =
-            Field::new_dict(<span class="string">&quot;dict&quot;</span>, array.data_type().clone(), <span class="bool-val">false</span>, <span class="number">2</span>, <span class="bool-val">false</span>);
+        </span><span class="kw">let </span>dctfield = Field::new_dict(<span class="string">"dict"</span>, array.data_type().clone(), <span class="bool-val">false</span>, <span class="number">2</span>, <span class="bool-val">false</span>);
+        <span class="kw">let </span>union_fields = [(<span class="number">0</span>, Arc::new(dctfield))].into_iter().collect();
 
-        <span class="kw">let </span>types = Buffer::from_slice_ref([<span class="number">0_i8</span>, <span class="number">0</span>, <span class="number">0</span>]);
-        <span class="kw">let </span>offsets = Buffer::from_slice_ref([<span class="number">0_i32</span>, <span class="number">1</span>, <span class="number">2</span>]);
+        <span class="kw">let </span>types = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>].into_iter().collect::&lt;ScalarBuffer&lt;i8&gt;&gt;();
+        <span class="kw">let </span>offsets = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>].into_iter().collect::&lt;ScalarBuffer&lt;i32&gt;&gt;();
 
-        <span class="kw">let </span>union =
-            UnionArray::try_new(<span class="kw-2">&amp;</span>[<span class="number">0</span>], types, <span class="prelude-val">Some</span>(offsets), <span class="macro">vec!</span>[(dctfield, array)])
-                .unwrap();
+        <span class="kw">let </span>union = UnionArray::try_new(union_fields, types, <span class="prelude-val">Some</span>(offsets), <span class="macro">vec!</span>[array]).unwrap();
 
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;union&quot;</span>,
+            <span class="string">"union"</span>,
             union.data_type().clone(),
             <span class="bool-val">false</span>,
         )]));
@@ -3871,13 +4341,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>track_struct_nested_dict() {
-        <span class="kw">let </span>inner: DictionaryArray&lt;Int32Type&gt; = <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;a&quot;</span>].into_iter().collect();
+        <span class="kw">let </span>inner: DictionaryArray&lt;Int32Type&gt; = <span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"a"</span>].into_iter().collect();
 
         <span class="kw">let </span>array = Arc::new(inner) <span class="kw">as </span>ArrayRef;
 
         <span class="comment">// Dict field with id 2
         </span><span class="kw">let </span>dctfield = Arc::new(Field::new_dict(
-            <span class="string">&quot;dict&quot;</span>,
+            <span class="string">"dict"</span>,
             array.data_type().clone(),
             <span class="bool-val">false</span>,
             <span class="number">2</span>,
@@ -3888,7 +4358,7 @@
         <span class="kw">let </span>struct_array = Arc::new(s) <span class="kw">as </span>ArrayRef;
 
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;struct&quot;</span>,
+            <span class="string">"struct"</span>,
             struct_array.data_type().clone(),
             <span class="bool-val">false</span>,
         )]));
@@ -3906,32 +4376,29 @@
 
     <span class="kw">fn </span>write_union_file(options: IpcWriteOptions) {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new_union(
-            <span class="string">&quot;union&quot;</span>,
+            <span class="string">"union"</span>,
             <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>],
             <span class="macro">vec!</span>[
-                Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-                Field::new(<span class="string">&quot;c&quot;</span>, DataType::Float64, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"c"</span>, DataType::Float64, <span class="bool-val">false</span>),
             ],
             UnionMode::Sparse,
         )]);
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::with_capacity_sparse(<span class="number">5</span>);
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-        builder.append_null::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+        builder.append_null::&lt;Float64Type&gt;(<span class="string">"c"</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
-        <span class="kw">let </span>batch = RecordBatch::try_new(
-            Arc::new(schema.clone()),
-            <span class="macro">vec!</span>[Arc::new(union) <span class="kw">as </span>ArrayRef],
-        )
-        .unwrap();
+        <span class="kw">let </span>batch =
+            RecordBatch::try_new(Arc::new(schema.clone()), <span class="macro">vec!</span>[Arc::new(union) <span class="kw">as </span>ArrayRef])
+                .unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
         {
-            <span class="kw">let </span><span class="kw-2">mut </span>writer =
-                FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, options).unwrap();
+            <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema, options).unwrap();
 
             writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
             writer.finish().unwrap();
@@ -3957,42 +4424,73 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_union_file_v4_v5() {
-        write_union_file(
-            IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, MetadataVersion::V4).unwrap(),
-        );
-        write_union_file(
-            IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap(),
-        );
+        write_union_file(IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, MetadataVersion::V4).unwrap());
+        write_union_file(IpcWriteOptions::try_new(<span class="number">8</span>, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap());
     }
 
-    <span class="kw">fn </span>serialize(record: <span class="kw-2">&amp;</span>RecordBatch) -&gt; Vec&lt;u8&gt; {
-        <span class="kw">let </span>buffer: Vec&lt;u8&gt; = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>stream_writer = StreamWriter::try_new(buffer, <span class="kw-2">&amp;</span>record.schema()).unwrap();
-        stream_writer.write(record).unwrap();
-        stream_writer.finish().unwrap();
-        stream_writer.into_inner().unwrap()
-    }
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_write_view_types() {
+        <span class="kw">const </span>LONG_TEST_STRING: <span class="kw-2">&amp;</span>str =
+            <span class="string">"This is a long string to make sure binary view array handles it"</span>;
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
+            Field::new(<span class="string">"field1"</span>, DataType::BinaryView, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"field2"</span>, DataType::Utf8View, <span class="bool-val">true</span>),
+        ]);
+        <span class="kw">let </span>values: Vec&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;&gt; = <span class="macro">vec!</span>[
+            <span class="prelude-val">Some</span>(<span class="string">b"foo"</span>),
+            <span class="prelude-val">Some</span>(<span class="string">b"bar"</span>),
+            <span class="prelude-val">Some</span>(LONG_TEST_STRING.as_bytes()),
+        ];
+        <span class="kw">let </span>binary_array = BinaryViewArray::from_iter(values);
+        <span class="kw">let </span>utf8_array =
+            StringViewArray::from_iter(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">Some</span>(<span class="string">"bar"</span>), <span class="prelude-val">Some</span>(LONG_TEST_STRING)]);
+        <span class="kw">let </span>record_batch = RecordBatch::try_new(
+            Arc::new(schema.clone()),
+            <span class="macro">vec!</span>[Arc::new(binary_array), Arc::new(utf8_array)],
+        )
+        .unwrap();
 
-    <span class="kw">fn </span>deserialize(bytes: Vec&lt;u8&gt;) -&gt; RecordBatch {
-        <span class="kw">let </span><span class="kw-2">mut </span>stream_reader =
-            <span class="kw">crate</span>::reader::StreamReader::try_new(std::io::Cursor::new(bytes), <span class="prelude-val">None</span>)
-                .unwrap();
-        stream_reader.next().unwrap().unwrap()
+        <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>schema).unwrap();
+            writer.write(<span class="kw-2">&amp;</span>record_batch).unwrap();
+            writer.finish().unwrap();
+        }
+        file.rewind().unwrap();
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(<span class="kw-2">&amp;</span>file, <span class="prelude-val">None</span>).unwrap();
+            <span class="kw">let </span>read_batch = reader.next().unwrap().unwrap();
+            read_batch
+                .columns()
+                .iter()
+                .zip(record_batch.columns())
+                .for_each(|(a, b)| {
+                    <span class="macro">assert_eq!</span>(a, b);
+                });
+        }
+        file.rewind().unwrap();
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(<span class="kw-2">&amp;</span>file, <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">0</span>])).unwrap();
+            <span class="kw">let </span>read_batch = reader.next().unwrap().unwrap();
+            <span class="macro">assert_eq!</span>(read_batch.num_columns(), <span class="number">1</span>);
+            <span class="kw">let </span>read_array = read_batch.column(<span class="number">0</span>);
+            <span class="kw">let </span>write_array = record_batch.column(<span class="number">0</span>);
+            <span class="macro">assert_eq!</span>(read_array, write_array);
+        }
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>truncate_ipc_record_batch() {
         <span class="kw">fn </span>create_batch(rows: usize) -&gt; RecordBatch {
             <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-                Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-                Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>),
             ]);
 
             <span class="kw">let </span>a = Int32Array::from_iter_values(<span class="number">0</span>..rows <span class="kw">as </span>i32);
             <span class="kw">let </span>b = StringArray::from_iter_values((<span class="number">0</span>..rows).map(|i| i.to_string()));
 
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)])
-                .unwrap()
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap()
         }
 
         <span class="kw">let </span>big_record_batch = create_batch(<span class="number">65536</span>);
@@ -4003,15 +4501,15 @@
         <span class="kw">let </span>offset = <span class="number">2</span>;
         <span class="kw">let </span>record_batch_slice = big_record_batch.slice(offset, length);
         <span class="macro">assert!</span>(
-            serialize(<span class="kw-2">&amp;</span>big_record_batch).len() &gt; serialize(<span class="kw-2">&amp;</span>small_record_batch).len()
+            serialize_stream(<span class="kw-2">&amp;</span>big_record_batch).len() &gt; serialize_stream(<span class="kw-2">&amp;</span>small_record_batch).len()
         );
         <span class="macro">assert_eq!</span>(
-            serialize(<span class="kw-2">&amp;</span>small_record_batch).len(),
-            serialize(<span class="kw-2">&amp;</span>record_batch_slice).len()
+            serialize_stream(<span class="kw-2">&amp;</span>small_record_batch).len(),
+            serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice).len()
         );
 
         <span class="macro">assert_eq!</span>(
-            deserialize(serialize(<span class="kw-2">&amp;</span>record_batch_slice)),
+            deserialize_stream(serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice)),
             record_batch_slice
         );
     }
@@ -4020,22 +4518,23 @@
     </span><span class="kw">fn </span>truncate_ipc_record_batch_with_nulls() {
         <span class="kw">fn </span>create_batch() -&gt; RecordBatch {
             <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-                Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">true</span>),
-                Field::new(<span class="string">&quot;b&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">true</span>),
+                Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">true</span>),
             ]);
 
             <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)]);
-            <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>)]);
+            <span class="kw">let </span>b = StringArray::from(<span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"a"</span>), <span class="prelude-val">Some</span>(<span class="string">"a"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"a"</span>)]);
 
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)])
-                .unwrap()
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap()
         }
 
         <span class="kw">let </span>record_batch = create_batch();
         <span class="kw">let </span>record_batch_slice = record_batch.slice(<span class="number">1</span>, <span class="number">2</span>);
-        <span class="kw">let </span>deserialized_batch = deserialize(serialize(<span class="kw-2">&amp;</span>record_batch_slice));
+        <span class="kw">let </span>deserialized_batch = deserialize_stream(serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice));
 
-        <span class="macro">assert!</span>(serialize(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize(<span class="kw-2">&amp;</span>record_batch_slice).len());
+        <span class="macro">assert!</span>(
+            serialize_stream(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice).len()
+        );
 
         <span class="macro">assert!</span>(deserialized_batch.column(<span class="number">0</span>).is_null(<span class="number">0</span>));
         <span class="macro">assert!</span>(deserialized_batch.column(<span class="number">0</span>).is_valid(<span class="number">1</span>));
@@ -4048,25 +4547,25 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>truncate_ipc_dictionary_array() {
         <span class="kw">fn </span>create_batch() -&gt; RecordBatch {
-            <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;bar&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;baz&quot;</span>)]
+            <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">Some</span>(<span class="string">"bar"</span>), <span class="prelude-val">Some</span>(<span class="string">"baz"</span>)]
                 .into_iter()
                 .collect();
-            <span class="kw">let </span>keys: Int32Array =
-                [<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)].into_iter().collect();
+            <span class="kw">let </span>keys: Int32Array = [<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)].into_iter().collect();
 
             <span class="kw">let </span>array = DictionaryArray::new(keys, Arc::new(values));
 
-            <span class="kw">let </span>schema =
-                Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;dict&quot;</span>, array.data_type().clone(), <span class="bool-val">true</span>)]);
+            <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"dict"</span>, array.data_type().clone(), <span class="bool-val">true</span>)]);
 
             RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(array)]).unwrap()
         }
 
         <span class="kw">let </span>record_batch = create_batch();
         <span class="kw">let </span>record_batch_slice = record_batch.slice(<span class="number">1</span>, <span class="number">2</span>);
-        <span class="kw">let </span>deserialized_batch = deserialize(serialize(<span class="kw-2">&amp;</span>record_batch_slice));
+        <span class="kw">let </span>deserialized_batch = deserialize_stream(serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice));
 
-        <span class="macro">assert!</span>(serialize(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize(<span class="kw-2">&amp;</span>record_batch_slice).len());
+        <span class="macro">assert!</span>(
+            serialize_stream(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice).len()
+        );
 
         <span class="macro">assert!</span>(deserialized_batch.column(<span class="number">0</span>).is_valid(<span class="number">0</span>));
         <span class="macro">assert!</span>(deserialized_batch.column(<span class="number">0</span>).is_null(<span class="number">1</span>));
@@ -4077,25 +4576,24 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>truncate_ipc_struct_array() {
         <span class="kw">fn </span>create_batch() -&gt; RecordBatch {
-            <span class="kw">let </span>strings: StringArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;bar&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;baz&quot;</span>)]
+            <span class="kw">let </span>strings: StringArray = [<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"bar"</span>), <span class="prelude-val">Some</span>(<span class="string">"baz"</span>)]
                 .into_iter()
                 .collect();
-            <span class="kw">let </span>ints: Int32Array =
-                [<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)].into_iter().collect();
+            <span class="kw">let </span>ints: Int32Array = [<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)].into_iter().collect();
 
             <span class="kw">let </span>struct_array = StructArray::from(<span class="macro">vec!</span>[
                 (
-                    Arc::new(Field::new(<span class="string">&quot;s&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>)),
+                    Arc::new(Field::new(<span class="string">"s"</span>, DataType::Utf8, <span class="bool-val">true</span>)),
                     Arc::new(strings) <span class="kw">as </span>ArrayRef,
                 ),
                 (
-                    Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">true</span>)),
+                    Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">true</span>)),
                     Arc::new(ints) <span class="kw">as </span>ArrayRef,
                 ),
             ]);
 
             <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(
-                <span class="string">&quot;struct_array&quot;</span>,
+                <span class="string">"struct_array"</span>,
                 struct_array.data_type().clone(),
                 <span class="bool-val">true</span>,
             )]);
@@ -4105,9 +4603,11 @@
 
         <span class="kw">let </span>record_batch = create_batch();
         <span class="kw">let </span>record_batch_slice = record_batch.slice(<span class="number">1</span>, <span class="number">2</span>);
-        <span class="kw">let </span>deserialized_batch = deserialize(serialize(<span class="kw-2">&amp;</span>record_batch_slice));
+        <span class="kw">let </span>deserialized_batch = deserialize_stream(serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice));
 
-        <span class="macro">assert!</span>(serialize(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize(<span class="kw-2">&amp;</span>record_batch_slice).len());
+        <span class="macro">assert!</span>(
+            serialize_stream(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice).len()
+        );
 
         <span class="kw">let </span>structs = deserialized_batch
             .column(<span class="number">0</span>)
@@ -4125,17 +4625,18 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>truncate_ipc_string_array_with_all_empty_string() {
         <span class="kw">fn </span>create_batch() -&gt; RecordBatch {
-            <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>)]);
-            <span class="kw">let </span>a =
-                StringArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>)]);
+            <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Utf8, <span class="bool-val">true</span>)]);
+            <span class="kw">let </span>a = StringArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">""</span>), <span class="prelude-val">Some</span>(<span class="string">""</span>), <span class="prelude-val">Some</span>(<span class="string">""</span>), <span class="prelude-val">Some</span>(<span class="string">""</span>), <span class="prelude-val">Some</span>(<span class="string">""</span>)]);
             RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a)]).unwrap()
         }
 
         <span class="kw">let </span>record_batch = create_batch();
         <span class="kw">let </span>record_batch_slice = record_batch.slice(<span class="number">0</span>, <span class="number">1</span>);
-        <span class="kw">let </span>deserialized_batch = deserialize(serialize(<span class="kw-2">&amp;</span>record_batch_slice));
+        <span class="kw">let </span>deserialized_batch = deserialize_stream(serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice));
 
-        <span class="macro">assert!</span>(serialize(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize(<span class="kw-2">&amp;</span>record_batch_slice).len());
+        <span class="macro">assert!</span>(
+            serialize_stream(<span class="kw-2">&amp;</span>record_batch).len() &gt; serialize_stream(<span class="kw-2">&amp;</span>record_batch_slice).len()
+        );
         <span class="macro">assert_eq!</span>(record_batch_slice, deserialized_batch);
     }
 
@@ -4151,18 +4652,17 @@
         <span class="macro">assert_eq!</span>(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)], sliced.iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());
 
         <span class="kw">let </span>batch = RecordBatch::try_new(
-            Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::UInt32, <span class="bool-val">true</span>)])),
+            Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::UInt32, <span class="bool-val">true</span>)])),
             <span class="macro">vec!</span>[Arc::new(sliced)],
         )
-        .expect(<span class="string">&quot;new batch&quot;</span>);
+        .expect(<span class="string">"new batch"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>writer =
-            StreamWriter::try_new(<span class="macro">vec!</span>[], <span class="kw-2">&amp;</span>batch.schema()).expect(<span class="string">&quot;new writer&quot;</span>);
-        writer.write(<span class="kw-2">&amp;</span>batch).expect(<span class="string">&quot;write&quot;</span>);
-        <span class="kw">let </span>outbuf = writer.into_inner().expect(<span class="string">&quot;inner&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = StreamWriter::try_new(<span class="macro">vec!</span>[], batch.schema_ref()).expect(<span class="string">"new writer"</span>);
+        writer.write(<span class="kw-2">&amp;</span>batch).expect(<span class="string">"write"</span>);
+        <span class="kw">let </span>outbuf = writer.into_inner().expect(<span class="string">"inner"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>reader = StreamReader::try_new(<span class="kw-2">&amp;</span>outbuf[..], <span class="prelude-val">None</span>).expect(<span class="string">&quot;new reader&quot;</span>);
-        <span class="kw">let </span>read_batch = reader.next().unwrap().expect(<span class="string">&quot;read batch&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>reader = StreamReader::try_new(<span class="kw-2">&amp;</span>outbuf[..], <span class="prelude-val">None</span>).expect(<span class="string">"new reader"</span>);
+        <span class="kw">let </span>read_batch = reader.next().unwrap().expect(<span class="string">"read batch"</span>);
 
         <span class="kw">let </span>read_array: <span class="kw-2">&amp;</span>UInt32Array = read_batch.column(<span class="number">0</span>).as_primitive();
         <span class="macro">assert_eq!</span>(
@@ -4179,9 +4679,9 @@
         <span class="comment">// slice somewhere in the middle
         </span>assert_bool_roundtrip(
             [
-                <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
-                <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>,
-                <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
+                <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
+                <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>,
+                <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
             ],
             <span class="number">13</span>,
             <span class="number">17</span>,
@@ -4190,8 +4690,7 @@
         <span class="comment">// start at byte boundary, end in the middle
         </span>assert_bool_roundtrip(
             [
-                <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
-                <span class="bool-val">false</span>,
+                <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
             ],
             <span class="number">8</span>,
             <span class="number">2</span>,
@@ -4200,44 +4699,33 @@
         <span class="comment">// start and stop and byte boundary
         </span>assert_bool_roundtrip(
             [
-                <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
-                <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
+                <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
+                <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
             ],
             <span class="number">8</span>,
             <span class="number">8</span>,
         );
     }
 
-    <span class="kw">fn </span>assert_bool_roundtrip&lt;<span class="kw">const </span>N: usize&gt;(
-        bools: [bool; N],
-        offset: usize,
-        length: usize,
-    ) {
-        <span class="kw">let </span>val_bool_field = Field::new(<span class="string">&quot;val&quot;</span>, DataType::Boolean, <span class="bool-val">false</span>);
+    <span class="kw">fn </span>assert_bool_roundtrip&lt;<span class="kw">const </span>N: usize&gt;(bools: [bool; N], offset: usize, length: usize) {
+        <span class="kw">let </span>val_bool_field = Field::new(<span class="string">"val"</span>, DataType::Boolean, <span class="bool-val">false</span>);
 
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[val_bool_field]));
 
         <span class="kw">let </span>bools = BooleanArray::from(bools.to_vec());
 
-        <span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::clone(<span class="kw-2">&amp;</span>schema), <span class="macro">vec!</span>[Arc::new(bools)]).unwrap();
+        <span class="kw">let </span>batch = RecordBatch::try_new(Arc::clone(<span class="kw-2">&amp;</span>schema), <span class="macro">vec!</span>[Arc::new(bools)]).unwrap();
         <span class="kw">let </span>batch = batch.slice(offset, length);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = StreamWriter::try_new(Vec::&lt;u8&gt;::new(), <span class="kw-2">&amp;</span>schema).unwrap();
-        writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
-        writer.finish().unwrap();
-        <span class="kw">let </span>data = writer.into_inner().unwrap();
-
-        <span class="kw">let </span><span class="kw-2">mut </span>reader = StreamReader::try_new(Cursor::new(data), <span class="prelude-val">None</span>).unwrap();
-        <span class="kw">let </span>batch2 = reader.next().unwrap().unwrap();
+        <span class="kw">let </span>data = serialize_stream(<span class="kw-2">&amp;</span>batch);
+        <span class="kw">let </span>batch2 = deserialize_stream(data);
         <span class="macro">assert_eq!</span>(batch, batch2);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_run_array_unslice() {
         <span class="kw">let </span>total_len = <span class="number">80</span>;
-        <span class="kw">let </span>vals: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; =
-            <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">5</span>)];
+        <span class="kw">let </span>vals: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">5</span>)];
         <span class="kw">let </span>repeats: Vec&lt;usize&gt; = <span class="macro">vec!</span>[<span class="number">3</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>input_array: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = Vec::with_capacity(total_len);
         <span class="kw">for </span>ix <span class="kw">in </span><span class="number">0_usize</span>..<span class="number">32 </span>{
@@ -4259,13 +4747,11 @@
                 run_array.slice(<span class="number">0</span>, slice_len).into_data().into();
 
             <span class="comment">// Create unsliced run array.
-            </span><span class="kw">let </span>unsliced_run_array =
-                into_zero_offset_run_array(sliced_run_array).unwrap();
+            </span><span class="kw">let </span>unsliced_run_array = into_zero_offset_run_array(sliced_run_array).unwrap();
             <span class="kw">let </span>typed = unsliced_run_array
                 .downcast::&lt;PrimitiveArray&lt;Int32Type&gt;&gt;()
                 .unwrap();
-            <span class="kw">let </span>expected: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; =
-                input_array.iter().take(slice_len).copied().collect();
+            <span class="kw">let </span>expected: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = input_array.iter().take(slice_len).copied().collect();
             <span class="kw">let </span>actual: Vec&lt;<span class="prelude-ty">Option</span>&lt;i32&gt;&gt; = typed.into_iter().collect();
             <span class="macro">assert_eq!</span>(expected, actual);
 
@@ -4276,8 +4762,7 @@
                 .into();
 
             <span class="comment">// Create unsliced run array.
-            </span><span class="kw">let </span>unsliced_run_array =
-                into_zero_offset_run_array(sliced_run_array).unwrap();
+            </span><span class="kw">let </span>unsliced_run_array = into_zero_offset_run_array(sliced_run_array).unwrap();
             <span class="kw">let </span>typed = unsliced_run_array
                 .downcast::&lt;PrimitiveArray&lt;Int32Type&gt;&gt;()
                 .unwrap();
@@ -4291,39 +4776,254 @@
         }
     }
 
+    <span class="kw">fn </span>generate_list_data&lt;O: OffsetSizeTrait&gt;() -&gt; GenericListArray&lt;O&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ls = GenericListBuilder::&lt;O, <span class="kw">_</span>&gt;::new(UInt32Builder::new());
+
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">100_000 </span>{
+            <span class="kw">for </span>value <span class="kw">in </span>[i, i, i] {
+                ls.values().append_value(value);
+            }
+            ls.append(<span class="bool-val">true</span>)
+        }
+
+        ls.finish()
+    }
+
+    <span class="kw">fn </span>generate_nested_list_data&lt;O: OffsetSizeTrait&gt;() -&gt; GenericListArray&lt;O&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ls =
+            GenericListBuilder::&lt;O, <span class="kw">_</span>&gt;::new(GenericListBuilder::&lt;O, <span class="kw">_</span>&gt;::new(UInt32Builder::new()));
+
+        <span class="kw">for </span>_i <span class="kw">in </span><span class="number">0</span>..<span class="number">10_000 </span>{
+            <span class="kw">for </span>j <span class="kw">in </span><span class="number">0</span>..<span class="number">10 </span>{
+                <span class="kw">for </span>value <span class="kw">in </span>[j, j, j, j] {
+                    ls.values().values().append_value(value);
+                }
+                ls.values().append(<span class="bool-val">true</span>)
+            }
+            ls.append(<span class="bool-val">true</span>);
+        }
+
+        ls.finish()
+    }
+
+    <span class="kw">fn </span>generate_map_array_data() -&gt; MapArray {
+        <span class="kw">let </span>keys_builder = UInt32Builder::new();
+        <span class="kw">let </span>values_builder = UInt32Builder::new();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = MapBuilder::new(<span class="prelude-val">None</span>, keys_builder, values_builder);
+
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">100_000 </span>{
+            <span class="kw">for </span>_j <span class="kw">in </span><span class="number">0</span>..<span class="number">3 </span>{
+                builder.keys().append_value(i);
+                builder.values().append_value(i * <span class="number">2</span>);
+            }
+            builder.append(<span class="bool-val">true</span>).unwrap();
+        }
+
+        builder.finish()
+    }
+
+    <span class="doccomment">/// Ensure when serde full &amp; sliced versions they are equal to original input.
+    /// Also ensure serialized sliced version is significantly smaller than serialized full.
+    </span><span class="kw">fn </span>roundtrip_ensure_sliced_smaller(in_batch: RecordBatch, expected_size_factor: usize) {
+        <span class="comment">// test both full and sliced versions
+        </span><span class="kw">let </span>in_sliced = in_batch.slice(<span class="number">999</span>, <span class="number">1</span>);
+
+        <span class="kw">let </span>bytes_batch = serialize_file(<span class="kw-2">&amp;</span>in_batch);
+        <span class="kw">let </span>bytes_sliced = serialize_file(<span class="kw-2">&amp;</span>in_sliced);
+
+        <span class="comment">// serializing 1 row should be significantly smaller than serializing 100,000
+        </span><span class="macro">assert!</span>(bytes_sliced.len() &lt; (bytes_batch.len() / expected_size_factor));
+
+        <span class="comment">// ensure both are still valid and equal to originals
+        </span><span class="kw">let </span>out_batch = deserialize_file(bytes_batch);
+        <span class="macro">assert_eq!</span>(in_batch, out_batch);
+
+        <span class="kw">let </span>out_sliced = deserialize_file(bytes_sliced);
+        <span class="macro">assert_eq!</span>(in_sliced, out_sliced);
+    }
+
     <span class="attr">#[test]
     </span><span class="kw">fn </span>encode_lists() {
-        <span class="kw">let </span>val_inner = Field::new(<span class="string">&quot;item&quot;</span>, DataType::UInt32, <span class="bool-val">true</span>);
-        <span class="kw">let </span>val_list_field = Field::new_list(<span class="string">&quot;val&quot;</span>, val_inner, <span class="bool-val">false</span>);
-
+        <span class="kw">let </span>val_inner = Field::new(<span class="string">"item"</span>, DataType::UInt32, <span class="bool-val">true</span>);
+        <span class="kw">let </span>val_list_field = Field::new(<span class="string">"val"</span>, DataType::List(Arc::new(val_inner)), <span class="bool-val">false</span>);
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[val_list_field]));
 
-        <span class="kw">let </span>values = {
-            <span class="kw">let </span>u32 = UInt32Builder::new();
-            <span class="kw">let </span><span class="kw-2">mut </span>ls = ListBuilder::new(u32);
+        <span class="kw">let </span>values = Arc::new(generate_list_data::&lt;i32&gt;());
 
-            <span class="kw">for </span>list <span class="kw">in </span>[<span class="macro">vec!</span>[<span class="number">1u32</span>, <span class="number">2</span>, <span class="number">3</span>], <span class="macro">vec!</span>[<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], <span class="macro">vec!</span>[<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]] {
-                <span class="kw">for </span>value <span class="kw">in </span>list {
-                    ls.values().append_value(value);
-                }
-                ls.append(<span class="bool-val">true</span>)
+        <span class="kw">let </span>in_batch = RecordBatch::try_new(schema, <span class="macro">vec!</span>[values]).unwrap();
+        roundtrip_ensure_sliced_smaller(in_batch, <span class="number">1000</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>encode_empty_list() {
+        <span class="kw">let </span>val_inner = Field::new(<span class="string">"item"</span>, DataType::UInt32, <span class="bool-val">true</span>);
+        <span class="kw">let </span>val_list_field = Field::new(<span class="string">"val"</span>, DataType::List(Arc::new(val_inner)), <span class="bool-val">false</span>);
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[val_list_field]));
+
+        <span class="kw">let </span>values = Arc::new(generate_list_data::&lt;i32&gt;());
+
+        <span class="kw">let </span>in_batch = RecordBatch::try_new(schema, <span class="macro">vec!</span>[values])
+            .unwrap()
+            .slice(<span class="number">999</span>, <span class="number">0</span>);
+        <span class="kw">let </span>out_batch = deserialize_file(serialize_file(<span class="kw-2">&amp;</span>in_batch));
+        <span class="macro">assert_eq!</span>(in_batch, out_batch);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>encode_large_lists() {
+        <span class="kw">let </span>val_inner = Field::new(<span class="string">"item"</span>, DataType::UInt32, <span class="bool-val">true</span>);
+        <span class="kw">let </span>val_list_field = Field::new(<span class="string">"val"</span>, DataType::LargeList(Arc::new(val_inner)), <span class="bool-val">false</span>);
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[val_list_field]));
+
+        <span class="kw">let </span>values = Arc::new(generate_list_data::&lt;i64&gt;());
+
+        <span class="comment">// ensure when serde full &amp; sliced versions they are equal to original input
+        // also ensure serialized sliced version is significantly smaller than serialized full
+        </span><span class="kw">let </span>in_batch = RecordBatch::try_new(schema, <span class="macro">vec!</span>[values]).unwrap();
+        roundtrip_ensure_sliced_smaller(in_batch, <span class="number">1000</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>encode_nested_lists() {
+        <span class="kw">let </span>inner_int = Arc::new(Field::new(<span class="string">"item"</span>, DataType::UInt32, <span class="bool-val">true</span>));
+        <span class="kw">let </span>inner_list_field = Arc::new(Field::new(<span class="string">"item"</span>, DataType::List(inner_int), <span class="bool-val">true</span>));
+        <span class="kw">let </span>list_field = Field::new(<span class="string">"val"</span>, DataType::List(inner_list_field), <span class="bool-val">true</span>);
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[list_field]));
+
+        <span class="kw">let </span>values = Arc::new(generate_nested_list_data::&lt;i32&gt;());
+
+        <span class="kw">let </span>in_batch = RecordBatch::try_new(schema, <span class="macro">vec!</span>[values]).unwrap();
+        roundtrip_ensure_sliced_smaller(in_batch, <span class="number">1000</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>encode_map_array() {
+        <span class="kw">let </span>keys = Arc::new(Field::new(<span class="string">"keys"</span>, DataType::UInt32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>values = Arc::new(Field::new(<span class="string">"values"</span>, DataType::UInt32, <span class="bool-val">true</span>));
+        <span class="kw">let </span>map_field = Field::new_map(<span class="string">"map"</span>, <span class="string">"entries"</span>, keys, values, <span class="bool-val">false</span>, <span class="bool-val">true</span>);
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[map_field]));
+
+        <span class="kw">let </span>values = Arc::new(generate_map_array_data());
+
+        <span class="kw">let </span>in_batch = RecordBatch::try_new(schema, <span class="macro">vec!</span>[values]).unwrap();
+        roundtrip_ensure_sliced_smaller(in_batch, <span class="number">1000</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_decimal128_alignment16_is_sufficient() {
+        <span class="kw">const </span>IPC_ALIGNMENT: usize = <span class="number">16</span>;
+
+        <span class="comment">// Test a bunch of different dimensions to ensure alignment is never an issue.
+        // For example, if we only test `num_cols = 1` then even with alignment 8 this
+        // test would _happen_ to pass, even though for different dimensions like
+        // `num_cols = 2` it would fail.
+        </span><span class="kw">for </span>num_cols <span class="kw">in </span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">17</span>, <span class="number">50</span>, <span class="number">73</span>, <span class="number">99</span>] {
+            <span class="kw">let </span>num_rows = (num_cols * <span class="number">7 </span>+ <span class="number">11</span>) % <span class="number">100</span>; <span class="comment">// Deterministic swizzle
+
+            </span><span class="kw">let </span><span class="kw-2">mut </span>fields = Vec::new();
+            <span class="kw">let </span><span class="kw-2">mut </span>arrays = Vec::new();
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num_cols {
+                <span class="kw">let </span>field = Field::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"col_{}"</span>, i), DataType::Decimal128(<span class="number">38</span>, <span class="number">10</span>), <span class="bool-val">true</span>);
+                <span class="kw">let </span>array = Decimal128Array::from(<span class="macro">vec!</span>[num_cols <span class="kw">as </span>i128; num_rows]);
+                fields.push(field);
+                arrays.push(Arc::new(array) <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;);
             }
+            <span class="kw">let </span>schema = Schema::new(fields);
+            <span class="kw">let </span>batch = RecordBatch::try_new(Arc::new(schema), arrays).unwrap();
 
-            ls.finish()
-        };
+            <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new_with_options(
+                Vec::new(),
+                batch.schema_ref(),
+                IpcWriteOptions::try_new(IPC_ALIGNMENT, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap(),
+            )
+            .unwrap();
+            writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
+            writer.finish().unwrap();
 
-        <span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::clone(<span class="kw-2">&amp;</span>schema), <span class="macro">vec!</span>[Arc::new(values)]).unwrap();
-        <span class="kw">let </span>batch = batch.slice(<span class="number">1</span>, <span class="number">1</span>);
+            <span class="kw">let </span>out: Vec&lt;u8&gt; = writer.into_inner().unwrap();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new(Vec::&lt;u8&gt;::new(), <span class="kw-2">&amp;</span>schema).unwrap();
+            <span class="kw">let </span>buffer = Buffer::from_vec(out);
+            <span class="kw">let </span>trailer_start = buffer.len() - <span class="number">10</span>;
+            <span class="kw">let </span>footer_len =
+                read_footer_length(buffer[trailer_start..].try_into().unwrap()).unwrap();
+            <span class="kw">let </span>footer =
+                root_as_footer(<span class="kw-2">&amp;</span>buffer[trailer_start - footer_len..trailer_start]).unwrap();
+
+            <span class="kw">let </span>schema = fb_to_schema(footer.schema().unwrap());
+
+            <span class="comment">// Importantly we set `require_alignment`, checking that 16-byte alignment is sufficient
+            // for `read_record_batch` later on to read the data in a zero-copy manner.
+            </span><span class="kw">let </span>decoder =
+                FileDecoder::new(Arc::new(schema), footer.version()).with_require_alignment(<span class="bool-val">true</span>);
+
+            <span class="kw">let </span>batches = footer.recordBatches().unwrap();
+
+            <span class="kw">let </span>block = batches.get(<span class="number">0</span>);
+            <span class="kw">let </span>block_len = block.bodyLength() <span class="kw">as </span>usize + block.metaDataLength() <span class="kw">as </span>usize;
+            <span class="kw">let </span>data = buffer.slice_with_length(block.offset() <span class="kw">as _</span>, block_len);
+
+            <span class="kw">let </span>batch2 = decoder.read_record_batch(block, <span class="kw-2">&amp;</span>data).unwrap().unwrap();
+
+            <span class="macro">assert_eq!</span>(batch, batch2);
+        }
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_decimal128_alignment8_is_unaligned() {
+        <span class="kw">const </span>IPC_ALIGNMENT: usize = <span class="number">8</span>;
+
+        <span class="kw">let </span>num_cols = <span class="number">2</span>;
+        <span class="kw">let </span>num_rows = <span class="number">1</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>fields = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>arrays = Vec::new();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num_cols {
+            <span class="kw">let </span>field = Field::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"col_{}"</span>, i), DataType::Decimal128(<span class="number">38</span>, <span class="number">10</span>), <span class="bool-val">true</span>);
+            <span class="kw">let </span>array = Decimal128Array::from(<span class="macro">vec!</span>[num_cols <span class="kw">as </span>i128; num_rows]);
+            fields.push(field);
+            arrays.push(Arc::new(array) <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;);
+        }
+        <span class="kw">let </span>schema = Schema::new(fields);
+        <span class="kw">let </span>batch = RecordBatch::try_new(Arc::new(schema), arrays).unwrap();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = FileWriter::try_new_with_options(
+            Vec::new(),
+            batch.schema_ref(),
+            IpcWriteOptions::try_new(IPC_ALIGNMENT, <span class="bool-val">false</span>, MetadataVersion::V5).unwrap(),
+        )
+        .unwrap();
         writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
         writer.finish().unwrap();
-        <span class="kw">let </span>data = writer.into_inner().unwrap();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>reader = FileReader::try_new(Cursor::new(data), <span class="prelude-val">None</span>).unwrap();
-        <span class="kw">let </span>batch2 = reader.next().unwrap().unwrap();
-        <span class="macro">assert_eq!</span>(batch, batch2);
+        <span class="kw">let </span>out: Vec&lt;u8&gt; = writer.into_inner().unwrap();
+
+        <span class="kw">let </span>buffer = Buffer::from_vec(out);
+        <span class="kw">let </span>trailer_start = buffer.len() - <span class="number">10</span>;
+        <span class="kw">let </span>footer_len = read_footer_length(buffer[trailer_start..].try_into().unwrap()).unwrap();
+        <span class="kw">let </span>footer = root_as_footer(<span class="kw-2">&amp;</span>buffer[trailer_start - footer_len..trailer_start]).unwrap();
+
+        <span class="kw">let </span>schema = fb_to_schema(footer.schema().unwrap());
+
+        <span class="comment">// Importantly we set `require_alignment`, otherwise the error later is suppressed due to copying
+        // to an aligned buffer in `ArrayDataBuilder.build_aligned`.
+        </span><span class="kw">let </span>decoder =
+            FileDecoder::new(Arc::new(schema), footer.version()).with_require_alignment(<span class="bool-val">true</span>);
+
+        <span class="kw">let </span>batches = footer.recordBatches().unwrap();
+
+        <span class="kw">let </span>block = batches.get(<span class="number">0</span>);
+        <span class="kw">let </span>block_len = block.bodyLength() <span class="kw">as </span>usize + block.metaDataLength() <span class="kw">as </span>usize;
+        <span class="kw">let </span>data = buffer.slice_with_length(block.offset() <span class="kw">as _</span>, block_len);
+
+        <span class="kw">let </span>result = decoder.read_record_batch(block, <span class="kw-2">&amp;</span>data);
+
+        <span class="kw">let </span>error = result.unwrap_err();
+        <span class="macro">assert_eq!</span>(
+            error.to_string(),
+            <span class="string">"Invalid argument error: Misaligned buffers[0] in array of type Decimal128(38, 10), \
+             offset from expected alignment of 16 by 8"
+        </span>);
     }
 }
 </code></pre></div></section></main></body></html>

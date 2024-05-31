@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-csv/src/writer.rs`."><title>writer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_csv" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_csv/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-csv/src/writer.rs`."><title>writer.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_csv" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -672,19 +672,161 @@
 <a href="#672" id="672">672</a>
 <a href="#673" id="673">673</a>
 <a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -704,15 +846,15 @@
 //! # use std::sync::Arc;
 //!
 //! let schema = Schema::new(vec![
-//!     Field::new(&quot;c1&quot;, DataType::Utf8, false),
-//!     Field::new(&quot;c2&quot;, DataType::Float64, true),
-//!     Field::new(&quot;c3&quot;, DataType::UInt32, false),
-//!     Field::new(&quot;c4&quot;, DataType::Boolean, true),
+//!     Field::new("c1", DataType::Utf8, false),
+//!     Field::new("c2", DataType::Float64, true),
+//!     Field::new("c3", DataType::UInt32, false),
+//!     Field::new("c4", DataType::Boolean, true),
 //! ]);
 //! let c1 = StringArray::from(vec![
-//!     &quot;Lorem ipsum dolor sit amet&quot;,
-//!     &quot;consectetur adipiscing elit&quot;,
-//!     &quot;sed do eiusmod tempor&quot;,
+//!     "Lorem ipsum dolor sit amet",
+//!     "consectetur adipiscing elit",
+//!     "sed do eiusmod tempor",
 //! ]);
 //! let c2 = PrimitiveArray::&lt;Float64Type&gt;::from(vec![
 //!     Some(123.564532),
@@ -744,53 +886,36 @@
 <span class="kw">use </span>std::io::Write;
 
 <span class="kw">use </span><span class="kw">crate</span>::map_csv_error;
-
-<span class="kw">const </span>DEFAULT_DATE_FORMAT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;%F&quot;</span>;
-<span class="kw">const </span>DEFAULT_TIME_FORMAT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;%T&quot;</span>;
-<span class="kw">const </span>DEFAULT_TIMESTAMP_FORMAT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;%FT%H:%M:%S.%9f&quot;</span>;
-<span class="kw">const </span>DEFAULT_TIMESTAMP_TZ_FORMAT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;%FT%H:%M:%S.%9f%:z&quot;</span>;
-<span class="kw">const </span>DEFAULT_NULL_VALUE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;&quot;</span>;
+<span class="kw">const </span>DEFAULT_NULL_VALUE: <span class="kw-2">&amp;</span>str = <span class="string">""</span>;
 
 <span class="doccomment">/// A CSV writer
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Writer&lt;W: Write&gt; {
     <span class="doccomment">/// The object to write to
     </span>writer: csv::Writer&lt;W&gt;,
-    <span class="doccomment">/// Whether file should be written with headers. Defaults to `true`
+    <span class="doccomment">/// Whether file should be written with headers, defaults to `true`
     </span>has_headers: bool,
-    <span class="doccomment">/// The date format for date arrays
+    <span class="doccomment">/// The date format for date arrays, defaults to RFC3339
     </span>date_format: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The datetime format for datetime arrays
+    <span class="doccomment">/// The datetime format for datetime arrays, defaults to RFC3339
     </span>datetime_format: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The timestamp format for timestamp arrays
+    <span class="doccomment">/// The timestamp format for timestamp arrays, defaults to RFC3339
     </span>timestamp_format: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The timestamp format for timestamp (with timezone) arrays
+    <span class="doccomment">/// The timestamp format for timestamp (with timezone) arrays, defaults to RFC3339
     </span>timestamp_tz_format: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The time format for time arrays
+    <span class="doccomment">/// The time format for time arrays, defaults to RFC3339
     </span>time_format: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Is the beginning-of-writer
     </span>beginning: bool,
-    <span class="doccomment">/// The value to represent null entries
-    </span>null_value: String,
+    <span class="doccomment">/// The value to represent null entries, defaults to [`DEFAULT_NULL_VALUE`]
+    </span>null_value: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl</span>&lt;W: Write&gt; Writer&lt;W&gt; {
     <span class="doccomment">/// Create a new CsvWriter from a writable object, with default options
     </span><span class="kw">pub fn </span>new(writer: W) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>delimiter = <span class="string">b&#39;,&#39;</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = csv::WriterBuilder::new();
-        <span class="kw">let </span>writer = builder.delimiter(delimiter).from_writer(writer);
-        Writer {
-            writer,
-            has_headers: <span class="bool-val">true</span>,
-            date_format: <span class="prelude-val">Some</span>(DEFAULT_DATE_FORMAT.to_string()),
-            datetime_format: <span class="prelude-val">Some</span>(DEFAULT_TIMESTAMP_FORMAT.to_string()),
-            time_format: <span class="prelude-val">Some</span>(DEFAULT_TIME_FORMAT.to_string()),
-            timestamp_format: <span class="prelude-val">Some</span>(DEFAULT_TIMESTAMP_FORMAT.to_string()),
-            timestamp_tz_format: <span class="prelude-val">Some</span>(DEFAULT_TIMESTAMP_TZ_FORMAT.to_string()),
-            beginning: <span class="bool-val">true</span>,
-            null_value: DEFAULT_NULL_VALUE.to_string(),
-        }
+        <span class="kw">let </span>delimiter = <span class="string">b','</span>;
+        WriterBuilder::new().with_delimiter(delimiter).build(writer)
     }
 
     <span class="doccomment">/// Write a vector of record batches to a writable object
@@ -812,7 +937,7 @@
         }
 
         <span class="kw">let </span>options = FormatOptions::default()
-            .with_null(<span class="kw-2">&amp;</span><span class="self">self</span>.null_value)
+            .with_null(<span class="self">self</span>.null_value.as_deref().unwrap_or(DEFAULT_NULL_VALUE))
             .with_date_format(<span class="self">self</span>.date_format.as_deref())
             .with_datetime_format(<span class="self">self</span>.datetime_format.as_deref())
             .with_timestamp_format(<span class="self">self</span>.timestamp_format.as_deref())
@@ -822,15 +947,15 @@
         <span class="kw">let </span>converters = batch
             .columns()
             .iter()
-            .map(|a| <span class="kw">match </span>a.data_type() {
-                d <span class="kw">if </span>d.is_nested() =&gt; <span class="prelude-val">Err</span>(ArrowError::CsvError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Nested type {} is not supported in CSV&quot;</span>,
-                    a.data_type()
-                ))),
-                DataType::Binary | DataType::LargeBinary =&gt; <span class="prelude-val">Err</span>(ArrowError::CsvError(
-                    <span class="string">&quot;Binary data cannot be written to CSV&quot;</span>.to_string(),
-                )),
-                <span class="kw">_ </span>=&gt; ArrayFormatter::try_new(a.as_ref(), <span class="kw-2">&amp;</span>options),
+            .map(|a| {
+                <span class="kw">if </span>a.data_type().is_nested() {
+                    <span class="prelude-val">Err</span>(ArrowError::CsvError(<span class="macro">format!</span>(
+                        <span class="string">"Nested type {} is not supported in CSV"</span>,
+                        a.data_type()
+                    )))
+                } <span class="kw">else </span>{
+                    ArrayFormatter::try_new(a.as_ref(), <span class="kw-2">&amp;</span>options)
+                }
             })
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;, ArrowError&gt;&gt;()<span class="question-mark">?</span>;
 
@@ -843,7 +968,7 @@
                 buffer.clear();
                 converter.value(row_idx).write(<span class="kw-2">&amp;mut </span>buffer).map_err(|e| {
                     ArrowError::CsvError(<span class="macro">format!</span>(
-                        <span class="string">&quot;Error processing row {}, col {}: {e}&quot;</span>,
+                        <span class="string">"Error processing row {}, col {}: {e}"</span>,
                         row_idx + <span class="number">1</span>,
                         col_idx + <span class="number">1
                     </span>))
@@ -880,10 +1005,16 @@
 <span class="doccomment">/// A CSV writer builder
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>WriterBuilder {
-    <span class="doccomment">/// Optional column delimiter. Defaults to `b&#39;,&#39;`
-    </span>delimiter: <span class="prelude-ty">Option</span>&lt;u8&gt;,
+    <span class="doccomment">/// Optional column delimiter. Defaults to `b','`
+    </span>delimiter: u8,
     <span class="doccomment">/// Whether to write column names as file headers. Defaults to `true`
-    </span>has_headers: bool,
+    </span>has_header: bool,
+    <span class="doccomment">/// Optional quote character. Defaults to `b'"'`
+    </span>quote: u8,
+    <span class="doccomment">/// Optional escape character. Defaults to `b'\\'`
+    </span>escape: u8,
+    <span class="doccomment">/// Enable double quote escapes. Defaults to `true`
+    </span>double_quote: bool,
     <span class="doccomment">/// Optional date format for date arrays
     </span>date_format: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Optional datetime format for datetime arrays
@@ -900,15 +1031,18 @@
 
 <span class="kw">impl </span>Default <span class="kw">for </span>WriterBuilder {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            has_headers: <span class="bool-val">true</span>,
-            delimiter: <span class="prelude-val">None</span>,
-            date_format: <span class="prelude-val">Some</span>(DEFAULT_DATE_FORMAT.to_string()),
-            datetime_format: <span class="prelude-val">Some</span>(DEFAULT_TIMESTAMP_FORMAT.to_string()),
-            time_format: <span class="prelude-val">Some</span>(DEFAULT_TIME_FORMAT.to_string()),
-            timestamp_format: <span class="prelude-val">Some</span>(DEFAULT_TIMESTAMP_FORMAT.to_string()),
-            timestamp_tz_format: <span class="prelude-val">Some</span>(DEFAULT_TIMESTAMP_TZ_FORMAT.to_string()),
-            null_value: <span class="prelude-val">Some</span>(DEFAULT_NULL_VALUE.to_string()),
+        WriterBuilder {
+            delimiter: <span class="string">b','</span>,
+            has_header: <span class="bool-val">true</span>,
+            quote: <span class="string">b'"'</span>,
+            escape: <span class="string">b'\\'</span>,
+            double_quote: <span class="bool-val">true</span>,
+            date_format: <span class="prelude-val">None</span>,
+            datetime_format: <span class="prelude-val">None</span>,
+            timestamp_format: <span class="prelude-val">None</span>,
+            timestamp_tz_format: <span class="prelude-val">None</span>,
+            time_format: <span class="prelude-val">None</span>,
+            null_value: <span class="prelude-val">None</span>,
         }
     }
 }
@@ -925,10 +1059,10 @@
     /// # use std::fs::File;
     ///
     /// fn example() -&gt; Writer&lt;File&gt; {
-    ///     let file = File::create(&quot;target/out.csv&quot;).unwrap();
+    ///     let file = File::create("target/out.csv").unwrap();
     ///
-    ///     // create a builder that doesn&#39;t write headers
-    ///     let builder = WriterBuilder::new().has_headers(false);
+    ///     // create a builder that doesn't write headers
+    ///     let builder = WriterBuilder::new().with_header(false);
     ///     let writer = builder.build(file);
     ///
     ///     writer
@@ -939,40 +1073,123 @@
     }
 
     <span class="doccomment">/// Set whether to write headers
+    </span><span class="attr">#[deprecated(note = <span class="string">"Use Self::with_header"</span>)]
+    #[doc(hidden)]
     </span><span class="kw">pub fn </span>has_headers(<span class="kw-2">mut </span><span class="self">self</span>, has_headers: bool) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.has_headers = has_headers;
+        <span class="self">self</span>.has_header = has_headers;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set the CSV file&#39;s column delimiter as a byte character
+    <span class="doccomment">/// Set whether to write the CSV file with a header
+    </span><span class="kw">pub fn </span>with_header(<span class="kw-2">mut </span><span class="self">self</span>, header: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.has_header = header;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Returns `true` if this writer is configured to write a header
+    </span><span class="kw">pub fn </span>header(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.has_header
+    }
+
+    <span class="doccomment">/// Set the CSV file's column delimiter as a byte character
     </span><span class="kw">pub fn </span>with_delimiter(<span class="kw-2">mut </span><span class="self">self</span>, delimiter: u8) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.delimiter = <span class="prelude-val">Some</span>(delimiter);
+        <span class="self">self</span>.delimiter = delimiter;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set the CSV file&#39;s date format
+    <span class="doccomment">/// Get the CSV file's column delimiter as a byte character
+    </span><span class="kw">pub fn </span>delimiter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="self">self</span>.delimiter
+    }
+
+    <span class="doccomment">/// Set the CSV file's quote character as a byte character
+    </span><span class="kw">pub fn </span>with_quote(<span class="kw-2">mut </span><span class="self">self</span>, quote: u8) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.quote = quote;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the CSV file's quote character as a byte character
+    </span><span class="kw">pub fn </span>quote(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="self">self</span>.quote
+    }
+
+    <span class="doccomment">/// Set the CSV file's escape character as a byte character
+    ///
+    /// In some variants of CSV, quotes are escaped using a special escape
+    /// character like `\` (instead of escaping quotes by doubling them).
+    ///
+    /// By default, writing these idiosyncratic escapes is disabled, and is
+    /// only used when `double_quote` is disabled.
+    </span><span class="kw">pub fn </span>with_escape(<span class="kw-2">mut </span><span class="self">self</span>, escape: u8) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.escape = escape;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the CSV file's escape character as a byte character
+    </span><span class="kw">pub fn </span>escape(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="self">self</span>.escape
+    }
+
+    <span class="doccomment">/// Set whether to enable double quote escapes
+    ///
+    /// When enabled (which is the default), quotes are escaped by doubling
+    /// them. e.g., `"` escapes to `""`.
+    ///
+    /// When disabled, quotes are escaped with the escape character (which
+    /// is `\\` by default).
+    </span><span class="kw">pub fn </span>with_double_quote(<span class="kw-2">mut </span><span class="self">self</span>, double_quote: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.double_quote = double_quote;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get whether double quote escapes are enabled
+    </span><span class="kw">pub fn </span>double_quote(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.double_quote
+    }
+
+    <span class="doccomment">/// Set the CSV file's date format
     </span><span class="kw">pub fn </span>with_date_format(<span class="kw-2">mut </span><span class="self">self</span>, format: String) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.date_format = <span class="prelude-val">Some</span>(format);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set the CSV file&#39;s datetime format
+    <span class="doccomment">/// Get the CSV file's date format if set, defaults to RFC3339
+    </span><span class="kw">pub fn </span>date_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.date_format.as_deref()
+    }
+
+    <span class="doccomment">/// Set the CSV file's datetime format
     </span><span class="kw">pub fn </span>with_datetime_format(<span class="kw-2">mut </span><span class="self">self</span>, format: String) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.datetime_format = <span class="prelude-val">Some</span>(format);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set the CSV file&#39;s time format
+    <span class="doccomment">/// Get the CSV file's datetime format if set, defaults to RFC3339
+    </span><span class="kw">pub fn </span>datetime_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.datetime_format.as_deref()
+    }
+
+    <span class="doccomment">/// Set the CSV file's time format
     </span><span class="kw">pub fn </span>with_time_format(<span class="kw-2">mut </span><span class="self">self</span>, format: String) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.time_format = <span class="prelude-val">Some</span>(format);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set the CSV file&#39;s timestamp format
+    <span class="doccomment">/// Get the CSV file's datetime time if set, defaults to RFC3339
+    </span><span class="kw">pub fn </span>time_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.time_format.as_deref()
+    }
+
+    <span class="doccomment">/// Set the CSV file's timestamp format
     </span><span class="kw">pub fn </span>with_timestamp_format(<span class="kw-2">mut </span><span class="self">self</span>, format: String) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.timestamp_format = <span class="prelude-val">Some</span>(format);
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// Get the CSV file's timestamp format if set, defaults to RFC3339
+    </span><span class="kw">pub fn </span>timestamp_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.timestamp_format.as_deref()
+    }
 
     <span class="doccomment">/// Set the value to represent null in output
     </span><span class="kw">pub fn </span>with_null(<span class="kw-2">mut </span><span class="self">self</span>, null_value: String) -&gt; <span class="self">Self </span>{
@@ -980,7 +1197,13 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Use RFC3339 format for date/time/timestamps
+    <span class="doccomment">/// Get the value to represent null in output
+    </span><span class="kw">pub fn </span>null(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="self">self</span>.null_value.as_deref().unwrap_or(DEFAULT_NULL_VALUE)
+    }
+
+    <span class="doccomment">/// Use RFC3339 format for date/time/timestamps (default)
+    </span><span class="attr">#[deprecated(note = <span class="string">"Use WriterBuilder::default()"</span>)]
     </span><span class="kw">pub fn </span>with_rfc3339(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.date_format = <span class="prelude-val">None</span>;
         <span class="self">self</span>.datetime_format = <span class="prelude-val">None</span>;
@@ -992,21 +1215,23 @@
 
     <span class="doccomment">/// Create a new `Writer`
     </span><span class="kw">pub fn </span>build&lt;W: Write&gt;(<span class="self">self</span>, writer: W) -&gt; Writer&lt;W&gt; {
-        <span class="kw">let </span>delimiter = <span class="self">self</span>.delimiter.unwrap_or(<span class="string">b&#39;,&#39;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>builder = csv::WriterBuilder::new();
-        <span class="kw">let </span>writer = builder.delimiter(delimiter).from_writer(writer);
+        <span class="kw">let </span>writer = builder
+            .delimiter(<span class="self">self</span>.delimiter)
+            .quote(<span class="self">self</span>.quote)
+            .double_quote(<span class="self">self</span>.double_quote)
+            .escape(<span class="self">self</span>.escape)
+            .from_writer(writer);
         Writer {
             writer,
-            has_headers: <span class="self">self</span>.has_headers,
+            beginning: <span class="bool-val">true</span>,
+            has_headers: <span class="self">self</span>.has_header,
             date_format: <span class="self">self</span>.date_format,
             datetime_format: <span class="self">self</span>.datetime_format,
             time_format: <span class="self">self</span>.time_format,
             timestamp_format: <span class="self">self</span>.timestamp_format,
             timestamp_tz_format: <span class="self">self</span>.timestamp_tz_format,
-            beginning: <span class="bool-val">true</span>,
-            null_value: <span class="self">self
-                </span>.null_value
-                .unwrap_or_else(|| DEFAULT_NULL_VALUE.to_string()),
+            null_value: <span class="self">self</span>.null_value,
         }
     }
 }
@@ -1016,7 +1241,10 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="kw">use </span><span class="kw">crate</span>::ReaderBuilder;
-    <span class="kw">use </span>arrow_array::builder::{Decimal128Builder, Decimal256Builder};
+    <span class="kw">use </span>arrow_array::builder::{
+        BinaryBuilder, Decimal128Builder, Decimal256Builder, FixedSizeBinaryBuilder,
+        LargeBinaryBuilder,
+    };
     <span class="kw">use </span>arrow_array::types::<span class="kw-2">*</span>;
     <span class="kw">use </span>arrow_buffer::i256;
     <span class="kw">use </span>std::io::{Cursor, Read, Seek};
@@ -1025,35 +1253,29 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_csv() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Float64, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::UInt32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c4&quot;</span>, DataType::Boolean, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c5&quot;</span>, DataType::Timestamp(TimeUnit::Millisecond, <span class="prelude-val">None</span>), <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c6&quot;</span>, DataType::Time32(TimeUnit::Second), <span class="bool-val">false</span>),
-            Field::new_dictionary(<span class="string">&quot;c7&quot;</span>, DataType::Int32, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Float64, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::UInt32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c4"</span>, DataType::Boolean, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c5"</span>, DataType::Timestamp(TimeUnit::Millisecond, <span class="prelude-val">None</span>), <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c6"</span>, DataType::Time32(TimeUnit::Second), <span class="bool-val">false</span>),
+            Field::new_dictionary(<span class="string">"c7"</span>, DataType::Int32, DataType::Utf8, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>c1 = StringArray::from(<span class="macro">vec!</span>[
-            <span class="string">&quot;Lorem ipsum dolor sit amet&quot;</span>,
-            <span class="string">&quot;consectetur adipiscing elit&quot;</span>,
-            <span class="string">&quot;sed do eiusmod tempor&quot;</span>,
+            <span class="string">"Lorem ipsum dolor sit amet"</span>,
+            <span class="string">"consectetur adipiscing elit"</span>,
+            <span class="string">"sed do eiusmod tempor"</span>,
         ]);
-        <span class="kw">let </span>c2 = PrimitiveArray::&lt;Float64Type&gt;::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="number">123.564532</span>),
-            <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(-<span class="number">556132.25</span>),
-        ]);
+        <span class="kw">let </span>c2 =
+            PrimitiveArray::&lt;Float64Type&gt;::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">123.564532</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(-<span class="number">556132.25</span>)]);
         <span class="kw">let </span>c3 = PrimitiveArray::&lt;UInt32Type&gt;::from(<span class="macro">vec!</span>[<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]);
         <span class="kw">let </span>c4 = BooleanArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="bool-val">true</span>), <span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">None</span>]);
-        <span class="kw">let </span>c5 = TimestampMillisecondArray::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(<span class="number">1555584887378</span>),
-            <span class="prelude-val">Some</span>(<span class="number">1555555555555</span>),
-        ]);
+        <span class="kw">let </span>c5 =
+            TimestampMillisecondArray::from(<span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1555584887378</span>), <span class="prelude-val">Some</span>(<span class="number">1555555555555</span>)]);
         <span class="kw">let </span>c6 = Time32SecondArray::from(<span class="macro">vec!</span>[<span class="number">1234</span>, <span class="number">24680</span>, <span class="number">85563</span>]);
         <span class="kw">let </span>c7: DictionaryArray&lt;Int32Type&gt; =
-            <span class="macro">vec!</span>[<span class="string">&quot;cupcakes&quot;</span>, <span class="string">&quot;cupcakes&quot;</span>, <span class="string">&quot;foo&quot;</span>].into_iter().collect();
+            <span class="macro">vec!</span>[<span class="string">"cupcakes"</span>, <span class="string">"cupcakes"</span>, <span class="string">"foo"</span>].into_iter().collect();
 
         <span class="kw">let </span>batch = RecordBatch::try_new(
             Arc::new(schema),
@@ -1083,31 +1305,29 @@
         <span class="kw">let </span><span class="kw-2">mut </span>buffer: Vec&lt;u8&gt; = <span class="macro">vec!</span>[];
         file.read_to_end(<span class="kw-2">&amp;mut </span>buffer).unwrap();
 
-        <span class="kw">let </span>expected = <span class="string">r#&quot;c1,c2,c3,c4,c5,c6,c7
+        <span class="kw">let </span>expected = <span class="string">r#"c1,c2,c3,c4,c5,c6,c7
 Lorem ipsum dolor sit amet,123.564532,3,true,,00:20:34,cupcakes
-consectetur adipiscing elit,,2,false,2019-04-18T10:54:47.378000000,06:51:20,cupcakes
-sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
+consectetur adipiscing elit,,2,false,2019-04-18T10:54:47.378,06:51:20,cupcakes
+sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555,23:46:03,foo
 Lorem ipsum dolor sit amet,123.564532,3,true,,00:20:34,cupcakes
-consectetur adipiscing elit,,2,false,2019-04-18T10:54:47.378000000,06:51:20,cupcakes
-sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
-&quot;#</span>;
+consectetur adipiscing elit,,2,false,2019-04-18T10:54:47.378,06:51:20,cupcakes
+sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555,23:46:03,foo
+"#</span>;
         <span class="macro">assert_eq!</span>(expected.to_string(), String::from_utf8(buffer).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_csv_decimal() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Decimal128(<span class="number">38</span>, <span class="number">6</span>), <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Decimal256(<span class="number">76</span>, <span class="number">6</span>), <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Decimal128(<span class="number">38</span>, <span class="number">6</span>), <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Decimal256(<span class="number">76</span>, <span class="number">6</span>), <span class="bool-val">true</span>),
         ]);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>c1_builder =
-            Decimal128Builder::new().with_data_type(DataType::Decimal128(<span class="number">38</span>, <span class="number">6</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>c1_builder = Decimal128Builder::new().with_data_type(DataType::Decimal128(<span class="number">38</span>, <span class="number">6</span>));
         c1_builder.extend(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(-<span class="number">3335724</span>), <span class="prelude-val">Some</span>(<span class="number">2179404</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">290472</span>)]);
         <span class="kw">let </span>c1 = c1_builder.finish();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>c2_builder =
-            Decimal256Builder::new().with_data_type(DataType::Decimal256(<span class="number">76</span>, <span class="number">6</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>c2_builder = Decimal256Builder::new().with_data_type(DataType::Decimal256(<span class="number">76</span>, <span class="number">6</span>));
         c2_builder.extend(<span class="macro">vec!</span>[
             <span class="prelude-val">Some</span>(i256::from_i128(-<span class="number">3335724</span>)),
             <span class="prelude-val">Some</span>(i256::from_i128(<span class="number">2179404</span>)),
@@ -1117,8 +1337,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         <span class="kw">let </span>c2 = c2_builder.finish();
 
         <span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(c1), Arc::new(c2)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(c1), Arc::new(c2)]).unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
 
@@ -1134,7 +1353,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         <span class="kw">let </span><span class="kw-2">mut </span>buffer: Vec&lt;u8&gt; = <span class="macro">vec!</span>[];
         file.read_to_end(<span class="kw-2">&amp;mut </span>buffer).unwrap();
 
-        <span class="kw">let </span>expected = <span class="string">r#&quot;c1,c2
+        <span class="kw">let </span>expected = <span class="string">r#"c1,c2
 -3.335724,-3.335724
 2.179404,2.179404
 ,
@@ -1143,30 +1362,27 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
 2.179404,2.179404
 ,
 0.290472,0.290472
-&quot;#</span>;
+"#</span>;
         <span class="macro">assert_eq!</span>(expected.to_string(), String::from_utf8(buffer).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_csv_custom_options() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Float64, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::UInt32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c4&quot;</span>, DataType::Boolean, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c6&quot;</span>, DataType::Time32(TimeUnit::Second), <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Float64, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::UInt32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c4"</span>, DataType::Boolean, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c6"</span>, DataType::Time32(TimeUnit::Second), <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>c1 = StringArray::from(<span class="macro">vec!</span>[
-            <span class="string">&quot;Lorem ipsum dolor sit amet&quot;</span>,
-            <span class="string">&quot;consectetur adipiscing elit&quot;</span>,
-            <span class="string">&quot;sed do eiusmod tempor&quot;</span>,
+            <span class="string">"Lorem ipsum \ndolor sit amet"</span>,
+            <span class="string">"consectetur \"adipiscing\" elit"</span>,
+            <span class="string">"sed do eiusmod tempor"</span>,
         ]);
-        <span class="kw">let </span>c2 = PrimitiveArray::&lt;Float64Type&gt;::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="number">123.564532</span>),
-            <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(-<span class="number">556132.25</span>),
-        ]);
+        <span class="kw">let </span>c2 =
+            PrimitiveArray::&lt;Float64Type&gt;::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">123.564532</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(-<span class="number">556132.25</span>)]);
         <span class="kw">let </span>c3 = PrimitiveArray::&lt;UInt32Type&gt;::from(<span class="macro">vec!</span>[<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]);
         <span class="kw">let </span>c4 = BooleanArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="bool-val">true</span>), <span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">None</span>]);
         <span class="kw">let </span>c6 = Time32SecondArray::from(<span class="macro">vec!</span>[<span class="number">1234</span>, <span class="number">24680</span>, <span class="number">85563</span>]);
@@ -1186,10 +1402,11 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
 
         <span class="kw">let </span>builder = WriterBuilder::new()
-            .has_headers(<span class="bool-val">false</span>)
-            .with_delimiter(<span class="string">b&#39;|&#39;</span>)
-            .with_null(<span class="string">&quot;NULL&quot;</span>.to_string())
-            .with_time_format(<span class="string">&quot;%r&quot;</span>.to_string());
+            .with_header(<span class="bool-val">false</span>)
+            .with_delimiter(<span class="string">b'|'</span>)
+            .with_quote(<span class="string">b'\''</span>)
+            .with_null(<span class="string">"NULL"</span>.to_string())
+            .with_time_format(<span class="string">"%r"</span>.to_string());
         <span class="kw">let </span><span class="kw-2">mut </span>writer = builder.build(<span class="kw-2">&amp;mut </span>file);
         <span class="kw">let </span>batches = <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>batch];
         <span class="kw">for </span>batch <span class="kw">in </span>batches {
@@ -1203,10 +1420,33 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         file.read_to_end(<span class="kw-2">&amp;mut </span>buffer).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;Lorem ipsum dolor sit amet|123.564532|3|true|12:20:34 AM\nconsectetur adipiscing elit|NULL|2|false|06:51:20 AM\nsed do eiusmod tempor|-556132.25|1|NULL|11:46:03 PM\n&quot;
+            <span class="string">"'Lorem ipsum \ndolor sit amet'|123.564532|3|true|12:20:34 AM\nconsectetur \"adipiscing\" elit|NULL|2|false|06:51:20 AM\nsed do eiusmod tempor|-556132.25|1|NULL|11:46:03 PM\n"
             </span>.to_string(),
             String::from_utf8(buffer).unwrap()
         );
+
+        <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
+
+        <span class="kw">let </span>builder = WriterBuilder::new()
+            .with_header(<span class="bool-val">true</span>)
+            .with_double_quote(<span class="bool-val">false</span>)
+            .with_escape(<span class="string">b'$'</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = builder.build(<span class="kw-2">&amp;mut </span>file);
+        <span class="kw">let </span>batches = <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>batch];
+        <span class="kw">for </span>batch <span class="kw">in </span>batches {
+            writer.write(batch).unwrap();
+        }
+        drop(writer);
+
+        file.rewind().unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>buffer: Vec&lt;u8&gt; = <span class="macro">vec!</span>[];
+        file.read_to_end(<span class="kw-2">&amp;mut </span>buffer).unwrap();
+
+        <span class="macro">assert_eq!</span>(
+			<span class="string">"c1,c2,c3,c4,c6\n\"Lorem ipsum \ndolor sit amet\",123.564532,3,true,00:20:34\n\"consectetur $\"adipiscing$\" elit\",,2,false,06:51:20\nsed do eiusmod tempor,-556132.25,1,,23:46:03\n"
+			</span>.to_string(),
+			String::from_utf8(buffer).unwrap()
+		);
     }
 
     <span class="attr">#[test]
@@ -1214,9 +1454,9 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         <span class="comment">// test if we can serialize and deserialize whilst retaining the same type information/ precision
 
         </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Date32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Date64, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::Timestamp(TimeUnit::Nanosecond, <span class="prelude-val">None</span>), <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Date32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Date64, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::Timestamp(TimeUnit::Nanosecond, <span class="prelude-val">None</span>), <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>nanoseconds = <span class="macro">vec!</span>[
@@ -1234,7 +1474,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         )
         .unwrap();
 
-        <span class="kw">let </span>builder = WriterBuilder::new().has_headers(<span class="bool-val">false</span>);
+        <span class="kw">let </span>builder = WriterBuilder::new().with_header(<span class="bool-val">false</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf: Cursor&lt;Vec&lt;u8&gt;&gt; = Default::default();
         <span class="comment">// drop the writer early to release the borrow.
@@ -1272,15 +1512,14 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_csv_invalid_cast() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c0&quot;</span>, DataType::UInt32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Date64, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c0"</span>, DataType::UInt32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Date64, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>c0 = UInt32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">123</span>), <span class="prelude-val">Some</span>(<span class="number">234</span>)]);
         <span class="kw">let </span>c1 = Date64Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1926632005177</span>), <span class="prelude-val">Some</span>(<span class="number">1926632005177685347</span>)]);
         <span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(c0), Arc::new(c1)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(c0), Arc::new(c1)]).unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>writer = Writer::new(<span class="kw-2">&amp;mut </span>file);
@@ -1288,7 +1527,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
 
         <span class="kw">for </span>batch <span class="kw">in </span>batches {
             <span class="kw">let </span>err = writer.write(batch).unwrap_err().to_string();
-            <span class="macro">assert_eq!</span>(err, <span class="string">&quot;Csv error: Error processing row 2, col 2: Cast error: Failed to convert 1926632005177685347 to temporal for Date64&quot;</span>)
+            <span class="macro">assert_eq!</span>(err, <span class="string">"Csv error: Error processing row 2, col 2: Cast error: Failed to convert 1926632005177685347 to temporal for Date64"</span>)
         }
         drop(writer);
     }
@@ -1297,24 +1536,18 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
     </span><span class="kw">fn </span>test_write_csv_using_rfc3339() {
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
             Field::new(
-                <span class="string">&quot;c1&quot;</span>,
-                DataType::Timestamp(TimeUnit::Millisecond, <span class="prelude-val">Some</span>(<span class="string">&quot;+00:00&quot;</span>.into())),
+                <span class="string">"c1"</span>,
+                DataType::Timestamp(TimeUnit::Millisecond, <span class="prelude-val">Some</span>(<span class="string">"+00:00"</span>.into())),
                 <span class="bool-val">true</span>,
             ),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Timestamp(TimeUnit::Millisecond, <span class="prelude-val">None</span>), <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::Date32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c4&quot;</span>, DataType::Time32(TimeUnit::Second), <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Timestamp(TimeUnit::Millisecond, <span class="prelude-val">None</span>), <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::Date32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c4"</span>, DataType::Time32(TimeUnit::Second), <span class="bool-val">false</span>),
         ]);
 
-        <span class="kw">let </span>c1 = TimestampMillisecondArray::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="number">1555584887378</span>),
-            <span class="prelude-val">Some</span>(<span class="number">1635577147000</span>),
-        ])
-        .with_timezone(<span class="string">&quot;+00:00&quot;</span>.to_string());
-        <span class="kw">let </span>c2 = TimestampMillisecondArray::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="number">1555584887378</span>),
-            <span class="prelude-val">Some</span>(<span class="number">1635577147000</span>),
-        ]);
+        <span class="kw">let </span>c1 = TimestampMillisecondArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1555584887378</span>), <span class="prelude-val">Some</span>(<span class="number">1635577147000</span>)])
+            .with_timezone(<span class="string">"+00:00"</span>.to_string());
+        <span class="kw">let </span>c2 = TimestampMillisecondArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1555584887378</span>), <span class="prelude-val">Some</span>(<span class="number">1635577147000</span>)]);
         <span class="kw">let </span>c3 = Date32Array::from(<span class="macro">vec!</span>[<span class="number">3</span>, <span class="number">2</span>]);
         <span class="kw">let </span>c4 = Time32SecondArray::from(<span class="macro">vec!</span>[<span class="number">1234</span>, <span class="number">24680</span>]);
 
@@ -1326,7 +1559,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
 
         <span class="kw">let </span><span class="kw-2">mut </span>file = tempfile::tempfile().unwrap();
 
-        <span class="kw">let </span>builder = WriterBuilder::new().with_rfc3339();
+        <span class="kw">let </span>builder = WriterBuilder::new();
         <span class="kw">let </span><span class="kw-2">mut </span>writer = builder.build(<span class="kw-2">&amp;mut </span>file);
         <span class="kw">let </span>batches = <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>batch];
         <span class="kw">for </span>batch <span class="kw">in </span>batches {
@@ -1339,10 +1572,61 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         file.read_to_end(<span class="kw-2">&amp;mut </span>buffer).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;c1,c2,c3,c4
+            <span class="string">"c1,c2,c3,c4
 2019-04-18T10:54:47.378Z,2019-04-18T10:54:47.378,1970-01-04,00:20:34
-2021-10-30T06:59:07Z,2021-10-30T06:59:07,1970-01-03,06:51:20\n&quot;</span>,
+2021-10-30T06:59:07Z,2021-10-30T06:59:07,1970-01-03,06:51:20\n"</span>,
             String::from_utf8(buffer).unwrap()
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_write_csv_binary() {
+        <span class="kw">let </span>fixed_size = <span class="number">8</span>;
+        <span class="kw">let </span>schema = SchemaRef::new(Schema::new(<span class="macro">vec!</span>[
+            Field::new(<span class="string">"c1"</span>, DataType::Binary, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::FixedSizeBinary(fixed_size), <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
+        ]));
+        <span class="kw">let </span><span class="kw-2">mut </span>c1_builder = BinaryBuilder::new();
+        c1_builder.append_value(<span class="string">b"Homer"</span>);
+        c1_builder.append_value(<span class="string">b"Bart"</span>);
+        c1_builder.append_null();
+        c1_builder.append_value(<span class="string">b"Ned"</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>c2_builder = FixedSizeBinaryBuilder::new(fixed_size);
+        c2_builder.append_value(<span class="string">b"Simpson "</span>).unwrap();
+        c2_builder.append_value(<span class="string">b"Simpson "</span>).unwrap();
+        c2_builder.append_null();
+        c2_builder.append_value(<span class="string">b"Flanders"</span>).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>c3_builder = LargeBinaryBuilder::new();
+        c3_builder.append_null();
+        c3_builder.append_null();
+        c3_builder.append_value(<span class="string">b"Comic Book Guy"</span>);
+        c3_builder.append_null();
+
+        <span class="kw">let </span>batch = RecordBatch::try_new(
+            schema,
+            <span class="macro">vec!</span>[
+                Arc::new(c1_builder.finish()) <span class="kw">as </span>ArrayRef,
+                Arc::new(c2_builder.finish()) <span class="kw">as </span>ArrayRef,
+                Arc::new(c3_builder.finish()) <span class="kw">as </span>ArrayRef,
+            ],
+        )
+        .unwrap();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
+        <span class="kw">let </span>builder = WriterBuilder::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = builder.build(<span class="kw-2">&amp;mut </span>buf);
+        writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
+        drop(writer);
+        <span class="macro">assert_eq!</span>(
+            <span class="string">"\
+            c1,c2,c3\n\
+            486f6d6572,53696d70736f6e20,\n\
+            42617274,53696d70736f6e20,\n\
+            ,,436f6d696320426f6f6b20477579\n\
+            4e6564,466c616e64657273,\n\
+            "</span>,
+            String::from_utf8(buf).unwrap()
         );
     }
 }

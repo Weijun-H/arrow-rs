@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/builder/fixed_size_list_builder.rs`."><title>fixed_size_list_builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/builder/fixed_size_list_builder.rs`."><title>fixed_size_list_builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -338,19 +338,171 @@
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -358,8 +510,7 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::builder::ArrayBuilder;
 <span class="kw">use crate</span>::{ArrayRef, FixedSizeListArray};
 <span class="kw">use </span>arrow_buffer::NullBufferBuilder;
-<span class="kw">use </span>arrow_data::ArrayData;
-<span class="kw">use </span>arrow_schema::{DataType, Field};
+<span class="kw">use </span>arrow_schema::{Field, FieldRef};
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -407,6 +558,7 @@
     null_buffer_builder: NullBufferBuilder,
     values_builder: T,
     list_len: i32,
+    field: <span class="prelude-ty">Option</span>&lt;FieldRef&gt;,
 }
 
 <span class="kw">impl</span>&lt;T: ArrayBuilder&gt; FixedSizeListBuilder&lt;T&gt; {
@@ -429,13 +581,27 @@
             null_buffer_builder: NullBufferBuilder::new(capacity),
             values_builder,
             list_len: value_length,
+            field: <span class="prelude-val">None</span>,
         }
+    }
+
+    <span class="doccomment">/// Override the field passed to [`FixedSizeListArray::new`]
+    ///
+    /// By default, a nullable field is created with the name `item`
+    ///
+    /// Note: [`Self::finish`] and [`Self::finish_cloned`] will panic if the
+    /// field's data type does not match that of `T`
+    </span><span class="kw">pub fn </span>with_field(<span class="self">self</span>, field: <span class="kw">impl </span>Into&lt;FieldRef&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            field: <span class="prelude-val">Some</span>(field.into()),
+            ..<span class="self">self
+        </span>}
     }
 }
 
 <span class="kw">impl</span>&lt;T: ArrayBuilder&gt; ArrayBuilder <span class="kw">for </span>FixedSizeListBuilder&lt;T&gt;
 <span class="kw">where
-    </span>T: <span class="lifetime">&#39;static</span>,
+    </span>T: <span class="lifetime">'static</span>,
 {
     <span class="doccomment">/// Returns the builder as a non-mutable `Any` reference.
     </span><span class="kw">fn </span>as_any(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>Any {
@@ -470,7 +636,7 @@
 
 <span class="kw">impl</span>&lt;T: ArrayBuilder&gt; FixedSizeListBuilder&lt;T&gt;
 <span class="kw">where
-    </span>T: <span class="lifetime">&#39;static</span>,
+    </span>T: <span class="lifetime">'static</span>,
 {
     <span class="doccomment">/// Returns the child array builder as a mutable reference.
     ///
@@ -494,90 +660,110 @@
     <span class="doccomment">/// Builds the [`FixedSizeListBuilder`] and reset this builder.
     </span><span class="kw">pub fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; FixedSizeListArray {
         <span class="kw">let </span>len = <span class="self">self</span>.len();
-        <span class="kw">let </span>values_arr = <span class="self">self</span>.values_builder.finish();
-        <span class="kw">let </span>values_data = values_arr.to_data();
+        <span class="kw">let </span>values = <span class="self">self</span>.values_builder.finish();
+        <span class="kw">let </span>nulls = <span class="self">self</span>.null_buffer_builder.finish();
 
         <span class="macro">assert_eq!</span>(
-            values_data.len(), len * <span class="self">self</span>.list_len <span class="kw">as </span>usize,
-            <span class="string">&quot;Length of the child array ({}) must be the multiple of the value length ({}) and the array length ({}).&quot;</span>,
-            values_data.len(),
+            values.len(), len * <span class="self">self</span>.list_len <span class="kw">as </span>usize,
+            <span class="string">"Length of the child array ({}) must be the multiple of the value length ({}) and the array length ({})."</span>,
+            values.len(),
             <span class="self">self</span>.list_len,
             len,
         );
 
-        <span class="kw">let </span>nulls = <span class="self">self</span>.null_buffer_builder.finish();
-        <span class="kw">let </span>array_data = ArrayData::builder(DataType::FixedSizeList(
-            Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, values_data.data_type().clone(), <span class="bool-val">true</span>)),
-            <span class="self">self</span>.list_len,
-        ))
-        .len(len)
-        .add_child_data(values_data)
-        .nulls(nulls);
+        <span class="kw">let </span>field = <span class="self">self
+            </span>.field
+            .clone()
+            .unwrap_or_else(|| Arc::new(Field::new(<span class="string">"item"</span>, values.data_type().clone(), <span class="bool-val">true</span>)));
 
-        <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{ array_data.build_unchecked() };
-
-        FixedSizeListArray::from(array_data)
+        FixedSizeListArray::new(field, <span class="self">self</span>.list_len, values, nulls)
     }
 
     <span class="doccomment">/// Builds the [`FixedSizeListBuilder`] without resetting the builder.
     </span><span class="kw">pub fn </span>finish_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FixedSizeListArray {
         <span class="kw">let </span>len = <span class="self">self</span>.len();
-        <span class="kw">let </span>values_arr = <span class="self">self</span>.values_builder.finish_cloned();
-        <span class="kw">let </span>values_data = values_arr.to_data();
+        <span class="kw">let </span>values = <span class="self">self</span>.values_builder.finish_cloned();
+        <span class="kw">let </span>nulls = <span class="self">self</span>.null_buffer_builder.finish_cloned();
 
         <span class="macro">assert_eq!</span>(
-            values_data.len(), len * <span class="self">self</span>.list_len <span class="kw">as </span>usize,
-            <span class="string">&quot;Length of the child array ({}) must be the multiple of the value length ({}) and the array length ({}).&quot;</span>,
-            values_data.len(),
+            values.len(), len * <span class="self">self</span>.list_len <span class="kw">as </span>usize,
+            <span class="string">"Length of the child array ({}) must be the multiple of the value length ({}) and the array length ({})."</span>,
+            values.len(),
             <span class="self">self</span>.list_len,
             len,
         );
 
-        <span class="kw">let </span>nulls = <span class="self">self</span>.null_buffer_builder.finish_cloned();
-        <span class="kw">let </span>array_data = ArrayData::builder(DataType::FixedSizeList(
-            Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, values_data.data_type().clone(), <span class="bool-val">true</span>)),
-            <span class="self">self</span>.list_len,
-        ))
-        .len(len)
-        .add_child_data(values_data)
-        .nulls(nulls);
+        <span class="kw">let </span>field = <span class="self">self
+            </span>.field
+            .clone()
+            .unwrap_or_else(|| Arc::new(Field::new(<span class="string">"item"</span>, values.data_type().clone(), <span class="bool-val">true</span>)));
 
-        <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{ array_data.build_unchecked() };
+        FixedSizeListArray::new(field, <span class="self">self</span>.list_len, values, nulls)
+    }
 
-        FixedSizeListArray::from(array_data)
+    <span class="doccomment">/// Returns the current null buffer as a slice
+    </span><span class="kw">pub fn </span>validity_slice(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
+        <span class="self">self</span>.null_buffer_builder.as_slice()
     }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span>arrow_schema::DataType;
 
     <span class="kw">use </span><span class="kw">crate</span>::builder::Int32Builder;
     <span class="kw">use </span><span class="kw">crate</span>::Array;
     <span class="kw">use </span><span class="kw">crate</span>::Int32Array;
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_fixed_size_list_array_builder() {
+    <span class="kw">fn </span>make_list_builder(
+        include_null_element: bool,
+        include_null_in_values: bool,
+    ) -&gt; FixedSizeListBuilder&lt;<span class="kw">crate</span>::builder::PrimitiveBuilder&lt;<span class="kw">crate</span>::types::Int32Type&gt;&gt; {
         <span class="kw">let </span>values_builder = Int32Builder::new();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = FixedSizeListBuilder::new(values_builder, <span class="number">3</span>);
 
-        <span class="comment">//  [[0, 1, 2], null, [3, null, 5], [6, 7, null]]
-        </span>builder.values().append_value(<span class="number">0</span>);
+        builder.values().append_value(<span class="number">0</span>);
         builder.values().append_value(<span class="number">1</span>);
         builder.values().append_value(<span class="number">2</span>);
         builder.append(<span class="bool-val">true</span>);
-        builder.values().append_null();
-        builder.values().append_null();
-        builder.values().append_null();
-        builder.append(<span class="bool-val">false</span>);
+
+        builder.values().append_value(<span class="number">2</span>);
         builder.values().append_value(<span class="number">3</span>);
-        builder.values().append_null();
-        builder.values().append_value(<span class="number">5</span>);
+        builder.values().append_value(<span class="number">4</span>);
         builder.append(<span class="bool-val">true</span>);
-        builder.values().append_value(<span class="number">6</span>);
-        builder.values().append_value(<span class="number">7</span>);
-        builder.values().append_null();
-        builder.append(<span class="bool-val">true</span>);
+
+        <span class="kw">if </span>include_null_element {
+            builder.values().append_null();
+            builder.values().append_null();
+            builder.values().append_null();
+            builder.append(<span class="bool-val">false</span>);
+        } <span class="kw">else </span>{
+            builder.values().append_value(<span class="number">2</span>);
+            builder.values().append_value(<span class="number">3</span>);
+            builder.values().append_value(<span class="number">4</span>);
+            builder.append(<span class="bool-val">true</span>);
+        }
+
+        <span class="kw">if </span>include_null_in_values {
+            builder.values().append_value(<span class="number">3</span>);
+            builder.values().append_null();
+            builder.values().append_value(<span class="number">5</span>);
+            builder.append(<span class="bool-val">true</span>);
+        } <span class="kw">else </span>{
+            builder.values().append_value(<span class="number">3</span>);
+            builder.values().append_value(<span class="number">4</span>);
+            builder.values().append_value(<span class="number">5</span>);
+            builder.append(<span class="bool-val">true</span>);
+        }
+
+        builder
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">true</span>);
+
         <span class="kw">let </span>list_array = builder.finish();
 
         <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
@@ -588,9 +774,46 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_finish_cloned() {
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_with_field() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">false</span>, <span class="bool-val">false</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = builder.with_field(Field::new(<span class="string">"list_element"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>list_array = builder.finish();
+
+        <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
+        <span class="macro">assert_eq!</span>(<span class="number">4</span>, list_array.len());
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, list_array.null_count());
+        <span class="macro">assert_eq!</span>(<span class="number">6</span>, list_array.value_offset(<span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.value_length());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_with_field_and_null() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">false</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = builder.with_field(Field::new(<span class="string">"list_element"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>list_array = builder.finish();
+
+        <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
+        <span class="macro">assert_eq!</span>(<span class="number">4</span>, list_array.len());
+        <span class="macro">assert_eq!</span>(<span class="number">1</span>, list_array.null_count());
+        <span class="macro">assert_eq!</span>(<span class="number">6</span>, list_array.value_offset(<span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.value_length());
+    }
+
+    <span class="attr">#[test]
+    #[should_panic(expected = <span class="string">"Found unmasked nulls for non-nullable FixedSizeListArray"</span>)]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_with_field_null_panic() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">true</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = builder.with_field(Field::new(<span class="string">"list_item"</span>, DataType::Int32, <span class="bool-val">false</span>));
+
+        builder.finish();
+    }
+
+    <span class="attr">#[test]
+    #[should_panic(expected = <span class="string">"FixedSizeListArray expected data type Int64 got Int32"</span>)]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_with_field_type_panic() {
         <span class="kw">let </span>values_builder = Int32Builder::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = FixedSizeListBuilder::new(values_builder, <span class="number">3</span>);
+        <span class="kw">let </span>builder = FixedSizeListBuilder::new(values_builder, <span class="number">3</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = builder.with_field(Field::new(<span class="string">"list_item"</span>, DataType::Int64, <span class="bool-val">true</span>));
 
         <span class="comment">//  [[0, 1, 2], null, [3, null, 5], [6, 7, null]]
         </span>builder.values().append_value(<span class="number">0</span>);
@@ -602,13 +825,66 @@
         builder.values().append_null();
         builder.append(<span class="bool-val">false</span>);
         builder.values().append_value(<span class="number">3</span>);
-        builder.values().append_null();
+        builder.values().append_value(<span class="number">4</span>);
         builder.values().append_value(<span class="number">5</span>);
         builder.append(<span class="bool-val">true</span>);
+
+        builder.finish();
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_cloned_with_field() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">true</span>);
+        <span class="kw">let </span>builder = builder.with_field(Field::new(<span class="string">"list_element"</span>, DataType::Int32, <span class="bool-val">true</span>));
+
+        <span class="kw">let </span>list_array = builder.finish_cloned();
+
+        <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
+        <span class="macro">assert_eq!</span>(<span class="number">4</span>, list_array.len());
+        <span class="macro">assert_eq!</span>(<span class="number">1</span>, list_array.null_count());
+        <span class="macro">assert_eq!</span>(<span class="number">6</span>, list_array.value_offset(<span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.value_length());
+    }
+
+    <span class="attr">#[test]
+    #[should_panic(expected = <span class="string">"Found unmasked nulls for non-nullable FixedSizeListArray"</span>)]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_cloned_with_field_null_panic() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">true</span>);
+        <span class="kw">let </span>builder = builder.with_field(Field::new(<span class="string">"list_item"</span>, DataType::Int32, <span class="bool-val">false</span>));
+
+        builder.finish_cloned();
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_cloned_with_field_and_null() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">false</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = builder.with_field(Field::new(<span class="string">"list_element"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>list_array = builder.finish();
+
+        <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
+        <span class="macro">assert_eq!</span>(<span class="number">4</span>, list_array.len());
+        <span class="macro">assert_eq!</span>(<span class="number">1</span>, list_array.null_count());
+        <span class="macro">assert_eq!</span>(<span class="number">6</span>, list_array.value_offset(<span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.value_length());
+    }
+
+    <span class="attr">#[test]
+    #[should_panic(expected = <span class="string">"FixedSizeListArray expected data type Int64 got Int32"</span>)]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_cloned_with_field_type_panic() {
+        <span class="kw">let </span>builder = make_list_builder(<span class="bool-val">false</span>, <span class="bool-val">false</span>);
+        <span class="kw">let </span>builder = builder.with_field(Field::new(<span class="string">"list_item"</span>, DataType::Int64, <span class="bool-val">true</span>));
+
+        builder.finish_cloned();
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_finish_cloned() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = make_list_builder(<span class="bool-val">true</span>, <span class="bool-val">true</span>);
+
         <span class="kw">let </span><span class="kw-2">mut </span>list_array = builder.finish_cloned();
 
         <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
-        <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.len());
+        <span class="macro">assert_eq!</span>(<span class="number">4</span>, list_array.len());
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, list_array.null_count());
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.value_length());
 
@@ -623,10 +899,38 @@
         list_array = builder.finish();
 
         <span class="macro">assert_eq!</span>(DataType::Int32, list_array.value_type());
-        <span class="macro">assert_eq!</span>(<span class="number">5</span>, list_array.len());
+        <span class="macro">assert_eq!</span>(<span class="number">6</span>, list_array.len());
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, list_array.null_count());
         <span class="macro">assert_eq!</span>(<span class="number">6</span>, list_array.value_offset(<span class="number">2</span>));
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, list_array.value_length());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_with_field_empty() {
+        <span class="kw">let </span>values_builder = Int32Array::builder(<span class="number">0</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = FixedSizeListBuilder::new(values_builder, <span class="number">3</span>).with_field(Field::new(
+            <span class="string">"list_item"</span>,
+            DataType::Int32,
+            <span class="bool-val">false</span>,
+        ));
+        <span class="macro">assert!</span>(builder.is_empty());
+        <span class="kw">let </span>arr = builder.finish();
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, arr.len());
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, builder.len());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_fixed_size_list_array_builder_cloned_with_field_empty() {
+        <span class="kw">let </span>values_builder = Int32Array::builder(<span class="number">0</span>);
+        <span class="kw">let </span>builder = FixedSizeListBuilder::new(values_builder, <span class="number">3</span>).with_field(Field::new(
+            <span class="string">"list_item"</span>,
+            DataType::Int32,
+            <span class="bool-val">false</span>,
+        ));
+        <span class="macro">assert!</span>(builder.is_empty());
+        <span class="kw">let </span>arr = builder.finish_cloned();
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, arr.len());
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, builder.len());
     }
 
     <span class="attr">#[test]
@@ -662,7 +966,7 @@
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Length of the child array (10) must be the multiple of the value length (3) and the array length (3).&quot;
+        expected = <span class="string">"Length of the child array (10) must be the multiple of the value length (3) and the array length (3)."
     </span>)]
     </span><span class="kw">fn </span>test_fixed_size_list_array_builder_fail() {
         <span class="kw">let </span>values_builder = Int32Array::builder(<span class="number">5</span>);

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/struct_array.rs`."><title>struct_array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/struct_array.rs`."><title>struct_array.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -726,19 +726,25 @@
 <a href="#726" id="726">726</a>
 <a href="#727" id="727">727</a>
 <a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -764,7 +770,7 @@
 /// * [`StructArray`] can be nested within other [`Array`], including itself
 /// * [`RecordBatch`] can contain top-level metadata on its associated [`Schema`][arrow_schema::Schema]
 /// * [`StructArray`] can contain top-level nulls, i.e. `null`
-/// * [`RecordBatch`] can only represent nulls in its child columns, i.e. `{&quot;field&quot;: null}`
+/// * [`RecordBatch`] can only represent nulls in its child columns, i.e. `{"field": null}`
 ///
 /// [`StructArray`] is therefore a more general data container than [`RecordBatch`], and as such
 /// code that needs to handle both will typically share an implementation in terms of
@@ -786,11 +792,11 @@
 ///
 /// let struct_array = StructArray::from(vec![
 ///     (
-///         Arc::new(Field::new(&quot;b&quot;, DataType::Boolean, false)),
+///         Arc::new(Field::new("b", DataType::Boolean, false)),
 ///         boolean.clone() as ArrayRef,
 ///     ),
 ///     (
-///         Arc::new(Field::new(&quot;c&quot;, DataType::Int32, false)),
+///         Arc::new(Field::new("c", DataType::Int32, false)),
 ///         int.clone() as ArrayRef,
 ///     ),
 /// ]);
@@ -836,7 +842,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">if </span>fields.len() != arrays.len() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Incorrect number of arrays for StructArray fields, expected {} got {}&quot;</span>,
+                <span class="string">"Incorrect number of arrays for StructArray fields, expected {} got {}"</span>,
                 fields.len(),
                 arrays.len()
             )));
@@ -846,7 +852,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = nulls.as_ref() {
             <span class="kw">if </span>n.len() != len {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Incorrect number of nulls for StructArray, expected {len} got {}&quot;</span>,
+                    <span class="string">"Incorrect number of nulls for StructArray, expected {len} got {}"</span>,
                     n.len(),
                 )));
             }
@@ -855,7 +861,7 @@
         <span class="kw">for </span>(f, a) <span class="kw">in </span>fields.iter().zip(<span class="kw-2">&amp;</span>arrays) {
             <span class="kw">if </span>f.data_type() != a.data_type() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Incorrect datatype for StructArray field {:?}, expected {} got {}&quot;</span>,
+                    <span class="string">"Incorrect datatype for StructArray field {:?}, expected {} got {}"</span>,
                     f.name(),
                     f.data_type(),
                     a.data_type()
@@ -864,7 +870,7 @@
 
             <span class="kw">if </span>a.len() != len {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Incorrect array length for StructArray field {:?}, expected {} got {}&quot;</span>,
+                    <span class="string">"Incorrect array length for StructArray field {:?}, expected {} got {}"</span>,
                     f.name(),
                     len,
                     a.len()
@@ -875,7 +881,7 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(a) = a.logical_nulls() {
                     <span class="kw">if </span>!nulls.as_ref().map(|n| n.contains(<span class="kw-2">&amp;</span>a)).unwrap_or_default() {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                            <span class="string">&quot;Found unmasked nulls for non-nullable StructArray field {:?}&quot;</span>,
+                            <span class="string">"Found unmasked nulls for non-nullable StructArray field {:?}"</span>,
                             f.name()
                         )));
                     }
@@ -925,6 +931,23 @@
         }
     }
 
+    <span class="doccomment">/// Create a new [`StructArray`] containing no fields
+    ///
+    /// # Panics
+    ///
+    /// If `len != nulls.len()`
+    </span><span class="kw">pub fn </span>new_empty_fields(len: usize, nulls: <span class="prelude-ty">Option</span>&lt;NullBuffer&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = <span class="kw-2">&amp;</span>nulls {
+            <span class="macro">assert_eq!</span>(len, n.len())
+        }
+        <span class="self">Self </span>{
+            len,
+            data_type: DataType::Struct(Fields::empty()),
+            fields: <span class="macro">vec!</span>[],
+            nulls,
+        }
+    }
+
     <span class="doccomment">/// Deconstruct this array into its constituent parts
     </span><span class="kw">pub fn </span>into_parts(<span class="self">self</span>) -&gt; (Fields, Vec&lt;ArrayRef&gt;, <span class="prelude-ty">Option</span>&lt;NullBuffer&gt;) {
         <span class="kw">let </span>f = <span class="kw">match </span><span class="self">self</span>.data_type {
@@ -950,7 +973,7 @@
     }
 
     <span class="doccomment">/// Returns child array refs of the struct array
-    </span><span class="attr">#[deprecated(note = <span class="string">&quot;Use columns().to_vec()&quot;</span>)]
+    </span><span class="attr">#[deprecated(note = <span class="string">"Use columns().to_vec()"</span>)]
     </span><span class="kw">pub fn </span>columns_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;ArrayRef&gt; {
         <span class="self">self</span>.columns().to_vec()
     }
@@ -962,7 +985,7 @@
                 .iter()
                 .map(|f| f.name().as_str())
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;(),
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Struct array&#39;s data type is not struct!&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"Struct array's data type is not struct!"</span>),
         }
     }
 
@@ -990,7 +1013,7 @@
     </span><span class="kw">pub fn </span>slice(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: usize, len: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(
             offset.saturating_add(len) &lt;= <span class="self">self</span>.len,
-            <span class="string">&quot;the length + offset of the sliced StructArray cannot exceed the existing length&quot;
+            <span class="string">"the length + offset of the sliced StructArray cannot exceed the existing length"
         </span>);
 
         <span class="kw">let </span>fields = <span class="self">self</span>.fields.iter().map(|a| a.slice(offset, len)).collect();
@@ -1115,12 +1138,12 @@
 
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>StructArray {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;StructArray\n[\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"StructArray\n[\n"</span>)<span class="question-mark">?</span>;
         <span class="kw">for </span>(child_index, name) <span class="kw">in </span><span class="self">self</span>.column_names().iter().enumerate() {
             <span class="kw">let </span>column = <span class="self">self</span>.column(child_index);
             <span class="macro">writeln!</span>(
                 f,
-                <span class="string">&quot;-- child {}: \&quot;{}\&quot; ({:?})&quot;</span>,
+                <span class="string">"-- child {}: \"{}\" ({:?})"</span>,
                 child_index,
                 name,
                 column.data_type()
@@ -1128,7 +1151,7 @@
             std::fmt::Debug::fmt(column, f)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
         }
-        <span class="macro">write!</span>(f, <span class="string">&quot;]&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"]"</span>)
     }
 }
 
@@ -1155,7 +1178,7 @@
 <span class="kw">impl </span>Index&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>StructArray {
     <span class="kw">type </span>Output = ArrayRef;
 
-    <span class="doccomment">/// Get a reference to a column&#39;s array by name.
+    <span class="doccomment">/// Get a reference to a column's array by name.
     ///
     /// Note: A schema can currently have duplicate field names, in which case
     /// the first field will always be selected.
@@ -1173,11 +1196,8 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">use crate</span>::{
-        BooleanArray, Float32Array, Float64Array, Int32Array, Int64Array, StringArray,
-    };
+    <span class="kw">use crate</span>::{BooleanArray, Float32Array, Float64Array, Int32Array, Int64Array, StringArray};
     <span class="kw">use </span>arrow_buffer::ToByteSlice;
-    <span class="kw">use </span>std::sync::Arc;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_struct_array_builder() {
@@ -1185,8 +1205,8 @@
         <span class="kw">let </span>int_array = Int64Array::from(<span class="macro">vec!</span>[<span class="number">42</span>, <span class="number">28</span>, <span class="number">19</span>, <span class="number">31</span>]);
 
         <span class="kw">let </span>fields = <span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Boolean, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int64, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Boolean, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Int64, <span class="bool-val">false</span>),
         ];
         <span class="kw">let </span>struct_array_data = ArrayData::builder(DataType::Struct(fields.into()))
             .len(<span class="number">4</span>)
@@ -1207,11 +1227,11 @@
 
         <span class="kw">let </span>struct_array = StructArray::from(<span class="macro">vec!</span>[
             (
-                Arc::new(Field::new(<span class="string">&quot;b&quot;</span>, DataType::Boolean, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"b"</span>, DataType::Boolean, <span class="bool-val">false</span>)),
                 boolean.clone() <span class="kw">as </span>ArrayRef,
             ),
             (
-                Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>)),
                 int.clone() <span class="kw">as </span>ArrayRef,
             ),
         ]);
@@ -1222,7 +1242,7 @@
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, struct_array.offset());
     }
 
-    <span class="doccomment">/// validates that struct can be accessed using `column_name` as index i.e. `struct_array[&quot;column_name&quot;]`.
+    <span class="doccomment">/// validates that struct can be accessed using `column_name` as index i.e. `struct_array["column_name"]`.
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_struct_array_index_access() {
         <span class="kw">let </span>boolean = Arc::new(BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]));
@@ -1230,33 +1250,31 @@
 
         <span class="kw">let </span>struct_array = StructArray::from(<span class="macro">vec!</span>[
             (
-                Arc::new(Field::new(<span class="string">&quot;b&quot;</span>, DataType::Boolean, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"b"</span>, DataType::Boolean, <span class="bool-val">false</span>)),
                 boolean.clone() <span class="kw">as </span>ArrayRef,
             ),
             (
-                Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>)),
                 int.clone() <span class="kw">as </span>ArrayRef,
             ),
         ]);
-        <span class="macro">assert_eq!</span>(struct_array[<span class="string">&quot;b&quot;</span>].as_ref(), boolean.as_ref());
-        <span class="macro">assert_eq!</span>(struct_array[<span class="string">&quot;c&quot;</span>].as_ref(), int.as_ref());
+        <span class="macro">assert_eq!</span>(struct_array[<span class="string">"b"</span>].as_ref(), boolean.as_ref());
+        <span class="macro">assert_eq!</span>(struct_array[<span class="string">"c"</span>].as_ref(), int.as_ref());
     }
 
     <span class="doccomment">/// validates that the in-memory representation follows [the spec](https://arrow.apache.org/docs/format/Columnar.html#struct-layout)
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_struct_array_from_vec() {
         <span class="kw">let </span>strings: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="string">&quot;joe&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">"joe"</span>),
             <span class="prelude-val">None</span>,
             <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;mark&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">"mark"</span>),
         ]));
-        <span class="kw">let </span>ints: ArrayRef =
-            Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">4</span>)]));
+        <span class="kw">let </span>ints: ArrayRef = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">4</span>)]));
 
         <span class="kw">let </span>arr =
-            StructArray::try_from(<span class="macro">vec!</span>[(<span class="string">&quot;f1&quot;</span>, strings.clone()), (<span class="string">&quot;f2&quot;</span>, ints.clone())])
-                .unwrap();
+            StructArray::try_from(<span class="macro">vec!</span>[(<span class="string">"f1"</span>, strings.clone()), (<span class="string">"f2"</span>, ints.clone())]).unwrap();
 
         <span class="kw">let </span>struct_data = arr.into_data();
         <span class="macro">assert_eq!</span>(<span class="number">4</span>, struct_data.len());
@@ -1266,7 +1284,7 @@
             .len(<span class="number">4</span>)
             .null_bit_buffer(<span class="prelude-val">Some</span>(Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">9_u8</span>])))
             .add_buffer(Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">7</span>].to_byte_slice()))
-            .add_buffer(Buffer::from(<span class="string">b&quot;joemark&quot;</span>))
+            .add_buffer(Buffer::from(<span class="string">b"joemark"</span>))
             .build()
             .unwrap();
 
@@ -1284,50 +1302,46 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_struct_array_from_vec_error() {
         <span class="kw">let </span>strings: ArrayRef = Arc::new(StringArray::from(<span class="macro">vec!</span>[
-            <span class="prelude-val">Some</span>(<span class="string">&quot;joe&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="string">"joe"</span>),
             <span class="prelude-val">None</span>,
             <span class="prelude-val">None</span>,
             <span class="comment">// 3 elements, not 4
         </span>]));
-        <span class="kw">let </span>ints: ArrayRef =
-            Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">4</span>)]));
+        <span class="kw">let </span>ints: ArrayRef = Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">4</span>)]));
 
-        <span class="kw">let </span>err =
-            StructArray::try_from(<span class="macro">vec!</span>[(<span class="string">&quot;f1&quot;</span>, strings.clone()), (<span class="string">&quot;f2&quot;</span>, ints.clone())])
-                .unwrap_err()
-                .to_string();
+        <span class="kw">let </span>err = StructArray::try_from(<span class="macro">vec!</span>[(<span class="string">"f1"</span>, strings.clone()), (<span class="string">"f2"</span>, ints.clone())])
+            .unwrap_err()
+            .to_string();
 
         <span class="macro">assert_eq!</span>(
             err,
-            <span class="string">&quot;Invalid argument error: Incorrect array length for StructArray field \&quot;f2\&quot;, expected 3 got 4&quot;
+            <span class="string">"Invalid argument error: Incorrect array length for StructArray field \"f2\", expected 3 got 4"
         </span>)
     }
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Incorrect datatype for StructArray field \\\&quot;b\\\&quot;, expected Int16 got Boolean&quot;
+        expected = <span class="string">"Incorrect datatype for StructArray field \\\"b\\\", expected Int16 got Boolean"
     </span>)]
     </span><span class="kw">fn </span>test_struct_array_from_mismatched_types_single() {
         drop(StructArray::from(<span class="macro">vec!</span>[(
-            Arc::new(Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int16, <span class="bool-val">false</span>)),
-            Arc::new(BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]))
-                <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;,
+            Arc::new(Field::new(<span class="string">"b"</span>, DataType::Int16, <span class="bool-val">false</span>)),
+            Arc::new(BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>])) <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;,
         )]));
     }
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Incorrect datatype for StructArray field \\\&quot;b\\\&quot;, expected Int16 got Boolean&quot;
+        expected = <span class="string">"Incorrect datatype for StructArray field \\\"b\\\", expected Int16 got Boolean"
     </span>)]
     </span><span class="kw">fn </span>test_struct_array_from_mismatched_types_multiple() {
         drop(StructArray::from(<span class="macro">vec!</span>[
             (
-                Arc::new(Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int16, <span class="bool-val">false</span>)),
-                Arc::new(BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]))
-                    <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;,
+                Arc::new(Field::new(<span class="string">"b"</span>, DataType::Int16, <span class="bool-val">false</span>)),
+                Arc::new(BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>])) <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;,
             ),
             (
-                Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"c"</span>, DataType::Utf8, <span class="bool-val">false</span>)),
                 Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">42</span>, <span class="number">28</span>, <span class="number">19</span>, <span class="number">31</span>])),
             ),
         ]));
@@ -1349,8 +1363,8 @@
             .unwrap();
 
         <span class="kw">let </span>field_types = <span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Boolean, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int32, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Boolean, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Int32, <span class="bool-val">true</span>),
         ];
         <span class="kw">let </span>struct_array_data = ArrayData::builder(DataType::Struct(field_types.into()))
             .len(<span class="number">5</span>)
@@ -1422,16 +1436,16 @@
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Incorrect array length for StructArray field \\\&quot;c\\\&quot;, expected 1 got 2&quot;
+        expected = <span class="string">"Incorrect array length for StructArray field \\\"c\\\", expected 1 got 2"
     </span>)]
     </span><span class="kw">fn </span>test_invalid_struct_child_array_lengths() {
         drop(StructArray::from(<span class="macro">vec!</span>[
             (
-                Arc::new(Field::new(<span class="string">&quot;b&quot;</span>, DataType::Float32, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"b"</span>, DataType::Float32, <span class="bool-val">false</span>)),
                 Arc::new(Float32Array::from(<span class="macro">vec!</span>[<span class="number">1.1</span>])) <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;,
             ),
             (
-                Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Float64, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"c"</span>, DataType::Float64, <span class="bool-val">false</span>)),
                 Arc::new(Float64Array::from(<span class="macro">vec!</span>[<span class="number">2.2</span>, <span class="number">3.3</span>])),
             ),
         ]));
@@ -1444,12 +1458,10 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;Found unmasked nulls for non-nullable StructArray field \\\&quot;c\\\&quot;&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"Found unmasked nulls for non-nullable StructArray field \\\"c\\\""</span>)]
     </span><span class="kw">fn </span>test_struct_array_from_mismatched_nullability() {
         drop(StructArray::from(<span class="macro">vec!</span>[(
-            Arc::new(Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)),
+            Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>)),
             Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">42</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">19</span>)])) <span class="kw">as </span>ArrayRef,
         )]));
     }

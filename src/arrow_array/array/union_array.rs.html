@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/union_array.rs`."><title>union_array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/union_array.rs`."><title>union_array.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1197,28 +1197,245 @@
 <a href="#1197" id="1197">1197</a>
 <a href="#1198" id="1198">1198</a>
 <a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
+<a href="#1242" id="1242">1242</a>
+<a href="#1243" id="1243">1243</a>
+<a href="#1244" id="1244">1244</a>
+<a href="#1245" id="1245">1245</a>
+<a href="#1246" id="1246">1246</a>
+<a href="#1247" id="1247">1247</a>
+<a href="#1248" id="1248">1248</a>
+<a href="#1249" id="1249">1249</a>
+<a href="#1250" id="1250">1250</a>
+<a href="#1251" id="1251">1251</a>
+<a href="#1252" id="1252">1252</a>
+<a href="#1253" id="1253">1253</a>
+<a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
+<a href="#1350" id="1350">1350</a>
+<a href="#1351" id="1351">1351</a>
+<a href="#1352" id="1352">1352</a>
+<a href="#1353" id="1353">1353</a>
+<a href="#1354" id="1354">1354</a>
+<a href="#1355" id="1355">1355</a>
+<a href="#1356" id="1356">1356</a>
+<a href="#1357" id="1357">1357</a>
+<a href="#1358" id="1358">1358</a>
+<a href="#1359" id="1359">1359</a>
+<a href="#1360" id="1360">1360</a>
+<a href="#1361" id="1361">1361</a>
+<a href="#1362" id="1362">1362</a>
+<a href="#1363" id="1363">1363</a>
+<a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
 </span><span class="kw">use crate</span>::{make_array, Array, ArrayRef};
 <span class="kw">use </span>arrow_buffer::buffer::NullBuffer;
-<span class="kw">use </span>arrow_buffer::{Buffer, ScalarBuffer};
+<span class="kw">use </span>arrow_buffer::ScalarBuffer;
 <span class="kw">use </span>arrow_data::{ArrayData, ArrayDataBuilder};
-<span class="kw">use </span>arrow_schema::{ArrowError, DataType, Field, UnionFields, UnionMode};
+<span class="kw">use </span>arrow_schema::{ArrowError, DataType, UnionFields, UnionMode};
 <span class="doccomment">/// Contains the `UnionArray` type.
 ///
 </span><span class="kw">use </span>std::any::Any;
@@ -1229,37 +1446,42 @@
 /// Each slot in a [UnionArray] can have a value chosen from a number
 /// of types.  Each of the possible types are named like the fields of
 /// a [`StructArray`](crate::StructArray).  A `UnionArray` can
-/// have two possible memory layouts, &quot;dense&quot; or &quot;sparse&quot;.  For more
+/// have two possible memory layouts, "dense" or "sparse".  For more
 /// information on please see the
 /// [specification](https://arrow.apache.org/docs/format/Columnar.html#union-layout).
 ///
 /// [UnionBuilder](crate::builder::UnionBuilder) can be used to
-/// create [UnionArray]&#39;s of primitive types. `UnionArray`&#39;s of nested
+/// create [UnionArray]'s of primitive types. `UnionArray`'s of nested
 /// types are also supported but not via `UnionBuilder`, see the tests
 /// for examples.
 ///
 /// # Examples
 /// ## Create a dense UnionArray `[1, 3.2, 34]`
 /// ```
-/// use arrow_buffer::Buffer;
+/// use arrow_buffer::ScalarBuffer;
 /// use arrow_schema::*;
 /// use std::sync::Arc;
 /// use arrow_array::{Array, Int32Array, Float64Array, UnionArray};
 ///
 /// let int_array = Int32Array::from(vec![1, 34]);
 /// let float_array = Float64Array::from(vec![3.2]);
-/// let type_id_buffer = Buffer::from_slice_ref(&amp;[0_i8, 1, 0]);
-/// let value_offsets_buffer = Buffer::from_slice_ref(&amp;[0_i32, 0, 1]);
+/// let type_ids = [0, 1, 0].into_iter().collect::&lt;ScalarBuffer&lt;i8&gt;&gt;();
+/// let offsets = [0, 0, 1].into_iter().collect::&lt;ScalarBuffer&lt;i32&gt;&gt;();
 ///
-/// let children: Vec&lt;(Field, Arc&lt;dyn Array&gt;)&gt; = vec![
-///     (Field::new(&quot;A&quot;, DataType::Int32, false), Arc::new(int_array)),
-///     (Field::new(&quot;B&quot;, DataType::Float64, false), Arc::new(float_array)),
+/// let union_fields = [
+///     (0, Arc::new(Field::new("A", DataType::Int32, false))),
+///     (1, Arc::new(Field::new("B", DataType::Float64, false))),
+/// ].into_iter().collect::&lt;UnionFields&gt;();
+///
+/// let children = vec![
+///     Arc::new(int_array) as Arc&lt;dyn Array&gt;,
+///     Arc::new(float_array),
 /// ];
 ///
 /// let array = UnionArray::try_new(
-///     &amp;vec![0, 1],
-///     type_id_buffer,
-///     Some(value_offsets_buffer),
+///     union_fields,
+///     type_ids,
+///     Some(offsets),
 ///     children,
 /// ).unwrap();
 ///
@@ -1275,23 +1497,28 @@
 ///
 /// ## Create a sparse UnionArray `[1, 3.2, 34]`
 /// ```
-/// use arrow_buffer::Buffer;
+/// use arrow_buffer::ScalarBuffer;
 /// use arrow_schema::*;
 /// use std::sync::Arc;
 /// use arrow_array::{Array, Int32Array, Float64Array, UnionArray};
 ///
 /// let int_array = Int32Array::from(vec![Some(1), None, Some(34)]);
 /// let float_array = Float64Array::from(vec![None, Some(3.2), None]);
-/// let type_id_buffer = Buffer::from_slice_ref(&amp;[0_i8, 1, 0]);
+/// let type_ids = [0_i8, 1, 0].into_iter().collect::&lt;ScalarBuffer&lt;i8&gt;&gt;();
 ///
-/// let children: Vec&lt;(Field, Arc&lt;dyn Array&gt;)&gt; = vec![
-///     (Field::new(&quot;A&quot;, DataType::Int32, false), Arc::new(int_array)),
-///     (Field::new(&quot;B&quot;, DataType::Float64, false), Arc::new(float_array)),
+/// let union_fields = [
+///     (0, Arc::new(Field::new("A", DataType::Int32, false))),
+///     (1, Arc::new(Field::new("B", DataType::Float64, false))),
+/// ].into_iter().collect::&lt;UnionFields&gt;();
+///
+/// let children = vec![
+///     Arc::new(int_array) as Arc&lt;dyn Array&gt;,
+///     Arc::new(float_array),
 /// ];
 ///
 /// let array = UnionArray::try_new(
-///     &amp;vec![0, 1],
-///     type_id_buffer,
+///     union_fields,
+///     type_ids,
 ///     None,
 ///     children,
 /// ).unwrap();
@@ -1323,123 +1550,120 @@
     ///
     /// # Safety
     ///
-    /// The `type_ids` `Buffer` should contain `i8` values.  These values should be greater than
-    /// zero and must be less than the number of children provided in `child_arrays`.  These values
-    /// are used to index into the `child_arrays`.
+    /// The `type_ids` values should be positive and must match one of the type ids of the fields provided in `fields`.
+    /// These values are used to index into the `children` arrays.
     ///
-    /// The `value_offsets` `Buffer` is only provided in the case of a dense union, sparse unions
-    /// should use `None`.  If provided the `value_offsets` `Buffer` should contain `i32` values.
-    /// The values in this array should be greater than zero and must be less than the length of the
-    /// overall array.
+    /// The `offsets` is provided in the case of a dense union, sparse unions should use `None`.
+    /// If provided the `offsets` values should be positive and must be less than the length of the
+    /// corresponding array.
     ///
     /// In both cases above we use signed integer types to maintain compatibility with other
     /// Arrow implementations.
-    ///
-    /// In both of the cases above we are accepting `Buffer`&#39;s which are assumed to be representing
-    /// `i8` and `i32` values respectively.  `Buffer` objects are untyped and no attempt is made
-    /// to ensure that the data provided is valid.
     </span><span class="kw">pub unsafe fn </span>new_unchecked(
-        field_type_ids: <span class="kw-2">&amp;</span>[i8],
-        type_ids: Buffer,
-        value_offsets: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
-        child_arrays: Vec&lt;(Field, ArrayRef)&gt;,
+        fields: UnionFields,
+        type_ids: ScalarBuffer&lt;i8&gt;,
+        offsets: <span class="prelude-ty">Option</span>&lt;ScalarBuffer&lt;i32&gt;&gt;,
+        children: Vec&lt;ArrayRef&gt;,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(fields, field_values): (Vec&lt;<span class="kw">_</span>&gt;, Vec&lt;<span class="kw">_</span>&gt;) = child_arrays.into_iter().unzip();
-        <span class="kw">let </span>len = type_ids.len();
-
-        <span class="kw">let </span>mode = <span class="kw">if </span>value_offsets.is_some() {
+        <span class="kw">let </span>mode = <span class="kw">if </span>offsets.is_some() {
             UnionMode::Dense
         } <span class="kw">else </span>{
             UnionMode::Sparse
         };
 
-        <span class="kw">let </span>builder = ArrayData::builder(DataType::Union(
-            UnionFields::new(field_type_ids.iter().copied(), fields),
-            mode,
-        ))
-        .add_buffer(type_ids)
-        .child_data(field_values.into_iter().map(|a| a.into_data()).collect())
-        .len(len);
+        <span class="kw">let </span>len = type_ids.len();
+        <span class="kw">let </span>builder = ArrayData::builder(DataType::Union(fields, mode))
+            .add_buffer(type_ids.into_inner())
+            .child_data(children.into_iter().map(Array::into_data).collect())
+            .len(len);
 
-        <span class="kw">let </span>data = <span class="kw">match </span>value_offsets {
-            <span class="prelude-val">Some</span>(b) =&gt; builder.add_buffer(b).build_unchecked(),
+        <span class="kw">let </span>data = <span class="kw">match </span>offsets {
+            <span class="prelude-val">Some</span>(offsets) =&gt; builder.add_buffer(offsets.into_inner()).build_unchecked(),
             <span class="prelude-val">None </span>=&gt; builder.build_unchecked(),
         };
         <span class="self">Self</span>::from(data)
     }
 
     <span class="doccomment">/// Attempts to create a new `UnionArray`, validating the inputs provided.
+    ///
+    /// The order of child arrays child array order must match the fields order
     </span><span class="kw">pub fn </span>try_new(
-        field_type_ids: <span class="kw-2">&amp;</span>[i8],
-        type_ids: Buffer,
-        value_offsets: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
-        child_arrays: Vec&lt;(Field, ArrayRef)&gt;,
+        fields: UnionFields,
+        type_ids: ScalarBuffer&lt;i8&gt;,
+        offsets: <span class="prelude-ty">Option</span>&lt;ScalarBuffer&lt;i32&gt;&gt;,
+        children: Vec&lt;ArrayRef&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(b) = <span class="kw-2">&amp;</span>value_offsets {
-            <span class="kw">if </span>((type_ids.len()) * <span class="number">4</span>) != b.len() {
+        <span class="comment">// There must be a child array for every field.
+        </span><span class="kw">if </span>fields.len() != children.len() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
+                <span class="string">"Union fields length must match child arrays length"</span>.to_string(),
+            ));
+        }
+
+        <span class="comment">// There must be an offset value for every type id value.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(offsets) = <span class="kw-2">&amp;</span>offsets {
+            <span class="kw">if </span>offsets.len() != type_ids.len() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
-                    <span class="string">&quot;Type Ids and Offsets represent a different number of array slots.&quot;
-                        </span>.to_string(),
+                    <span class="string">"Type Ids and Offsets lengths must match"</span>.to_string(),
                 ));
             }
         }
 
-        <span class="comment">// Check the type_ids
-        </span><span class="kw">let </span>type_id_slice: <span class="kw-2">&amp;</span>[i8] = type_ids.typed_data();
-        <span class="kw">let </span>invalid_type_ids = type_id_slice
-            .iter()
-            .filter(|i| <span class="kw-2">*</span>i &lt; <span class="kw-2">&amp;</span><span class="number">0</span>)
-            .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>i8&gt;&gt;();
-        <span class="kw">if </span>!invalid_type_ids.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Type Ids must be positive and cannot be greater than the number of \
-                child arrays, found:\n{invalid_type_ids:?}&quot;
-            </span>)));
+        <span class="comment">// Create mapping from type id to array lengths.
+        </span><span class="kw">let </span>max_id = fields.iter().map(|(i, <span class="kw">_</span>)| i).max().unwrap_or_default() <span class="kw">as </span>usize;
+        <span class="kw">let </span><span class="kw-2">mut </span>array_lens = <span class="macro">vec!</span>[i32::MIN; max_id + <span class="number">1</span>];
+        <span class="kw">for </span>(cd, (field_id, <span class="kw">_</span>)) <span class="kw">in </span>children.iter().zip(fields.iter()) {
+            array_lens[field_id <span class="kw">as </span>usize] = cd.len() <span class="kw">as </span>i32;
         }
 
-        <span class="comment">// Check the value offsets if provided
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(offset_buffer) = <span class="kw-2">&amp;</span>value_offsets {
-            <span class="kw">let </span>max_len = type_ids.len() <span class="kw">as </span>i32;
-            <span class="kw">let </span>offsets_slice: <span class="kw-2">&amp;</span>[i32] = offset_buffer.typed_data();
-            <span class="kw">let </span>invalid_offsets = offsets_slice
-                .iter()
-                .filter(|i| <span class="kw-2">*</span>i &lt; <span class="kw-2">&amp;</span><span class="number">0 </span>|| <span class="kw-2">*</span>i &gt; <span class="kw-2">&amp;</span>max_len)
-                .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>i32&gt;&gt;();
-            <span class="kw">if </span>!invalid_offsets.is_empty() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                    <span class="string">&quot;Offsets must be positive and within the length of the Array, \
-                    found:\n{invalid_offsets:?}&quot;
-                </span>)));
+        <span class="comment">// Type id values must match one of the fields.
+        </span><span class="kw">for </span>id <span class="kw">in </span><span class="kw-2">&amp;</span>type_ids {
+            <span class="kw">match </span>array_lens.get(<span class="kw-2">*</span>id <span class="kw">as </span>usize) {
+                <span class="prelude-val">Some</span>(x) <span class="kw">if </span><span class="kw-2">*</span>x != i32::MIN =&gt; {}
+                <span class="kw">_ </span>=&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
+                        <span class="string">"Type Ids values must match one of the field type ids"</span>.to_owned(),
+                    ))
+                }
             }
         }
 
-        <span class="comment">// Unsafe Justification: arguments were validated above (and
-        // re-revalidated as part of data().validate() below)
-        </span><span class="kw">let </span>new_self = <span class="kw">unsafe </span>{
-            <span class="self">Self</span>::new_unchecked(field_type_ids, type_ids, value_offsets, child_arrays)
-        };
-        new_self.to_data().validate()<span class="question-mark">?</span>;
+        <span class="comment">// Check the value offsets are in bounds.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(offsets) = <span class="kw-2">&amp;</span>offsets {
+            <span class="kw">let </span><span class="kw-2">mut </span>iter = type_ids.iter().zip(offsets.iter());
+            <span class="kw">if </span>iter.any(|(type_id, <span class="kw-2">&amp;</span>offset)| offset &lt; <span class="number">0 </span>|| offset &gt;= array_lens[<span class="kw-2">*</span>type_id <span class="kw">as </span>usize])
+            {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(
+                    <span class="string">"Offsets must be positive and within the length of the Array"</span>.to_owned(),
+                ));
+            }
+        }
 
-        <span class="prelude-val">Ok</span>(new_self)
+        <span class="comment">// Safety:
+        // - Arguments validated above.
+        </span><span class="kw">let </span>union_array = <span class="kw">unsafe </span>{ <span class="self">Self</span>::new_unchecked(fields, type_ids, offsets, children) };
+        <span class="prelude-val">Ok</span>(union_array)
     }
 
     <span class="doccomment">/// Accesses the child array for `type_id`.
     ///
     /// # Panics
     ///
-    /// Panics if the `type_id` provided is less than zero or greater than the number of types
+    /// Panics if the `type_id` provided is not present in the array's DataType
     /// in the `Union`.
     </span><span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>, type_id: i8) -&gt; <span class="kw-2">&amp;</span>ArrayRef {
+        <span class="macro">assert!</span>((type_id <span class="kw">as </span>usize) &lt; <span class="self">self</span>.fields.len());
         <span class="kw">let </span>boxed = <span class="kw-2">&amp;</span><span class="self">self</span>.fields[type_id <span class="kw">as </span>usize];
-        boxed.as_ref().expect(<span class="string">&quot;invalid type id&quot;</span>)
+        boxed.as_ref().expect(<span class="string">"invalid type id"</span>)
     }
 
     <span class="doccomment">/// Returns the `type_id` for the array slot at `index`.
     ///
     /// # Panics
     ///
-    /// Panics if `index` is greater than the length of the array.
+    /// Panics if `index` is greater than or equal to the number of child arrays
     </span><span class="kw">pub fn </span>type_id(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; i8 {
+        <span class="macro">assert!</span>(index &lt; <span class="self">self</span>.type_ids.len());
         <span class="self">self</span>.type_ids[index]
     }
 
@@ -1457,7 +1681,7 @@
     ///
     /// # Panics
     ///
-    /// Panics if `index` is greater than the length of the array.
+    /// Panics if `index` is greater than or equal the length of the array.
     </span><span class="kw">pub fn </span>value_offset(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; usize {
         <span class="macro">assert!</span>(index &lt; <span class="self">self</span>.len());
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.offsets {
@@ -1466,7 +1690,7 @@
         }
     }
 
-    <span class="doccomment">/// Returns the array&#39;s value at index `i`.
+    <span class="doccomment">/// Returns the array's value at index `i`.
     /// # Panics
     /// Panics if index `i` is out of bounds
     </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, i: usize) -&gt; ArrayRef {
@@ -1483,7 +1707,7 @@
                 .iter()
                 .map(|(<span class="kw">_</span>, f)| f.name().as_str())
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;(),
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Union array&#39;s data type is not a union!&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"Union array's data type is not a union!"</span>),
         }
     }
 
@@ -1491,7 +1715,7 @@
     </span><span class="kw">fn </span>is_dense(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self</span>.data_type() {
             DataType::Union(<span class="kw">_</span>, mode) =&gt; mode == <span class="kw-2">&amp;</span>UnionMode::Dense,
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Union array&#39;s data type is not a union!&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"Union array's data type is not a union!"</span>),
         }
     }
 
@@ -1518,13 +1742,67 @@
             fields,
         }
     }
+
+    <span class="doccomment">/// Deconstruct this array into its constituent parts
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use arrow_array::array::UnionArray;
+    /// # use arrow_array::types::Int32Type;
+    /// # use arrow_array::builder::UnionBuilder;
+    /// # use arrow_buffer::ScalarBuffer;
+    /// # fn main() -&gt; Result&lt;(), arrow_schema::ArrowError&gt; {
+    /// let mut builder = UnionBuilder::new_dense();
+    /// builder.append::&lt;Int32Type&gt;("a", 1).unwrap();
+    /// let union_array = builder.build()?;
+    ///
+    /// // Deconstruct into parts
+    /// let (union_fields, type_ids, offsets, children) = union_array.into_parts();
+    ///
+    /// // Reconstruct from parts
+    /// let union_array = UnionArray::try_new(
+    ///     union_fields,
+    ///     type_ids,
+    ///     offsets,
+    ///     children,
+    /// );
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">pub fn </span>into_parts(
+        <span class="self">self</span>,
+    ) -&gt; (
+        UnionFields,
+        ScalarBuffer&lt;i8&gt;,
+        <span class="prelude-ty">Option</span>&lt;ScalarBuffer&lt;i32&gt;&gt;,
+        Vec&lt;ArrayRef&gt;,
+    ) {
+        <span class="kw">let </span><span class="self">Self </span>{
+            data_type,
+            type_ids,
+            offsets,
+            <span class="kw-2">mut </span>fields,
+        } = <span class="self">self</span>;
+        <span class="kw">match </span>data_type {
+            DataType::Union(union_fields, <span class="kw">_</span>) =&gt; {
+                <span class="kw">let </span>children = union_fields
+                    .iter()
+                    .map(|(type_id, <span class="kw">_</span>)| fields[type_id <span class="kw">as </span>usize].take().unwrap())
+                    .collect();
+                (union_fields, type_ids, offsets, children)
+            }
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+        }
+    }
 }
 
 <span class="kw">impl </span>From&lt;ArrayData&gt; <span class="kw">for </span>UnionArray {
     <span class="kw">fn </span>from(data: ArrayData) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(fields, mode) = <span class="kw">match </span>data.data_type() {
             DataType::Union(fields, mode) =&gt; (fields, <span class="kw-2">*</span>mode),
-            d =&gt; <span class="macro">panic!</span>(<span class="string">&quot;UnionArray expected ArrayData with type Union got {d}&quot;</span>),
+            d =&gt; <span class="macro">panic!</span>(<span class="string">"UnionArray expected ArrayData with type Union got {d}"</span>),
         };
         <span class="kw">let </span>(type_ids, offsets) = <span class="kw">match </span>mode {
             UnionMode::Sparse =&gt; (
@@ -1665,18 +1943,18 @@
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>UnionArray {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">let </span>header = <span class="kw">if </span><span class="self">self</span>.is_dense() {
-            <span class="string">&quot;UnionArray(Dense)\n[&quot;
+            <span class="string">"UnionArray(Dense)\n["
         </span>} <span class="kw">else </span>{
-            <span class="string">&quot;UnionArray(Sparse)\n[&quot;
+            <span class="string">"UnionArray(Sparse)\n["
         </span>};
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;{header}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">"{header}"</span>)<span class="question-mark">?</span>;
 
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;-- type id buffer:&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.type_ids)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">"-- type id buffer:"</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">"{:?}"</span>, <span class="self">self</span>.type_ids)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(offsets) = <span class="kw-2">&amp;</span><span class="self">self</span>.offsets {
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;-- offsets buffer:&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;{:?}&quot;</span>, offsets)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f, <span class="string">"-- offsets buffer:"</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f, <span class="string">"{:?}"</span>, offsets)<span class="question-mark">?</span>;
         }
 
         <span class="kw">let </span>fields = <span class="kw">match </span><span class="self">self</span>.data_type() {
@@ -1688,7 +1966,7 @@
             <span class="kw">let </span>child = <span class="self">self</span>.child(type_id);
             <span class="macro">writeln!</span>(
                 f,
-                <span class="string">&quot;-- child {}: \&quot;{}\&quot; ({:?})&quot;</span>,
+                <span class="string">"-- child {}: \"{}\" ({:?})"</span>,
                 type_id,
                 field.name(),
                 field.data_type()
@@ -1696,32 +1974,34 @@
             std::fmt::Debug::fmt(child, f)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
         }
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;]&quot;</span>)
+        <span class="macro">writeln!</span>(f, <span class="string">"]"</span>)
     }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span>std::collections::HashSet;
 
+    <span class="kw">use </span><span class="kw">crate</span>::array::Int8Type;
     <span class="kw">use </span><span class="kw">crate</span>::builder::UnionBuilder;
     <span class="kw">use </span><span class="kw">crate</span>::cast::AsArray;
     <span class="kw">use </span><span class="kw">crate</span>::types::{Float32Type, Float64Type, Int32Type, Int64Type};
     <span class="kw">use </span><span class="kw">crate</span>::RecordBatch;
     <span class="kw">use crate</span>::{Float64Array, Int32Array, Int64Array, StringArray};
-    <span class="kw">use </span>arrow_schema::Schema;
-    <span class="kw">use </span>std::sync::Arc;
+    <span class="kw">use </span>arrow_buffer::Buffer;
+    <span class="kw">use </span>arrow_schema::{Field, Schema};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dense_i32() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_dense();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;b&quot;</span>, <span class="number">2</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">5</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">6</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;b&quot;</span>, <span class="number">7</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"b"</span>, <span class="number">2</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"c"</span>, <span class="number">3</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"c"</span>, <span class="number">5</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">6</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"b"</span>, <span class="number">7</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="kw">let </span>expected_type_ids = <span class="macro">vec!</span>[<span class="number">0_i8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>];
@@ -1776,7 +2056,7 @@
 
         expected_array_values
             .iter()
-            .for_each(|v| builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="kw-2">*</span>v).unwrap());
+            .for_each(|v| builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="kw-2">*</span>v).unwrap());
 
         <span class="kw">let </span>union = builder.build().unwrap();
 
@@ -1805,11 +2085,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dense_mixed() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_dense();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append::&lt;Int64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
-        builder.append::&lt;Int64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">5</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">6</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int64Type&gt;(<span class="string">"c"</span>, <span class="number">3</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int64Type&gt;(<span class="string">"c"</span>, <span class="number">5</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">6</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, union.len());
@@ -1855,11 +2135,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dense_mixed_with_nulls() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_dense();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append::&lt;Int64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">10</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">6</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int64Type&gt;(<span class="string">"c"</span>, <span class="number">3</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">10</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">6</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, union.len());
@@ -1903,11 +2183,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dense_mixed_with_nulls_and_offset() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_dense();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append::&lt;Int64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">10</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">6</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int64Type&gt;(<span class="string">"c"</span>, <span class="number">3</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">10</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">6</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="kw">let </span>slice = union.slice(<span class="number">2</span>, <span class="number">3</span>);
@@ -1939,34 +2219,31 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dense_mixed_with_str() {
-        <span class="kw">let </span>string_array = StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="kw">let </span>string_array = StringArray::from(<span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"baz"</span>]);
         <span class="kw">let </span>int_array = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>]);
         <span class="kw">let </span>float_array = Float64Array::from(<span class="macro">vec!</span>[<span class="number">10.0</span>]);
 
-        <span class="kw">let </span>type_ids = [<span class="number">1_i8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>];
-        <span class="kw">let </span>offsets = [<span class="number">0_i32</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>];
+        <span class="kw">let </span>type_ids = [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>].into_iter().collect::&lt;ScalarBuffer&lt;i8&gt;&gt;();
+        <span class="kw">let </span>offsets = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>]
+            .into_iter()
+            .collect::&lt;ScalarBuffer&lt;i32&gt;&gt;();
 
-        <span class="kw">let </span>type_id_buffer = Buffer::from_slice_ref(type_ids);
-        <span class="kw">let </span>value_offsets_buffer = Buffer::from_slice_ref(offsets);
-
-        <span class="kw">let </span>children: Vec&lt;(Field, Arc&lt;<span class="kw">dyn </span>Array&gt;)&gt; = <span class="macro">vec!</span>[
-            (
-                Field::new(<span class="string">&quot;A&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-                Arc::new(string_array),
-            ),
-            (Field::new(<span class="string">&quot;B&quot;</span>, DataType::Int32, <span class="bool-val">false</span>), Arc::new(int_array)),
-            (
-                Field::new(<span class="string">&quot;C&quot;</span>, DataType::Float64, <span class="bool-val">false</span>),
-                Arc::new(float_array),
-            ),
-        ];
-        <span class="kw">let </span>array = UnionArray::try_new(
-            <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],
-            type_id_buffer,
-            <span class="prelude-val">Some</span>(value_offsets_buffer),
-            children,
-        )
-        .unwrap();
+        <span class="kw">let </span>fields = [
+            (<span class="number">0</span>, Arc::new(Field::new(<span class="string">"A"</span>, DataType::Utf8, <span class="bool-val">false</span>))),
+            (<span class="number">1</span>, Arc::new(Field::new(<span class="string">"B"</span>, DataType::Int32, <span class="bool-val">false</span>))),
+            (<span class="number">2</span>, Arc::new(Field::new(<span class="string">"C"</span>, DataType::Float64, <span class="bool-val">false</span>))),
+        ]
+        .into_iter()
+        .collect::&lt;UnionFields&gt;();
+        <span class="kw">let </span>children = [
+            Arc::new(string_array) <span class="kw">as </span>Arc&lt;<span class="kw">dyn </span>Array&gt;,
+            Arc::new(int_array),
+            Arc::new(float_array),
+        ]
+        .into_iter()
+        .collect();
+        <span class="kw">let </span>array =
+            UnionArray::try_new(fields, type_ids.clone(), <span class="prelude-val">Some</span>(offsets.clone()), children).unwrap();
 
         <span class="comment">// Check type ids
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">*</span>array.type_ids(), type_ids);
@@ -1993,7 +2270,7 @@
             .downcast_ref::&lt;StringArray&gt;()
             .unwrap()
             .value(<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;foo&quot;</span>, value);
+        <span class="macro">assert_eq!</span>(<span class="string">"foo"</span>, value);
 
         <span class="kw">let </span>slot = array.value(<span class="number">2</span>);
         <span class="kw">let </span>value = slot
@@ -2001,7 +2278,7 @@
             .downcast_ref::&lt;StringArray&gt;()
             .unwrap()
             .value(<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;bar&quot;</span>, value);
+        <span class="macro">assert_eq!</span>(<span class="string">"bar"</span>, value);
 
         <span class="kw">let </span>slot = array.value(<span class="number">3</span>);
         <span class="kw">let </span>value = slot
@@ -2017,7 +2294,7 @@
             .downcast_ref::&lt;StringArray&gt;()
             .unwrap()
             .value(<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;baz&quot;</span>, value);
+        <span class="macro">assert_eq!</span>(<span class="string">"baz"</span>, value);
 
         <span class="kw">let </span>slot = array.value(<span class="number">5</span>);
         <span class="kw">let </span>value = slot.as_any().downcast_ref::&lt;Int32Array&gt;().unwrap().value(<span class="number">0</span>);
@@ -2027,13 +2304,13 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_sparse_i32() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;b&quot;</span>, <span class="number">2</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">5</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">6</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;b&quot;</span>, <span class="number">7</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"b"</span>, <span class="number">2</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"c"</span>, <span class="number">3</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"c"</span>, <span class="number">5</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">6</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"b"</span>, <span class="number">7</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="kw">let </span>expected_type_ids = <span class="macro">vec!</span>[<span class="number">0_i8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>];
@@ -2076,11 +2353,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_sparse_mixed() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">5.0</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">6</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">5.0</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">6</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="kw">let </span>expected_type_ids = <span class="macro">vec!</span>[<span class="number">0_i8</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>];
@@ -2136,10 +2413,10 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_sparse_mixed_with_nulls() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="kw">let </span>expected_type_ids = <span class="macro">vec!</span>[<span class="number">0_i8</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>];
@@ -2186,11 +2463,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_sparse_mixed_with_nulls_and_offset() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-        builder.append_null::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+        builder.append_null::&lt;Float64Type&gt;(<span class="string">"c"</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         <span class="kw">let </span>slice = union.slice(<span class="number">1</span>, <span class="number">4</span>);
@@ -2233,21 +2510,21 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_union_array_validity() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-        builder.append_null::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+        builder.append_null::&lt;Float64Type&gt;(<span class="string">"c"</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         test_union_validity(<span class="kw-2">&amp;</span>union);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_dense();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-        builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-        builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-        builder.append_null::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>).unwrap();
-        builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+        builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+        builder.append_null::&lt;Float64Type&gt;(<span class="string">"c"</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
         <span class="kw">let </span>union = builder.build().unwrap();
 
         test_union_validity(<span class="kw-2">&amp;</span>union);
@@ -2256,26 +2533,32 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_type_check() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
-        builder.append::&lt;Float32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1.0</span>).unwrap();
-        <span class="kw">let </span>err = builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap_err().to_string();
-        <span class="macro">assert!</span>(err.contains(<span class="string">&quot;Attempt to write col \&quot;a\&quot; with type Int32 doesn&#39;t match existing type Float32&quot;</span>), <span class="string">&quot;{}&quot;</span>, err);
+        builder.append::&lt;Float32Type&gt;(<span class="string">"a"</span>, <span class="number">1.0</span>).unwrap();
+        <span class="kw">let </span>err = builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap_err().to_string();
+        <span class="macro">assert!</span>(
+            err.contains(
+                <span class="string">"Attempt to write col \"a\" with type Int32 doesn't match existing type Float32"
+            </span>),
+            <span class="string">"{}"</span>,
+            err
+        );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>slice_union_array() {
         <span class="comment">// [1, null, 3.0, null, 4]
         </span><span class="kw">fn </span>create_union(<span class="kw-2">mut </span>builder: UnionBuilder) -&gt; UnionArray {
-            builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>).unwrap();
-            builder.append_null::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>).unwrap();
-            builder.append::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>, <span class="number">3.0</span>).unwrap();
-            builder.append_null::&lt;Float64Type&gt;(<span class="string">&quot;c&quot;</span>).unwrap();
-            builder.append::&lt;Int32Type&gt;(<span class="string">&quot;a&quot;</span>, <span class="number">4</span>).unwrap();
+            builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+            builder.append_null::&lt;Int32Type&gt;(<span class="string">"a"</span>).unwrap();
+            builder.append::&lt;Float64Type&gt;(<span class="string">"c"</span>, <span class="number">3.0</span>).unwrap();
+            builder.append_null::&lt;Float64Type&gt;(<span class="string">"c"</span>).unwrap();
+            builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">4</span>).unwrap();
             builder.build().unwrap()
         }
 
         <span class="kw">fn </span>create_batch(<span class="kw">union</span>: UnionArray) -&gt; RecordBatch {
             <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(
-                <span class="string">&quot;struct_array&quot;</span>,
+                <span class="string">"struct_array"</span>,
                 union.data_type().clone(),
                 <span class="bool-val">true</span>,
             )]);
@@ -2332,15 +2615,15 @@
             UnionFields::new(
                 <span class="macro">vec!</span>[<span class="number">8</span>, <span class="number">4</span>, <span class="number">9</span>],
                 <span class="macro">vec!</span>[
-                    Field::new(<span class="string">&quot;strings&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-                    Field::new(<span class="string">&quot;integers&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-                    Field::new(<span class="string">&quot;floats&quot;</span>, DataType::Float64, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"strings"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"integers"</span>, DataType::Int32, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"floats"</span>, DataType::Float64, <span class="bool-val">false</span>),
                 ],
             ),
             UnionMode::Dense,
         );
 
-        <span class="kw">let </span>string_array = StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="kw">let </span>string_array = StringArray::from(<span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"baz"</span>]);
         <span class="kw">let </span>int_array = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>]);
         <span class="kw">let </span>float_array = Float64Array::from(<span class="macro">vec!</span>[<span class="number">10.0</span>]);
 
@@ -2368,7 +2651,7 @@
         <span class="kw">let </span>v = array.value(<span class="number">1</span>);
         <span class="macro">assert_eq!</span>(v.data_type(), <span class="kw-2">&amp;</span>DataType::Utf8);
         <span class="macro">assert_eq!</span>(v.len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(v.as_string::&lt;i32&gt;().value(<span class="number">0</span>), <span class="string">&quot;foo&quot;</span>);
+        <span class="macro">assert_eq!</span>(v.as_string::&lt;i32&gt;().value(<span class="number">0</span>), <span class="string">"foo"</span>);
 
         <span class="kw">let </span>v = array.value(<span class="number">2</span>);
         <span class="macro">assert_eq!</span>(v.data_type(), <span class="kw-2">&amp;</span>DataType::Int32);
@@ -2378,7 +2661,7 @@
         <span class="kw">let </span>v = array.value(<span class="number">3</span>);
         <span class="macro">assert_eq!</span>(v.data_type(), <span class="kw-2">&amp;</span>DataType::Utf8);
         <span class="macro">assert_eq!</span>(v.len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(v.as_string::&lt;i32&gt;().value(<span class="number">0</span>), <span class="string">&quot;bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(v.as_string::&lt;i32&gt;().value(<span class="number">0</span>), <span class="string">"bar"</span>);
 
         <span class="kw">let </span>v = array.value(<span class="number">4</span>);
         <span class="macro">assert_eq!</span>(v.data_type(), <span class="kw-2">&amp;</span>DataType::Float64);
@@ -2393,7 +2676,158 @@
         <span class="kw">let </span>v = array.value(<span class="number">6</span>);
         <span class="macro">assert_eq!</span>(v.data_type(), <span class="kw-2">&amp;</span>DataType::Utf8);
         <span class="macro">assert_eq!</span>(v.len(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(v.as_string::&lt;i32&gt;().value(<span class="number">0</span>), <span class="string">&quot;baz&quot;</span>);
+        <span class="macro">assert_eq!</span>(v.as_string::&lt;i32&gt;().value(<span class="number">0</span>), <span class="string">"baz"</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>into_parts() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_dense();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int8Type&gt;(<span class="string">"b"</span>, <span class="number">2</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">3</span>).unwrap();
+        <span class="kw">let </span>dense_union = builder.build().unwrap();
+
+        <span class="kw">let </span>field = [
+            <span class="kw-2">&amp;</span>Arc::new(Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)),
+            <span class="kw-2">&amp;</span>Arc::new(Field::new(<span class="string">"b"</span>, DataType::Int8, <span class="bool-val">false</span>)),
+        ];
+        <span class="kw">let </span>(union_fields, type_ids, offsets, children) = dense_union.into_parts();
+        <span class="macro">assert_eq!</span>(
+            union_fields
+                .iter()
+                .map(|(<span class="kw">_</span>, field)| field)
+                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
+            field
+        );
+        <span class="macro">assert_eq!</span>(type_ids, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+        <span class="macro">assert!</span>(offsets.is_some());
+        <span class="macro">assert_eq!</span>(offsets.as_ref().unwrap(), <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>]);
+
+        <span class="kw">let </span>result = UnionArray::try_new(union_fields, type_ids, offsets, children);
+        <span class="macro">assert!</span>(result.is_ok());
+        <span class="macro">assert_eq!</span>(result.unwrap().len(), <span class="number">3</span>);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = UnionBuilder::new_sparse();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">1</span>).unwrap();
+        builder.append::&lt;Int8Type&gt;(<span class="string">"b"</span>, <span class="number">2</span>).unwrap();
+        builder.append::&lt;Int32Type&gt;(<span class="string">"a"</span>, <span class="number">3</span>).unwrap();
+        <span class="kw">let </span>sparse_union = builder.build().unwrap();
+
+        <span class="kw">let </span>(union_fields, type_ids, offsets, children) = sparse_union.into_parts();
+        <span class="macro">assert_eq!</span>(type_ids, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+        <span class="macro">assert!</span>(offsets.is_none());
+
+        <span class="kw">let </span>result = UnionArray::try_new(union_fields, type_ids, offsets, children);
+        <span class="macro">assert!</span>(result.is_ok());
+        <span class="macro">assert_eq!</span>(result.unwrap().len(), <span class="number">3</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>into_parts_custom_type_ids() {
+        <span class="kw">let </span>set_field_type_ids: [i8; <span class="number">3</span>] = [<span class="number">8</span>, <span class="number">4</span>, <span class="number">9</span>];
+        <span class="kw">let </span>data_type = DataType::Union(
+            UnionFields::new(
+                set_field_type_ids,
+                [
+                    Field::new(<span class="string">"strings"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"integers"</span>, DataType::Int32, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"floats"</span>, DataType::Float64, <span class="bool-val">false</span>),
+                ],
+            ),
+            UnionMode::Dense,
+        );
+        <span class="kw">let </span>string_array = StringArray::from(<span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"baz"</span>]);
+        <span class="kw">let </span>int_array = Int32Array::from(<span class="macro">vec!</span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>]);
+        <span class="kw">let </span>float_array = Float64Array::from(<span class="macro">vec!</span>[<span class="number">10.0</span>]);
+        <span class="kw">let </span>type_ids = Buffer::from_vec(<span class="macro">vec!</span>[<span class="number">4_i8</span>, <span class="number">8</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">4</span>, <span class="number">8</span>]);
+        <span class="kw">let </span>value_offsets = Buffer::from_vec(<span class="macro">vec!</span>[<span class="number">0_i32</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">2</span>]);
+        <span class="kw">let </span>data = ArrayData::builder(data_type)
+            .len(<span class="number">7</span>)
+            .buffers(<span class="macro">vec!</span>[type_ids, value_offsets])
+            .child_data(<span class="macro">vec!</span>[
+                string_array.into_data(),
+                int_array.into_data(),
+                float_array.into_data(),
+            ])
+            .build()
+            .unwrap();
+        <span class="kw">let </span>array = UnionArray::from(data);
+
+        <span class="kw">let </span>(union_fields, type_ids, offsets, children) = array.into_parts();
+        <span class="macro">assert_eq!</span>(
+            type_ids.iter().collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;(),
+            set_field_type_ids.iter().collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;()
+        );
+        <span class="kw">let </span>result = UnionArray::try_new(union_fields, type_ids, offsets, children);
+        <span class="macro">assert!</span>(result.is_ok());
+        <span class="kw">let </span>array = result.unwrap();
+        <span class="macro">assert_eq!</span>(array.len(), <span class="number">7</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_invalid() {
+        <span class="kw">let </span>fields = UnionFields::new(
+            [<span class="number">3</span>, <span class="number">2</span>],
+            [
+                Field::new(<span class="string">"a"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            ],
+        );
+        <span class="kw">let </span>children = <span class="macro">vec!</span>[
+            Arc::new(StringArray::from_iter_values([<span class="string">"a"</span>, <span class="string">"b"</span>])) <span class="kw">as _</span>,
+            Arc::new(StringArray::from_iter_values([<span class="string">"c"</span>, <span class="string">"d"</span>])) <span class="kw">as _</span>,
+        ];
+
+        <span class="kw">let </span>type_ids = <span class="macro">vec!</span>[<span class="number">3</span>, <span class="number">3</span>, <span class="number">2</span>].into();
+        UnionArray::try_new(fields.clone(), type_ids, <span class="prelude-val">None</span>, children.clone()).unwrap();
+
+        <span class="kw">let </span>type_ids = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>].into();
+        <span class="kw">let </span>err =
+            UnionArray::try_new(fields.clone(), type_ids, <span class="prelude-val">None</span>, children.clone()).unwrap_err();
+        <span class="macro">assert_eq!</span>(
+            err.to_string(),
+            <span class="string">"Invalid argument error: Type Ids values must match one of the field type ids"
+        </span>);
+
+        <span class="kw">let </span>type_ids = <span class="macro">vec!</span>[<span class="number">7</span>, <span class="number">2</span>].into();
+        <span class="kw">let </span>err = UnionArray::try_new(fields.clone(), type_ids, <span class="prelude-val">None</span>, children).unwrap_err();
+        <span class="macro">assert_eq!</span>(
+            err.to_string(),
+            <span class="string">"Invalid argument error: Type Ids values must match one of the field type ids"
+        </span>);
+
+        <span class="kw">let </span>children = <span class="macro">vec!</span>[
+            Arc::new(StringArray::from_iter_values([<span class="string">"a"</span>, <span class="string">"b"</span>])) <span class="kw">as _</span>,
+            Arc::new(StringArray::from_iter_values([<span class="string">"c"</span>])) <span class="kw">as _</span>,
+        ];
+        <span class="kw">let </span>type_ids = ScalarBuffer::from(<span class="macro">vec!</span>[<span class="number">3_i8</span>, <span class="number">3</span>, <span class="number">2</span>]);
+        <span class="kw">let </span>offsets = <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>].into());
+        UnionArray::try_new(fields.clone(), type_ids.clone(), offsets, children.clone()).unwrap();
+
+        <span class="kw">let </span>offsets = <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>].into());
+        <span class="kw">let </span>err = UnionArray::try_new(fields.clone(), type_ids.clone(), offsets, children.clone())
+            .unwrap_err();
+
+        <span class="macro">assert_eq!</span>(
+            err.to_string(),
+            <span class="string">"Invalid argument error: Offsets must be positive and within the length of the Array"
+        </span>);
+
+        <span class="kw">let </span>offsets = <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>].into());
+        <span class="kw">let </span>err =
+            UnionArray::try_new(fields.clone(), type_ids.clone(), offsets, children).unwrap_err();
+
+        <span class="macro">assert_eq!</span>(
+            err.to_string(),
+            <span class="string">"Invalid argument error: Type Ids and Offsets lengths must match"
+        </span>);
+
+        <span class="kw">let </span>err = UnionArray::try_new(fields.clone(), type_ids, <span class="prelude-val">None</span>, <span class="macro">vec!</span>[]).unwrap_err();
+
+        <span class="macro">assert_eq!</span>(
+            err.to_string(),
+            <span class="string">"Invalid argument error: Union fields length must match child arrays length"
+        </span>);
     }
 }
 </code></pre></div></section></main></body></html>

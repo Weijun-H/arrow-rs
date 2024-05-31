@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/bin/parquet-index.rs`."><title>parquet-index.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parquet_index" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../parquet_index/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/bin/parquet-index.rs`."><title>parquet-index.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parquet_index" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -170,21 +170,19 @@
 <a href="#170" id="170">170</a>
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -217,12 +215,12 @@
 <span class="kw">use </span>std::fs::File;
 
 <span class="attr">#[derive(Debug, Parser)]
-#[clap(author, version, about(<span class="string">&quot;Prints the page index of a parquet file&quot;</span>), long_about = <span class="prelude-val">None</span>)]
+#[clap(author, version, about(<span class="string">"Prints the page index of a parquet file"</span>), long_about = <span class="prelude-val">None</span>)]
 </span><span class="kw">struct </span>Args {
-    <span class="attr">#[clap(help(<span class="string">&quot;Path to a parquet file&quot;</span>))]
+    <span class="attr">#[clap(help(<span class="string">"Path to a parquet file"</span>))]
     </span>file: String,
 
-    <span class="attr">#[clap(help(<span class="string">&quot;Column name to print&quot;</span>))]
+    <span class="attr">#[clap(help(<span class="string">"Column name to print"</span>))]
     </span>column: String,
 }
 
@@ -238,20 +236,20 @@
             .iter()
             .position(|x| x.name() == <span class="self">self</span>.column.as_str())
             .ok_or_else(|| {
-                ParquetError::General(<span class="macro">format!</span>(<span class="string">&quot;Failed to find column {}&quot;</span>, <span class="self">self</span>.column))
+                ParquetError::General(<span class="macro">format!</span>(<span class="string">"Failed to find column {}"</span>, <span class="self">self</span>.column))
             })<span class="question-mark">?</span>;
 
         <span class="comment">// Column index data for all row groups and columns
         </span><span class="kw">let </span>column_index = reader
             .metadata()
             .column_index()
-            .ok_or_else(|| ParquetError::General(<span class="string">&quot;Column index not found&quot;</span>.to_string()))<span class="question-mark">?</span>;
+            .ok_or_else(|| ParquetError::General(<span class="string">"Column index not found"</span>.to_string()))<span class="question-mark">?</span>;
 
         <span class="comment">// Offset index data for all row groups and columns
         </span><span class="kw">let </span>offset_index = reader
             .metadata()
             .offset_index()
-            .ok_or_else(|| ParquetError::General(<span class="string">&quot;Offset index not found&quot;</span>.to_string()))<span class="question-mark">?</span>;
+            .ok_or_else(|| ParquetError::General(<span class="string">"Offset index not found"</span>.to_string()))<span class="question-mark">?</span>;
 
         <span class="comment">// Iterate through each row group
         </span><span class="kw">for </span>(row_group_idx, ((column_indices, offset_indices), row_group)) <span class="kw">in </span>column_index
@@ -260,25 +258,23 @@
             .zip(reader.metadata().row_groups())
             .enumerate()
         {
-            <span class="macro">println!</span>(<span class="string">&quot;Row Group: {row_group_idx}&quot;</span>);
+            <span class="macro">println!</span>(<span class="string">"Row Group: {row_group_idx}"</span>);
             <span class="kw">let </span>offset_index = offset_indices.get(column_idx).ok_or_else(|| {
                 ParquetError::General(<span class="macro">format!</span>(
-                    <span class="string">&quot;No offset index for row group {row_group_idx} column chunk {column_idx}&quot;
+                    <span class="string">"No offset index for row group {row_group_idx} column chunk {column_idx}"
                 </span>))
             })<span class="question-mark">?</span>;
 
             <span class="kw">let </span>row_counts = compute_row_counts(offset_index, row_group.num_rows());
             <span class="kw">match </span><span class="kw-2">&amp;</span>column_indices[column_idx] {
-                Index::NONE =&gt; <span class="macro">println!</span>(<span class="string">&quot;NO INDEX&quot;</span>),
+                Index::NONE =&gt; <span class="macro">println!</span>(<span class="string">"NO INDEX"</span>),
                 Index::BOOLEAN(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
                 Index::INT32(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
                 Index::INT64(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
                 Index::INT96(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
                 Index::FLOAT(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
                 Index::DOUBLE(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
-                Index::BYTE_ARRAY(v) =&gt; {
-                    print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?
-                </span>}
+                Index::BYTE_ARRAY(v) =&gt; print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?</span>,
                 Index::FIXED_LEN_BYTE_ARRAY(v) =&gt; {
                     print_index(<span class="kw-2">&amp;</span>v.indexes, offset_index, <span class="kw-2">&amp;</span>row_counts)<span class="question-mark">?
                 </span>}
@@ -312,7 +308,7 @@
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">if </span>column_index.len() != offset_index.len() {
         <span class="kw">return </span><span class="prelude-val">Err</span>(ParquetError::General(<span class="macro">format!</span>(
-            <span class="string">&quot;Index length mismatch, got {} and {}&quot;</span>,
+            <span class="string">"Index length mismatch, got {} and {}"</span>,
             column_index.len(),
             offset_index.len()
         )));
@@ -325,17 +321,17 @@
         .enumerate()
     {
         <span class="macro">print!</span>(
-            <span class="string">&quot;Page {:&gt;5} at offset {:#010x} with length {:&gt;10} and row count {:&gt;10}&quot;</span>,
+            <span class="string">"Page {:&gt;5} at offset {:#010x} with length {:&gt;10} and row count {:&gt;10}"</span>,
             idx, o.offset, o.compressed_page_size, row_count
         );
         <span class="kw">match </span><span class="kw-2">&amp;</span>c.min {
-            <span class="prelude-val">Some</span>(m) =&gt; <span class="macro">print!</span>(<span class="string">&quot;, min {m:&gt;10}&quot;</span>),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">print!</span>(<span class="string">&quot;, min {:&gt;10}&quot;</span>, <span class="string">&quot;NONE&quot;</span>),
+            <span class="prelude-val">Some</span>(m) =&gt; <span class="macro">print!</span>(<span class="string">", min {m:&gt;10}"</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">print!</span>(<span class="string">", min {:&gt;10}"</span>, <span class="string">"NONE"</span>),
         }
 
         <span class="kw">match </span><span class="kw-2">&amp;</span>c.max {
-            <span class="prelude-val">Some</span>(m) =&gt; <span class="macro">print!</span>(<span class="string">&quot;, max {m:&gt;10}&quot;</span>),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">print!</span>(<span class="string">&quot;, max {:&gt;10}&quot;</span>, <span class="string">&quot;NONE&quot;</span>),
+            <span class="prelude-val">Some</span>(m) =&gt; <span class="macro">print!</span>(<span class="string">", max {m:&gt;10}"</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">print!</span>(<span class="string">", max {:&gt;10}"</span>, <span class="string">"NONE"</span>),
         }
         <span class="macro">println!</span>()
     }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-json/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_json" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_json/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-json/src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_json" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -128,26 +128,99 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="doccomment">//! Transfer data between the Arrow memory format and JSON
-//! line-delimited records. See the module level documentation for the
+</span><span class="doccomment">//! Transfer data between the Arrow memory format and JSON line-delimited records.
+//!
+//! See the module level documentation for the
 //! [`reader`] and [`writer`] for usage examples.
+//!
+//! # Binary Data
+//!
+//! As per [RFC7159] JSON cannot encode arbitrary binary data. A common approach to workaround
+//! this is to use a [binary-to-text encoding] scheme, such as base64, to encode the
+//! input data and then decode it on output.
+//!
+//! ```
+//! # use std::io::Cursor;
+//! # use std::sync::Arc;
+//! # use arrow_array::{BinaryArray, RecordBatch, StringArray};
+//! # use arrow_array::cast::AsArray;
+//! # use arrow_cast::base64::{b64_decode, b64_encode, BASE64_STANDARD};
+//! # use arrow_json::{LineDelimitedWriter, ReaderBuilder};
+//! #
+//! // The data we want to write
+//! let input = BinaryArray::from(vec![b"\xDE\x00\xFF".as_ref()]);
+//!
+//! // Base64 encode it to a string
+//! let encoded: StringArray = b64_encode(&amp;BASE64_STANDARD, &amp;input);
+//!
+//! // Write the StringArray to JSON
+//! let batch = RecordBatch::try_from_iter([("col", Arc::new(encoded) as _)]).unwrap();
+//! let mut buf = Vec::with_capacity(1024);
+//! let mut writer = LineDelimitedWriter::new(&amp;mut buf);
+//! writer.write(&amp;batch).unwrap();
+//! writer.finish().unwrap();
+//!
+//! // Read the JSON data
+//! let cursor = Cursor::new(buf);
+//! let mut reader = ReaderBuilder::new(batch.schema()).build(cursor).unwrap();
+//! let batch = reader.next().unwrap().unwrap();
+//!
+//! // Reverse the base64 encoding
+//! let col: BinaryArray = batch.column(0).as_string::&lt;i32&gt;().clone().into();
+//! let output = b64_decode(&amp;BASE64_STANDARD, &amp;col).unwrap();
+//!
+//! assert_eq!(input, output);
+//! ```
+//!
+//! [RFC7159]: https://datatracker.ietf.org/doc/html/rfc7159#section-8.1
+//! [binary-to-text encoding]: https://en.wikipedia.org/wiki/Binary-to-text_encoding
+//!
 
 </span><span class="attr">#![deny(rustdoc::broken_intra_doc_links)]
 #![warn(missing_docs)]
@@ -155,30 +228,18 @@
 </span><span class="kw">pub mod </span>reader;
 <span class="kw">pub mod </span>writer;
 
-<span class="attr">#[doc(hidden)]
-#[deprecated(note = <span class="string">&quot;Use Decoder&quot;</span>)]
-</span><span class="kw">pub type </span>RawDecoder = reader::Decoder;
-
-<span class="attr">#[doc(hidden)]
-#[deprecated(note = <span class="string">&quot;Use Reader&quot;</span>)]
-</span><span class="kw">pub type </span>RawReader&lt;R&gt; = Reader&lt;R&gt;;
-
-<span class="attr">#[doc(hidden)]
-#[deprecated(note = <span class="string">&quot;Use ReaderBuilder&quot;</span>)]
-</span><span class="kw">pub type </span>RawReaderBuilder = ReaderBuilder;
-
 <span class="kw">pub use </span><span class="self">self</span>::reader::{Reader, ReaderBuilder};
-<span class="kw">pub use </span><span class="self">self</span>::writer::{ArrayWriter, LineDelimitedWriter, Writer};
+<span class="kw">pub use </span><span class="self">self</span>::writer::{ArrayWriter, LineDelimitedWriter, Writer, WriterBuilder};
 <span class="kw">use </span>half::f16;
 <span class="kw">use </span>serde_json::{Number, Value};
 
 <span class="doccomment">/// Trait declaring any type that is serializable to JSON. This includes all primitive types (bool, i32, etc.).
-</span><span class="kw">pub trait </span>JsonSerializable: <span class="lifetime">&#39;static </span>{
+</span><span class="kw">pub trait </span>JsonSerializable: <span class="lifetime">'static </span>{
     <span class="doccomment">/// Converts self into json value if its possible
     </span><span class="kw">fn </span>into_json_value(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Value&gt;;
 }
 
-<span class="macro">macro_rules! </span>json_serializable {
+<span class="macro">macro_rules!</span> json_serializable {
     (<span class="macro-nonterminal">$t</span>:ty) =&gt; {
         <span class="kw">impl </span>JsonSerializable <span class="kw">for </span><span class="macro-nonterminal">$t </span>{
             <span class="kw">fn </span>into_json_value(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Value&gt; {
@@ -230,10 +291,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">use </span>serde_json::{
-        Number,
-        Value::{Bool, Number <span class="kw">as </span>VNumber, String <span class="kw">as </span>VString},
-    };
+    <span class="kw">use </span>serde_json::Value::{Bool, Number <span class="kw">as </span>VNumber, String <span class="kw">as </span>VString};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_arrow_native_type_to_json() {
@@ -242,7 +300,7 @@
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VNumber(Number::from(<span class="number">1</span>))), <span class="number">1i16</span>.into_json_value());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VNumber(Number::from(<span class="number">1</span>))), <span class="number">1i32</span>.into_json_value());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VNumber(Number::from(<span class="number">1</span>))), <span class="number">1i64</span>.into_json_value());
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VString(<span class="string">&quot;1&quot;</span>.to_string())), <span class="number">1i128</span>.into_json_value());
+        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VString(<span class="string">"1"</span>.to_string())), <span class="number">1i128</span>.into_json_value());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VNumber(Number::from(<span class="number">1</span>))), <span class="number">1u8</span>.into_json_value());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VNumber(Number::from(<span class="number">1</span>))), <span class="number">1u16</span>.into_json_value());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(VNumber(Number::from(<span class="number">1</span>))), <span class="number">1u32</span>.into_json_value());

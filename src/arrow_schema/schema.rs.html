@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-schema/src/schema.rs`."><title>schema.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_schema" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_schema/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-schema/src/schema.rs`."><title>schema.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_schema" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -839,19 +839,144 @@
 <a href="#839" id="839">839</a>
 <a href="#840" id="840">840</a>
 <a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
+<a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
+<a href="#942" id="942">942</a>
+<a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
+<a href="#959" id="959">959</a>
+<a href="#960" id="960">960</a>
+<a href="#961" id="961">961</a>
+<a href="#962" id="962">962</a>
+<a href="#963" id="963">963</a>
+<a href="#964" id="964">964</a>
+<a href="#965" id="965">965</a>
+<a href="#966" id="966">966</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -869,6 +994,7 @@
 </span><span class="attr">#[derive(Debug, Default)]
 </span><span class="kw">pub struct </span>SchemaBuilder {
     fields: Vec&lt;FieldRef&gt;,
+    metadata: HashMap&lt;String, String&gt;,
 }
 
 <span class="kw">impl </span>SchemaBuilder {
@@ -881,12 +1007,55 @@
     </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             fields: Vec::with_capacity(capacity),
+            metadata: Default::default(),
         }
     }
 
     <span class="doccomment">/// Appends a [`FieldRef`] to this [`SchemaBuilder`] without checking for collision
     </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, field: <span class="kw">impl </span>Into&lt;FieldRef&gt;) {
         <span class="self">self</span>.fields.push(field.into())
+    }
+
+    <span class="doccomment">/// Removes and returns the [`FieldRef`] as index `idx`
+    ///
+    /// # Panics
+    ///
+    /// Panics if index out of bounds
+    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: usize) -&gt; FieldRef {
+        <span class="self">self</span>.fields.remove(idx)
+    }
+
+    <span class="doccomment">/// Returns an immutable reference to the [`FieldRef`] at index `idx`
+    ///
+    /// # Panics
+    ///
+    /// Panics if index out of bounds
+    </span><span class="kw">pub fn </span>field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: usize) -&gt; <span class="kw-2">&amp;</span>FieldRef {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.fields[idx]
+    }
+
+    <span class="doccomment">/// Returns a mutable reference to the [`FieldRef`] at index `idx`
+    ///
+    /// # Panics
+    ///
+    /// Panics if index out of bounds
+    </span><span class="kw">pub fn </span>field_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: usize) -&gt; <span class="kw-2">&amp;mut </span>FieldRef {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.fields[idx]
+    }
+
+    <span class="doccomment">/// Returns an immutable reference to the Map of custom metadata key-value pairs.
+    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;String, String&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.metadata
+    }
+
+    <span class="doccomment">/// Returns a mutable reference to the Map of custom metadata key-value pairs.
+    </span><span class="kw">pub fn </span>metadata_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>HashMap&lt;String, String&gt; {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.metadata
+    }
+
+    <span class="doccomment">/// Reverse the fileds
+    </span><span class="kw">pub fn </span>reverse(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.fields.reverse();
     }
 
     <span class="doccomment">/// Appends a [`FieldRef`] to this [`SchemaBuilder`] checking for collision
@@ -912,7 +1081,10 @@
 
     <span class="doccomment">/// Consume this [`SchemaBuilder`] yielding the final [`Schema`]
     </span><span class="kw">pub fn </span>finish(<span class="self">self</span>) -&gt; Schema {
-        Schema::new(<span class="self">self</span>.fields)
+        Schema {
+            fields: <span class="self">self</span>.fields.into(),
+            metadata: <span class="self">self</span>.metadata,
+        }
     }
 }
 
@@ -920,6 +1092,7 @@
     <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span>Fields) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             fields: value.to_vec(),
+            metadata: Default::default(),
         }
     }
 }
@@ -928,6 +1101,22 @@
     <span class="kw">fn </span>from(value: Fields) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             fields: value.to_vec(),
+            metadata: Default::default(),
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>Schema&gt; <span class="kw">for </span>SchemaBuilder {
+    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span>Schema) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from(value.clone())
+    }
+}
+
+<span class="kw">impl </span>From&lt;Schema&gt; <span class="kw">for </span>SchemaBuilder {
+    <span class="kw">fn </span>from(value: Schema) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            fields: value.fields.to_vec(),
+            metadata: value.metadata,
         }
     }
 }
@@ -960,7 +1149,7 @@
 /// Note that this information is only part of the meta-data and not part of the physical
 /// memory layout.
 </span><span class="attr">#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>Schema {
     <span class="kw">pub </span>fields: Fields,
     <span class="doccomment">/// A map of key-value pairs containing additional meta data.
@@ -982,8 +1171,8 @@
     ///
     /// ```
     /// # use arrow_schema::*;
-    /// let field_a = Field::new(&quot;a&quot;, DataType::Int64, false);
-    /// let field_b = Field::new(&quot;b&quot;, DataType::Boolean, false);
+    /// let field_a = Field::new("a", DataType::Int64, false);
+    /// let field_b = Field::new("b", DataType::Boolean, false);
     ///
     /// let schema = Schema::new(vec![field_a, field_b]);
     /// ```
@@ -1000,19 +1189,16 @@
     /// # use arrow_schema::*;
     /// # use std::collections::HashMap;
     ///
-    /// let field_a = Field::new(&quot;a&quot;, DataType::Int64, false);
-    /// let field_b = Field::new(&quot;b&quot;, DataType::Boolean, false);
+    /// let field_a = Field::new("a", DataType::Int64, false);
+    /// let field_b = Field::new("b", DataType::Boolean, false);
     ///
     /// let mut metadata: HashMap&lt;String, String&gt; = HashMap::new();
-    /// metadata.insert(&quot;row_count&quot;.to_string(), &quot;100&quot;.to_string());
+    /// metadata.insert("row_count".to_string(), "100".to_string());
     ///
     /// let schema = Schema::new_with_metadata(vec![field_a, field_b], metadata);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new_with_metadata(
-        fields: <span class="kw">impl </span>Into&lt;Fields&gt;,
-        metadata: HashMap&lt;String, String&gt;,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new_with_metadata(fields: <span class="kw">impl </span>Into&lt;Fields&gt;, metadata: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             fields: fields.into(),
             metadata,
@@ -1033,7 +1219,7 @@
             .map(|i| {
                 <span class="self">self</span>.fields.get(<span class="kw-2">*</span>i).cloned().ok_or_else(|| {
                     ArrowError::SchemaError(<span class="macro">format!</span>(
-                        <span class="string">&quot;project index {} out of bounds, max field {}&quot;</span>,
+                        <span class="string">"project index {} out of bounds, max field {}"</span>,
                         i,
                         <span class="self">self</span>.fields().len()
                     ))
@@ -1052,28 +1238,26 @@
     ///
     /// let merged = Schema::try_merge(vec![
     ///     Schema::new(vec![
-    ///         Field::new(&quot;c1&quot;, DataType::Int64, false),
-    ///         Field::new(&quot;c2&quot;, DataType::Utf8, false),
+    ///         Field::new("c1", DataType::Int64, false),
+    ///         Field::new("c2", DataType::Utf8, false),
     ///     ]),
     ///     Schema::new(vec![
-    ///         Field::new(&quot;c1&quot;, DataType::Int64, true),
-    ///         Field::new(&quot;c2&quot;, DataType::Utf8, false),
-    ///         Field::new(&quot;c3&quot;, DataType::Utf8, false),
+    ///         Field::new("c1", DataType::Int64, true),
+    ///         Field::new("c2", DataType::Utf8, false),
+    ///         Field::new("c3", DataType::Utf8, false),
     ///     ]),
     /// ]).unwrap();
     ///
     /// assert_eq!(
     ///     merged,
     ///     Schema::new(vec![
-    ///         Field::new(&quot;c1&quot;, DataType::Int64, true),
-    ///         Field::new(&quot;c2&quot;, DataType::Utf8, false),
-    ///         Field::new(&quot;c3&quot;, DataType::Utf8, false),
+    ///         Field::new("c1", DataType::Int64, true),
+    ///         Field::new("c2", DataType::Utf8, false),
+    ///         Field::new("c3", DataType::Utf8, false),
     ///     ]),
     /// );
     /// ```
-    </span><span class="kw">pub fn </span>try_merge(
-        schemas: <span class="kw">impl </span>IntoIterator&lt;Item = <span class="self">Self</span>&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
+    </span><span class="kw">pub fn </span>try_merge(schemas: <span class="kw">impl </span>IntoIterator&lt;Item = <span class="self">Self</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>out_meta = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>out_fields = SchemaBuilder::new();
         <span class="kw">for </span>schema <span class="kw">in </span>schemas {
@@ -1084,8 +1268,8 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(old_val) = out_meta.get(<span class="kw-2">&amp;</span>key) {
                     <span class="kw">if </span>old_val != <span class="kw-2">&amp;</span>value {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::SchemaError(<span class="macro">format!</span>(
-                            <span class="string">&quot;Fail to merge schema due to conflicting metadata. \
-                                         Key &#39;{key}&#39; has different values &#39;{old_val}&#39; and &#39;{value}&#39;&quot;
+                            <span class="string">"Fail to merge schema due to conflicting metadata. \
+                                         Key '{key}' has different values '{old_val}' and '{value}'"
                         </span>)));
                     }
                 }
@@ -1136,7 +1320,7 @@
         <span class="kw">let </span>(idx, <span class="kw">_</span>) = <span class="self">self</span>.fields().find(name).ok_or_else(|| {
             <span class="kw">let </span>valid_fields: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.fields.iter().map(|f| f.name()).collect();
             ArrowError::SchemaError(<span class="macro">format!</span>(
-                <span class="string">&quot;Unable to get field named \&quot;{name}\&quot;. Valid fields: {valid_fields:?}&quot;
+                <span class="string">"Unable to get field named \"{name}\". Valid fields: {valid_fields:?}"
             </span>))
         })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(idx)
@@ -1164,9 +1348,37 @@
     </span><span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Schema) -&gt; bool {
         <span class="comment">// make sure self.metadata is a superset of other.metadata
         </span><span class="self">self</span>.fields.contains(<span class="kw-2">&amp;</span>other.fields)
-            &amp;&amp; other.metadata.iter().all(|(k, v1)| {
-                <span class="self">self</span>.metadata.get(k).map(|v2| v1 == v2).unwrap_or_default()
-            })
+            &amp;&amp; other
+                .metadata
+                .iter()
+                .all(|(k, v1)| <span class="self">self</span>.metadata.get(k).map(|v2| v1 == v2).unwrap_or_default())
+    }
+
+    <span class="doccomment">/// Remove field by index and return it. Recommend to use [`SchemaBuilder`]
+    /// if you are looking to remove multiple columns, as this will save allocations.
+    ///
+    /// # Panic
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use arrow_schema::{DataType, Field, Schema};
+    /// let mut schema = Schema::new(vec![
+    ///   Field::new("a", DataType::Boolean, false),
+    ///   Field::new("b", DataType::Int8, false),
+    ///   Field::new("c", DataType::Utf8, false),
+    /// ]);
+    /// assert_eq!(schema.fields.len(), 3);
+    /// assert_eq!(schema.remove(1), Field::new("b", DataType::Int8, false).into());
+    /// assert_eq!(schema.fields.len(), 2);
+    /// ```
+    </span><span class="attr">#[deprecated(note = <span class="string">"Use SchemaBuilder::remove"</span>)]
+    #[doc(hidden)]
+    #[allow(deprecated)]
+    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; FieldRef {
+        <span class="self">self</span>.fields.remove(index)
     }
 }
 
@@ -1178,7 +1390,7 @@
                 .iter()
                 .map(|c| c.to_string())
                 .collect::&lt;Vec&lt;String&gt;&gt;()
-                .join(<span class="string">&quot;, &quot;</span>),
+                .join(<span class="string">", "</span>),
         )
     }
 }
@@ -1194,7 +1406,7 @@
         keys.sort();
         <span class="kw">for </span>k <span class="kw">in </span>keys {
             k.hash(state);
-            <span class="self">self</span>.metadata.get(k).expect(<span class="string">&quot;key valid&quot;</span>).hash(state);
+            <span class="self">self</span>.metadata.get(k).expect(<span class="string">"key valid"</span>).hash(state);
         }
     }
 }
@@ -1207,13 +1419,13 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+    #[cfg(feature = <span class="string">"serde"</span>)]
     </span><span class="kw">fn </span>test_ser_de_metadata() {
         <span class="comment">// ser/de with empty metadata
         </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;address&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;priority&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"address"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"priority"</span>, DataType::UInt8, <span class="bool-val">false</span>),
         ]);
 
         <span class="kw">let </span>json = serde_json::to_string(<span class="kw-2">&amp;</span>schema).unwrap();
@@ -1222,8 +1434,8 @@
         <span class="macro">assert_eq!</span>(schema, de_schema);
 
         <span class="comment">// ser/de with non-empty metadata
-        </span><span class="kw">let </span>schema = schema
-            .with_metadata([(<span class="string">&quot;key&quot;</span>.to_owned(), <span class="string">&quot;val&quot;</span>.to_owned())].into_iter().collect());
+        </span><span class="kw">let </span>schema =
+            schema.with_metadata([(<span class="string">"key"</span>.to_owned(), <span class="string">"val"</span>.to_owned())].into_iter().collect());
         <span class="kw">let </span>json = serde_json::to_string(<span class="kw-2">&amp;</span>schema).unwrap();
         <span class="kw">let </span>de_schema = serde_json::from_str(<span class="kw-2">&amp;</span>json).unwrap();
 
@@ -1233,32 +1445,32 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_projection() {
         <span class="kw">let </span><span class="kw-2">mut </span>metadata = HashMap::new();
-        metadata.insert(<span class="string">&quot;meta&quot;</span>.to_string(), <span class="string">&quot;data&quot;</span>.to_string());
+        metadata.insert(<span class="string">"meta"</span>.to_string(), <span class="string">"data"</span>.to_string());
 
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;address&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;priority&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"address"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"priority"</span>, DataType::UInt8, <span class="bool-val">false</span>),
         ])
         .with_metadata(metadata);
 
         <span class="kw">let </span>projected: Schema = schema.project(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">2</span>]).unwrap();
 
         <span class="macro">assert_eq!</span>(projected.fields().len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(projected.fields()[<span class="number">0</span>].name(), <span class="string">&quot;name&quot;</span>);
-        <span class="macro">assert_eq!</span>(projected.fields()[<span class="number">1</span>].name(), <span class="string">&quot;priority&quot;</span>);
-        <span class="macro">assert_eq!</span>(projected.metadata.get(<span class="string">&quot;meta&quot;</span>).unwrap(), <span class="string">&quot;data&quot;</span>)
+        <span class="macro">assert_eq!</span>(projected.fields()[<span class="number">0</span>].name(), <span class="string">"name"</span>);
+        <span class="macro">assert_eq!</span>(projected.fields()[<span class="number">1</span>].name(), <span class="string">"priority"</span>);
+        <span class="macro">assert_eq!</span>(projected.metadata.get(<span class="string">"meta"</span>).unwrap(), <span class="string">"data"</span>)
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_oob_projection() {
         <span class="kw">let </span><span class="kw-2">mut </span>metadata = HashMap::new();
-        metadata.insert(<span class="string">&quot;meta&quot;</span>.to_string(), <span class="string">&quot;data&quot;</span>.to_string());
+        metadata.insert(<span class="string">"meta"</span>.to_string(), <span class="string">"data"</span>.to_string());
 
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;address&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;priority&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"address"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"priority"</span>, DataType::UInt8, <span class="bool-val">false</span>),
         ])
         .with_metadata(metadata);
 
@@ -1268,7 +1480,7 @@
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = projected {
             <span class="macro">assert_eq!</span>(
                 e.to_string(),
-                <span class="string">&quot;Schema error: project index 3 out of bounds, max field 3&quot;</span>.to_string()
+                <span class="string">"Schema error: project index 3 out of bounds, max field 3"</span>.to_string()
             )
         }
     }
@@ -1276,22 +1488,22 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_schema_contains() {
         <span class="kw">let </span><span class="kw-2">mut </span>metadata1 = HashMap::new();
-        metadata1.insert(<span class="string">&quot;meta&quot;</span>.to_string(), <span class="string">&quot;data&quot;</span>.to_string());
+        metadata1.insert(<span class="string">"meta"</span>.to_string(), <span class="string">"data"</span>.to_string());
 
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;address&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;priority&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"address"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"priority"</span>, DataType::UInt8, <span class="bool-val">false</span>),
         ])
         .with_metadata(metadata1.clone());
 
         <span class="kw">let </span><span class="kw-2">mut </span>metadata2 = HashMap::new();
-        metadata2.insert(<span class="string">&quot;meta&quot;</span>.to_string(), <span class="string">&quot;data&quot;</span>.to_string());
-        metadata2.insert(<span class="string">&quot;meta2&quot;</span>.to_string(), <span class="string">&quot;data&quot;</span>.to_string());
+        metadata2.insert(<span class="string">"meta"</span>.to_string(), <span class="string">"data"</span>.to_string());
+        metadata2.insert(<span class="string">"meta2"</span>.to_string(), <span class="string">"data"</span>.to_string());
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;address&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;priority&quot;</span>, DataType::UInt8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"address"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"priority"</span>, DataType::UInt8, <span class="bool-val">false</span>),
         ])
         .with_metadata(metadata2);
 
@@ -1306,25 +1518,25 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>schema_equality() {
         <span class="kw">let </span>schema1 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Float64, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Float64, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
         ]);
         <span class="kw">let </span>schema2 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Float64, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Float64, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
         ]);
 
         <span class="macro">assert_eq!</span>(schema1, schema2);
 
         <span class="kw">let </span>schema3 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Float32, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c1"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Float32, <span class="bool-val">true</span>),
         ]);
         <span class="kw">let </span>schema4 = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;C1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;C2&quot;</span>, DataType::Float64, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"C1"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"C2"</span>, DataType::Float64, <span class="bool-val">true</span>),
         ]);
 
         <span class="macro">assert_ne!</span>(schema1, schema3);
@@ -1333,16 +1545,16 @@
         <span class="macro">assert_ne!</span>(schema2, schema4);
         <span class="macro">assert_ne!</span>(schema3, schema4);
 
-        <span class="kw">let </span>f = Field::new(<span class="string">&quot;c1&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
-            [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+        <span class="kw">let </span>f = Field::new(<span class="string">"c1"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
+            [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                 .iter()
                 .cloned()
                 .collect(),
         );
         <span class="kw">let </span>schema5 = Schema::new(<span class="macro">vec!</span>[
             f,
-            Field::new(<span class="string">&quot;c2&quot;</span>, DataType::Float64, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;c3&quot;</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c2"</span>, DataType::Float64, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"c3"</span>, DataType::LargeBinary, <span class="bool-val">true</span>),
         ]);
         <span class="macro">assert_ne!</span>(schema1, schema5);
     }
@@ -1351,13 +1563,13 @@
     </span><span class="kw">fn </span>create_schema_string() {
         <span class="kw">let </span>schema = person_schema();
         <span class="macro">assert_eq!</span>(schema.to_string(),
-                   <span class="string">&quot;Field { name: \&quot;first_name\&quot;, data_type: Utf8, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {\&quot;k\&quot;: \&quot;v\&quot;} }, \
-        Field { name: \&quot;last_name\&quot;, data_type: Utf8, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, \
-        Field { name: \&quot;address\&quot;, data_type: Struct([\
-            Field { name: \&quot;street\&quot;, data_type: Utf8, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, \
-            Field { name: \&quot;zip\&quot;, data_type: UInt16, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }\
+                   <span class="string">"Field { name: \"first_name\", data_type: Utf8, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {\"k\": \"v\"} }, \
+        Field { name: \"last_name\", data_type: Utf8, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, \
+        Field { name: \"address\", data_type: Struct([\
+            Field { name: \"street\", data_type: Utf8, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, \
+            Field { name: \"zip\", data_type: UInt16, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }\
         ]), nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, \
-        Field { name: \&quot;interests\&quot;, data_type: Dictionary(Int32, Utf8), nullable: true, dict_id: 123, dict_is_ordered: true, metadata: {} }&quot;</span>)
+        Field { name: \"interests\", data_type: Dictionary(Int32, Utf8), nullable: true, dict_id: 123, dict_is_ordered: true, metadata: {} }"</span>)
     }
 
     <span class="attr">#[test]
@@ -1369,7 +1581,7 @@
 
         <span class="comment">// test field accessors
         </span><span class="kw">let </span>first_name = <span class="kw-2">&amp;</span>schema.fields()[<span class="number">0</span>];
-        <span class="macro">assert_eq!</span>(first_name.name(), <span class="string">&quot;first_name&quot;</span>);
+        <span class="macro">assert_eq!</span>(first_name.name(), <span class="string">"first_name"</span>);
         <span class="macro">assert_eq!</span>(first_name.data_type(), <span class="kw-2">&amp;</span>DataType::Utf8);
         <span class="macro">assert!</span>(!first_name.is_nullable());
         <span class="macro">assert_eq!</span>(first_name.dict_id(), <span class="prelude-val">None</span>);
@@ -1379,12 +1591,12 @@
         <span class="macro">assert!</span>(!metadata.is_empty());
         <span class="kw">let </span>md = <span class="kw-2">&amp;</span>metadata;
         <span class="macro">assert_eq!</span>(md.len(), <span class="number">1</span>);
-        <span class="kw">let </span>key = md.get(<span class="string">&quot;k&quot;</span>);
+        <span class="kw">let </span>key = md.get(<span class="string">"k"</span>);
         <span class="macro">assert!</span>(key.is_some());
-        <span class="macro">assert_eq!</span>(key.unwrap(), <span class="string">&quot;v&quot;</span>);
+        <span class="macro">assert_eq!</span>(key.unwrap(), <span class="string">"v"</span>);
 
         <span class="kw">let </span>interests = <span class="kw-2">&amp;</span>schema.fields()[<span class="number">3</span>];
-        <span class="macro">assert_eq!</span>(interests.name(), <span class="string">&quot;interests&quot;</span>);
+        <span class="macro">assert_eq!</span>(interests.name(), <span class="string">"interests"</span>);
         <span class="macro">assert_eq!</span>(
             interests.data_type(),
             <span class="kw-2">&amp;</span>DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8))
@@ -1395,30 +1607,30 @@
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Unable to get field named \\\&quot;nickname\\\&quot;. Valid fields: [\\\&quot;first_name\\\&quot;, \\\&quot;last_name\\\&quot;, \\\&quot;address\\\&quot;, \\\&quot;interests\\\&quot;]&quot;
+        expected = <span class="string">"Unable to get field named \\\"nickname\\\". Valid fields: [\\\"first_name\\\", \\\"last_name\\\", \\\"address\\\", \\\"interests\\\"]"
     </span>)]
     </span><span class="kw">fn </span>schema_index_of() {
         <span class="kw">let </span>schema = person_schema();
-        <span class="macro">assert_eq!</span>(schema.index_of(<span class="string">&quot;first_name&quot;</span>).unwrap(), <span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(schema.index_of(<span class="string">&quot;last_name&quot;</span>).unwrap(), <span class="number">1</span>);
-        schema.index_of(<span class="string">&quot;nickname&quot;</span>).unwrap();
+        <span class="macro">assert_eq!</span>(schema.index_of(<span class="string">"first_name"</span>).unwrap(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(schema.index_of(<span class="string">"last_name"</span>).unwrap(), <span class="number">1</span>);
+        schema.index_of(<span class="string">"nickname"</span>).unwrap();
     }
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Unable to get field named \\\&quot;nickname\\\&quot;. Valid fields: [\\\&quot;first_name\\\&quot;, \\\&quot;last_name\\\&quot;, \\\&quot;address\\\&quot;, \\\&quot;interests\\\&quot;]&quot;
+        expected = <span class="string">"Unable to get field named \\\"nickname\\\". Valid fields: [\\\"first_name\\\", \\\"last_name\\\", \\\"address\\\", \\\"interests\\\"]"
     </span>)]
     </span><span class="kw">fn </span>schema_field_with_name() {
         <span class="kw">let </span>schema = person_schema();
         <span class="macro">assert_eq!</span>(
-            schema.field_with_name(<span class="string">&quot;first_name&quot;</span>).unwrap().name(),
-            <span class="string">&quot;first_name&quot;
+            schema.field_with_name(<span class="string">"first_name"</span>).unwrap().name(),
+            <span class="string">"first_name"
         </span>);
         <span class="macro">assert_eq!</span>(
-            schema.field_with_name(<span class="string">&quot;last_name&quot;</span>).unwrap().name(),
-            <span class="string">&quot;last_name&quot;
+            schema.field_with_name(<span class="string">"last_name"</span>).unwrap().name(),
+            <span class="string">"last_name"
         </span>);
-        schema.field_with_name(<span class="string">&quot;nickname&quot;</span>).unwrap();
+        schema.field_with_name(<span class="string">"nickname"</span>).unwrap();
     }
 
     <span class="attr">#[test]
@@ -1430,30 +1642,30 @@
             .iter()
             .map(|f| f.name())
             .collect();
-        <span class="macro">assert_eq!</span>(fields_dict_123, <span class="macro">vec!</span>[<span class="string">&quot;interests&quot;</span>]);
+        <span class="macro">assert_eq!</span>(fields_dict_123, <span class="macro">vec!</span>[<span class="string">"interests"</span>]);
 
         <span class="macro">assert!</span>(schema.fields_with_dict_id(<span class="number">456</span>).is_empty());
     }
 
     <span class="kw">fn </span>person_schema() -&gt; Schema {
-        <span class="kw">let </span>kv_array = [(<span class="string">&quot;k&quot;</span>.to_string(), <span class="string">&quot;v&quot;</span>.to_string())];
+        <span class="kw">let </span>kv_array = [(<span class="string">"k"</span>.to_string(), <span class="string">"v"</span>.to_string())];
         <span class="kw">let </span>field_metadata: HashMap&lt;String, String&gt; = kv_array.iter().cloned().collect();
         <span class="kw">let </span>first_name =
-            Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(field_metadata);
+            Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(field_metadata);
 
         Schema::new(<span class="macro">vec!</span>[
             first_name,
-            Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"last_name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
             Field::new(
-                <span class="string">&quot;address&quot;</span>,
+                <span class="string">"address"</span>,
                 DataType::Struct(Fields::from(<span class="macro">vec!</span>[
-                    Field::new(<span class="string">&quot;street&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-                    Field::new(<span class="string">&quot;zip&quot;</span>, DataType::UInt16, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"street"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"zip"</span>, DataType::UInt16, <span class="bool-val">false</span>),
                 ])),
                 <span class="bool-val">false</span>,
             ),
             Field::new_dict(
-                <span class="string">&quot;interests&quot;</span>,
+                <span class="string">"interests"</span>,
                 DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
                 <span class="bool-val">true</span>,
                 <span class="number">123</span>,
@@ -1465,45 +1677,41 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_try_merge_field_with_metadata() {
         <span class="comment">// 1. Different values for the same key should cause error.
-        </span><span class="kw">let </span>metadata1: HashMap&lt;String, String&gt; = [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+        </span><span class="kw">let </span>metadata1: HashMap&lt;String, String&gt; = [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
             .iter()
             .cloned()
             .collect();
-        <span class="kw">let </span>f1 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(metadata1);
+        <span class="kw">let </span>f1 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(metadata1);
 
-        <span class="kw">let </span>metadata2: HashMap&lt;String, String&gt; = [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;baz&quot;</span>.to_string())]
+        <span class="kw">let </span>metadata2: HashMap&lt;String, String&gt; = [(<span class="string">"foo"</span>.to_string(), <span class="string">"baz"</span>.to_string())]
             .iter()
             .cloned()
             .collect();
-        <span class="kw">let </span>f2 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(metadata2);
+        <span class="kw">let </span>f2 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(metadata2);
 
-        <span class="macro">assert!</span>(
-            Schema::try_merge(<span class="macro">vec!</span>[Schema::new(<span class="macro">vec!</span>[f1]), Schema::new(<span class="macro">vec!</span>[f2])])
-                .is_err()
-        );
+        <span class="macro">assert!</span>(Schema::try_merge(<span class="macro">vec!</span>[Schema::new(<span class="macro">vec!</span>[f1]), Schema::new(<span class="macro">vec!</span>[f2])]).is_err());
 
         <span class="comment">// 2. None + Some
-        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>);
-        <span class="kw">let </span>metadata2: HashMap&lt;String, String&gt; =
-            [(<span class="string">&quot;missing&quot;</span>.to_string(), <span class="string">&quot;value&quot;</span>.to_string())]
-                .iter()
-                .cloned()
-                .collect();
-        <span class="kw">let </span>f2 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(metadata2);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>);
+        <span class="kw">let </span>metadata2: HashMap&lt;String, String&gt; = [(<span class="string">"missing"</span>.to_string(), <span class="string">"value"</span>.to_string())]
+            .iter()
+            .cloned()
+            .collect();
+        <span class="kw">let </span>f2 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(metadata2);
 
         <span class="macro">assert!</span>(f1.try_merge(<span class="kw-2">&amp;</span>f2).is_ok());
         <span class="macro">assert!</span>(!f1.metadata().is_empty());
         <span class="macro">assert_eq!</span>(f1.metadata(), f2.metadata());
 
         <span class="comment">// 3. Some + Some
-        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
-            [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
+            [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                 .iter()
                 .cloned()
                 .collect(),
         );
-        <span class="kw">let </span>f2 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
-            [(<span class="string">&quot;foo2&quot;</span>.to_string(), <span class="string">&quot;bar2&quot;</span>.to_string())]
+        <span class="kw">let </span>f2 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
+            [(<span class="string">"foo2"</span>.to_string(), <span class="string">"bar2"</span>.to_string())]
                 .iter()
                 .cloned()
                 .collect(),
@@ -1514,8 +1722,8 @@
         <span class="macro">assert_eq!</span>(
             f1.metadata().clone(),
             [
-                (<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string()),
-                (<span class="string">&quot;foo2&quot;</span>.to_string(), <span class="string">&quot;bar2&quot;</span>.to_string())
+                (<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string()),
+                (<span class="string">"foo2"</span>.to_string(), <span class="string">"bar2"</span>.to_string())
             ]
             .iter()
             .cloned()
@@ -1523,26 +1731,26 @@
         );
 
         <span class="comment">// 4. Some + None.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
-            [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>).with_metadata(
+            [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                 .iter()
                 .cloned()
                 .collect(),
         );
-        <span class="kw">let </span>f2 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>);
+        <span class="kw">let </span>f2 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>);
         <span class="macro">assert!</span>(f1.try_merge(<span class="kw-2">&amp;</span>f2).is_ok());
         <span class="macro">assert!</span>(!f1.metadata().is_empty());
         <span class="macro">assert_eq!</span>(
             f1.metadata().clone(),
-            [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+            [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                 .iter()
                 .cloned()
                 .collect()
         );
 
         <span class="comment">// 5. None + None.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>);
-        <span class="kw">let </span>f2 = Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>f1 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>);
+        <span class="kw">let </span>f2 = Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>);
         <span class="macro">assert!</span>(f1.try_merge(<span class="kw-2">&amp;</span>f2).is_ok());
         <span class="macro">assert!</span>(f1.metadata().is_empty());
     }
@@ -1551,34 +1759,32 @@
     </span><span class="kw">fn </span>test_schema_merge() {
         <span class="kw">let </span>merged = Schema::try_merge(<span class="macro">vec!</span>[
             Schema::new(<span class="macro">vec!</span>[
-                Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-                Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"last_name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
                 Field::new(
-                    <span class="string">&quot;address&quot;</span>,
-                    DataType::Struct(
-                        <span class="macro">vec!</span>[Field::new(<span class="string">&quot;zip&quot;</span>, DataType::UInt16, <span class="bool-val">false</span>)].into(),
-                    ),
+                    <span class="string">"address"</span>,
+                    DataType::Struct(<span class="macro">vec!</span>[Field::new(<span class="string">"zip"</span>, DataType::UInt16, <span class="bool-val">false</span>)].into()),
                     <span class="bool-val">false</span>,
                 ),
             ]),
             Schema::new_with_metadata(
                 <span class="macro">vec!</span>[
                     <span class="comment">// nullable merge
-                    </span>Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                    </span>Field::new(<span class="string">"last_name"</span>, DataType::Utf8, <span class="bool-val">true</span>),
                     Field::new(
-                        <span class="string">&quot;address&quot;</span>,
+                        <span class="string">"address"</span>,
                         DataType::Struct(Fields::from(<span class="macro">vec!</span>[
                             <span class="comment">// add new nested field
-                            </span>Field::new(<span class="string">&quot;street&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                            </span>Field::new(<span class="string">"street"</span>, DataType::Utf8, <span class="bool-val">false</span>),
                             <span class="comment">// nullable merge on nested field
-                            </span>Field::new(<span class="string">&quot;zip&quot;</span>, DataType::UInt16, <span class="bool-val">true</span>),
+                            </span>Field::new(<span class="string">"zip"</span>, DataType::UInt16, <span class="bool-val">true</span>),
                         ])),
                         <span class="bool-val">false</span>,
                     ),
                     <span class="comment">// new field
-                    </span>Field::new(<span class="string">&quot;number&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                    </span>Field::new(<span class="string">"number"</span>, DataType::Utf8, <span class="bool-val">true</span>),
                 ],
-                [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+                [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                     .iter()
                     .cloned()
                     .collect::&lt;HashMap&lt;String, String&gt;&gt;(),
@@ -1590,19 +1796,19 @@
             merged,
             Schema::new_with_metadata(
                 <span class="macro">vec!</span>[
-                    Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-                    Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                    Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                    Field::new(<span class="string">"last_name"</span>, DataType::Utf8, <span class="bool-val">true</span>),
                     Field::new(
-                        <span class="string">&quot;address&quot;</span>,
+                        <span class="string">"address"</span>,
                         DataType::Struct(Fields::from(<span class="macro">vec!</span>[
-                            Field::new(<span class="string">&quot;zip&quot;</span>, DataType::UInt16, <span class="bool-val">true</span>),
-                            Field::new(<span class="string">&quot;street&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                            Field::new(<span class="string">"zip"</span>, DataType::UInt16, <span class="bool-val">true</span>),
+                            Field::new(<span class="string">"street"</span>, DataType::Utf8, <span class="bool-val">false</span>),
                         ])),
                         <span class="bool-val">false</span>,
                     ),
-                    Field::new(<span class="string">&quot;number&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                    Field::new(<span class="string">"number"</span>, DataType::Utf8, <span class="bool-val">true</span>),
                 ],
-                [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+                [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                     .iter()
                     .cloned()
                     .collect::&lt;HashMap&lt;String, String&gt;&gt;()
@@ -1613,32 +1819,32 @@
         </span><span class="macro">assert_eq!</span>(
             Schema::try_merge(<span class="macro">vec!</span>[
                 Schema::new(<span class="macro">vec!</span>[Field::new_union(
-                    <span class="string">&quot;c1&quot;</span>,
+                    <span class="string">"c1"</span>,
                     <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>],
                     <span class="macro">vec!</span>[
-                        Field::new(<span class="string">&quot;c11&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
-                        Field::new(<span class="string">&quot;c12&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                        Field::new(<span class="string">"c11"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                        Field::new(<span class="string">"c12"</span>, DataType::Utf8, <span class="bool-val">true</span>),
                     ],
                     UnionMode::Dense
                 ),]),
                 Schema::new(<span class="macro">vec!</span>[Field::new_union(
-                    <span class="string">&quot;c1&quot;</span>,
+                    <span class="string">"c1"</span>,
                     <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>],
                     <span class="macro">vec!</span>[
-                        Field::new(<span class="string">&quot;c12&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
-                        Field::new(<span class="string">&quot;c13&quot;</span>, DataType::Time64(TimeUnit::Second), <span class="bool-val">true</span>),
+                        Field::new(<span class="string">"c12"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                        Field::new(<span class="string">"c13"</span>, DataType::Time64(TimeUnit::Second), <span class="bool-val">true</span>),
                     ],
                     UnionMode::Dense
                 ),])
             ])
             .unwrap(),
             Schema::new(<span class="macro">vec!</span>[Field::new_union(
-                <span class="string">&quot;c1&quot;</span>,
+                <span class="string">"c1"</span>,
                 <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],
                 <span class="macro">vec!</span>[
-                    Field::new(<span class="string">&quot;c11&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
-                    Field::new(<span class="string">&quot;c12&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
-                    Field::new(<span class="string">&quot;c13&quot;</span>, DataType::Time64(TimeUnit::Second), <span class="bool-val">true</span>),
+                    Field::new(<span class="string">"c11"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                    Field::new(<span class="string">"c12"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+                    Field::new(<span class="string">"c13"</span>, DataType::Time64(TimeUnit::Second), <span class="bool-val">true</span>),
                 ],
                 UnionMode::Dense
             ),]),
@@ -1647,25 +1853,25 @@
         <span class="comment">// incompatible field should throw error
         </span><span class="macro">assert!</span>(Schema::try_merge(<span class="macro">vec!</span>[
             Schema::new(<span class="macro">vec!</span>[
-                Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-                Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+                Field::new(<span class="string">"last_name"</span>, DataType::Utf8, <span class="bool-val">false</span>),
             ]),
-            Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Int64, <span class="bool-val">false</span>),])
+            Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"last_name"</span>, DataType::Int64, <span class="bool-val">false</span>),])
         ])
         .is_err());
 
         <span class="comment">// incompatible metadata should throw error
         </span><span class="kw">let </span>res = Schema::try_merge(<span class="macro">vec!</span>[
             Schema::new_with_metadata(
-                <span class="macro">vec!</span>[Field::new(<span class="string">&quot;first_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>)],
-                [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+                <span class="macro">vec!</span>[Field::new(<span class="string">"first_name"</span>, DataType::Utf8, <span class="bool-val">false</span>)],
+                [(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                     .iter()
                     .cloned()
                     .collect::&lt;HashMap&lt;String, String&gt;&gt;(),
             ),
             Schema::new_with_metadata(
-                <span class="macro">vec!</span>[Field::new(<span class="string">&quot;last_name&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>)],
-                [(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;baz&quot;</span>.to_string())]
+                <span class="macro">vec!</span>[Field::new(<span class="string">"last_name"</span>, DataType::Utf8, <span class="bool-val">false</span>)],
+                [(<span class="string">"foo"</span>.to_string(), <span class="string">"baz"</span>.to_string())]
                     .iter()
                     .cloned()
                     .collect::&lt;HashMap&lt;String, String&gt;&gt;(),
@@ -1673,11 +1879,55 @@
         ])
         .unwrap_err();
 
-        <span class="kw">let </span>expected = <span class="string">&quot;Fail to merge schema due to conflicting metadata. Key &#39;foo&#39; has different values &#39;bar&#39; and &#39;baz&#39;&quot;</span>;
+        <span class="kw">let </span>expected = <span class="string">"Fail to merge schema due to conflicting metadata. Key 'foo' has different values 'bar' and 'baz'"</span>;
         <span class="macro">assert!</span>(
             res.to_string().contains(expected),
-            <span class="string">&quot;Could not find expected string &#39;{expected}&#39; in &#39;{res}&#39;&quot;
+            <span class="string">"Could not find expected string '{expected}' in '{res}'"
         </span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_schema_builder_change_field() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = SchemaBuilder::new();
+        builder.push(Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        builder.push(Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">false</span>));
+        <span class="kw-2">*</span>builder.field_mut(<span class="number">1</span>) = Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="macro">assert_eq!</span>(
+            builder.fields,
+            <span class="macro">vec!</span>[
+                Arc::new(Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>))
+            ]
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_schema_builder_reverse() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = SchemaBuilder::new();
+        builder.push(Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        builder.push(Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">true</span>));
+        builder.reverse();
+        <span class="macro">assert_eq!</span>(
+            builder.fields,
+            <span class="macro">vec!</span>[
+                Arc::new(Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">true</span>)),
+                Arc::new(Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>))
+            ]
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_schema_builder_metadata() {
+        <span class="kw">let </span><span class="kw-2">mut </span>metadata = HashMap::with_capacity(<span class="number">1</span>);
+        metadata.insert(<span class="string">"key"</span>.to_string(), <span class="string">"value"</span>.to_string());
+
+        <span class="kw">let </span>fields = <span class="macro">vec!</span>[Field::new(<span class="string">"test"</span>, DataType::Int8, <span class="bool-val">true</span>)];
+        <span class="kw">let </span><span class="kw-2">mut </span>builder: SchemaBuilder = Schema::new(fields).with_metadata(metadata).into();
+        builder.metadata_mut().insert(<span class="string">"k"</span>.into(), <span class="string">"v"</span>.into());
+        <span class="kw">let </span>out = builder.finish();
+        <span class="macro">assert_eq!</span>(out.metadata.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(out.metadata[<span class="string">"k"</span>], <span class="string">"v"</span>);
+        <span class="macro">assert_eq!</span>(out.metadata[<span class="string">"key"</span>], <span class="string">"value"</span>);
     }
 }
 </code></pre></div></section></main></body></html>

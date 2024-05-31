@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/arrow/record_reader/definition_levels.rs`."><title>definition_levels.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="parquet" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../parquet/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/arrow/record_reader/definition_levels.rs`."><title>definition_levels.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="parquet" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -446,76 +446,40 @@
 <a href="#446" id="446">446</a>
 <a href="#447" id="447">447</a>
 <a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::ops::Range;
-
-<span class="kw">use </span>arrow_array::builder::BooleanBufferBuilder;
+</span><span class="kw">use </span>arrow_array::builder::BooleanBufferBuilder;
 <span class="kw">use </span>arrow_buffer::bit_chunk_iterator::UnalignedBitChunk;
 <span class="kw">use </span>arrow_buffer::Buffer;
+<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::arrow::buffer::bit_util::count_set_bits;
 <span class="kw">use </span><span class="kw">crate</span>::basic::Encoding;
 <span class="kw">use </span><span class="kw">crate</span>::column::reader::decoder::{
     ColumnLevelDecoder, DefinitionLevelDecoder, DefinitionLevelDecoderImpl,
-    LevelsBufferSlice,
 };
 <span class="kw">use </span><span class="kw">crate</span>::errors::{ParquetError, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::schema::types::ColumnDescPtr;
-<span class="kw">use </span><span class="kw">crate</span>::util::memory::ByteBufferPtr;
-
-<span class="kw">use </span><span class="kw">super</span>::buffer::ScalarBuffer;
 
 <span class="kw">enum </span>BufferInner {
     <span class="doccomment">/// Compute levels and null mask
     </span>Full {
-        levels: ScalarBuffer&lt;i16&gt;,
+        levels: Vec&lt;i16&gt;,
         nulls: BooleanBufferBuilder,
         max_level: i16,
     },
@@ -543,13 +507,13 @@
                 <span class="macro">assert_eq!</span>(
                     desc.max_def_level(),
                     <span class="number">1</span>,
-                    <span class="string">&quot;max definition level must be 1 to only compute null bitmask&quot;
+                    <span class="string">"max definition level must be 1 to only compute null bitmask"
                 </span>);
 
                 <span class="macro">assert_eq!</span>(
                     desc.max_rep_level(),
                     <span class="number">0</span>,
-                    <span class="string">&quot;max repetition level must be 0 to only compute null bitmask&quot;
+                    <span class="string">"max repetition level must be 0 to only compute null bitmask"
                 </span>);
 
                 BufferInner::Mask {
@@ -557,7 +521,7 @@
                 }
             }
             <span class="bool-val">false </span>=&gt; BufferInner::Full {
-                levels: ScalarBuffer::new(),
+                levels: Vec::new(),
                 nulls: BooleanBufferBuilder::new(<span class="number">0</span>),
                 max_level: desc.max_def_level(),
             },
@@ -567,16 +531,11 @@
     }
 
     <span class="doccomment">/// Returns the built level data
-    </span><span class="kw">pub fn </span>consume_levels(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Buffer&gt; {
+    </span><span class="kw">pub fn </span>consume_levels(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;i16&gt;&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.inner {
-            BufferInner::Full { levels, .. } =&gt; <span class="prelude-val">Some</span>(std::mem::take(levels).into()),
+            BufferInner::Full { levels, .. } =&gt; <span class="prelude-val">Some</span>(std::mem::take(levels)),
             BufferInner::Mask { .. } =&gt; <span class="prelude-val">None</span>,
         }
-    }
-
-    <span class="kw">pub fn </span>set_len(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) {
-        <span class="macro">assert_eq!</span>(<span class="self">self</span>.nulls().len(), len);
-        <span class="self">self</span>.len = len;
     }
 
     <span class="doccomment">/// Returns the built null bitmask
@@ -593,18 +552,6 @@
             BufferInner::Full { nulls, .. } =&gt; nulls,
             BufferInner::Mask { nulls } =&gt; nulls,
         }
-    }
-}
-
-<span class="kw">impl </span>LevelsBufferSlice <span class="kw">for </span>DefinitionLevelBuffer {
-    <span class="kw">fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        usize::MAX
-    }
-
-    <span class="kw">fn </span>count_nulls(<span class="kw-2">&amp;</span><span class="self">self</span>, range: Range&lt;usize&gt;, _max_level: i16) -&gt; usize {
-        <span class="kw">let </span>total_count = range.end - range.start;
-        <span class="kw">let </span>range = range.start + <span class="self">self</span>.len..range.end + <span class="self">self</span>.len;
-        total_count - count_set_bits(<span class="self">self</span>.nulls().as_slice(), range)
     }
 }
 
@@ -630,9 +577,9 @@
 }
 
 <span class="kw">impl </span>ColumnLevelDecoder <span class="kw">for </span>DefinitionLevelBufferDecoder {
-    <span class="kw">type </span>Slice = DefinitionLevelBuffer;
+    <span class="kw">type </span>Buffer = DefinitionLevelBuffer;
 
-    <span class="kw">fn </span>set_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, encoding: Encoding, data: ByteBufferPtr) {
+    <span class="kw">fn </span>set_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, encoding: Encoding, data: Bytes) {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.decoder {
             MaybePacked::Packed(d) =&gt; d.set_data(encoding, data),
             MaybePacked::Fallback(d) =&gt; d.set_data(encoding, data),
@@ -643,9 +590,9 @@
 <span class="kw">impl </span>DefinitionLevelDecoder <span class="kw">for </span>DefinitionLevelBufferDecoder {
     <span class="kw">fn </span>read_def_levels(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        writer: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Slice,
-        range: Range&lt;usize&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        writer: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Buffer,
+        num_levels: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(usize, usize)&gt; {
         <span class="kw">match </span>(<span class="kw-2">&amp;mut </span>writer.inner, <span class="kw-2">&amp;mut </span><span class="self">self</span>.decoder) {
             (
                 BufferInner::Full {
@@ -656,39 +603,33 @@
                 MaybePacked::Fallback(decoder),
             ) =&gt; {
                 <span class="macro">assert_eq!</span>(<span class="self">self</span>.max_level, <span class="kw-2">*</span>max_level);
-                <span class="macro">assert_eq!</span>(range.start + writer.len, nulls.len());
 
-                levels.resize(range.end + writer.len);
-
-                <span class="kw">let </span>slice = <span class="kw-2">&amp;mut </span>levels.as_slice_mut()[writer.len..];
-                <span class="kw">let </span>levels_read = decoder.read_def_levels(slice, range.clone())<span class="question-mark">?</span>;
+                <span class="kw">let </span>start = levels.len();
+                <span class="kw">let </span>(values_read, levels_read) = decoder.read_def_levels(levels, num_levels)<span class="question-mark">?</span>;
 
                 nulls.reserve(levels_read);
-                <span class="kw">for </span>i <span class="kw">in </span><span class="kw-2">&amp;</span>slice[range.start..range.start + levels_read] {
-                    nulls.append(i == max_level)
+                <span class="kw">for </span>i <span class="kw">in </span><span class="kw-2">&amp;</span>levels[start..] {
+                    nulls.append(i == max_level);
                 }
 
-                <span class="prelude-val">Ok</span>(levels_read)
+                <span class="prelude-val">Ok</span>((values_read, levels_read))
             }
             (BufferInner::Mask { nulls }, MaybePacked::Packed(decoder)) =&gt; {
                 <span class="macro">assert_eq!</span>(<span class="self">self</span>.max_level, <span class="number">1</span>);
-                <span class="macro">assert_eq!</span>(range.start + writer.len, nulls.len());
 
-                decoder.read(nulls, range.end - range.start)
+                <span class="kw">let </span>start = nulls.len();
+                <span class="kw">let </span>levels_read = decoder.read(nulls, num_levels)<span class="question-mark">?</span>;
+
+                <span class="kw">let </span>values_read = count_set_bits(nulls.as_slice(), start..start + levels_read);
+                <span class="prelude-val">Ok</span>((values_read, levels_read))
             }
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;inconsistent null mask&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"inconsistent null mask"</span>),
         }
     }
 
-    <span class="kw">fn </span>skip_def_levels(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        num_levels: usize,
-        max_def_level: i16,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(usize, usize)&gt; {
+    <span class="kw">fn </span>skip_def_levels(<span class="kw-2">&amp;mut </span><span class="self">self</span>, num_levels: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(usize, usize)&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.decoder {
-            MaybePacked::Fallback(decoder) =&gt; {
-                decoder.skip_def_levels(num_levels, max_def_level)
-            }
+            MaybePacked::Fallback(decoder) =&gt; decoder.skip_def_levels(num_levels),
             MaybePacked::Packed(decoder) =&gt; decoder.skip(num_levels),
         }
     }
@@ -709,7 +650,7 @@
 /// [RLE]: https://github.com/apache/parquet-format/blob/master/Encodings.md#run-length-encoding--bit-packing-hybrid-rle--3
 /// [BIT_PACKED]: https://github.com/apache/parquet-format/blob/master/Encodings.md#bit-packed-deprecated-bit_packed--4
 </span><span class="kw">struct </span>PackedDecoder {
-    data: ByteBufferPtr,
+    data: Bytes,
     data_offset: usize,
     rle_left: usize,
     rle_value: bool,
@@ -728,8 +669,7 @@
             <span class="self">self</span>.rle_left = (indicator_value &gt;&gt; <span class="number">1</span>) <span class="kw">as </span>usize;
             <span class="kw">let </span>byte = <span class="kw-2">*</span><span class="self">self</span>.data.as_ref().get(<span class="self">self</span>.data_offset).ok_or_else(|| {
                 ParquetError::EOF(
-                    <span class="string">&quot;unexpected end of file whilst decoding definition levels rle value&quot;
-                        </span>.into(),
+                    <span class="string">"unexpected end of file whilst decoding definition levels rle value"</span>.into(),
                 )
             })<span class="question-mark">?</span>;
 
@@ -750,7 +690,7 @@
                 .get(<span class="self">self</span>.data_offset + offset)
                 .ok_or_else(|| {
                     ParquetError::EOF(
-                        <span class="string">&quot;unexpected end of file whilst decoding definition levels rle header&quot;
+                        <span class="string">"unexpected end of file whilst decoding definition levels rle header"
                             </span>.into(),
                     )
                 })<span class="question-mark">?</span>;
@@ -762,14 +702,14 @@
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(v);
             }
         }
-        <span class="prelude-val">Err</span>(<span class="macro">general_err!</span>(<span class="string">&quot;too many bytes for VLQ&quot;</span>))
+        <span class="prelude-val">Err</span>(<span class="macro">general_err!</span>(<span class="string">"too many bytes for VLQ"</span>))
     }
 }
 
 <span class="kw">impl </span>PackedDecoder {
     <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            data: ByteBufferPtr::new(<span class="macro">vec!</span>[]),
+            data: Bytes::from(<span class="macro">vec!</span>[]),
             data_offset: <span class="number">0</span>,
             rle_left: <span class="number">0</span>,
             rle_value: <span class="bool-val">false</span>,
@@ -778,14 +718,15 @@
         }
     }
 
-    <span class="kw">fn </span>set_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, encoding: Encoding, data: ByteBufferPtr) {
+    <span class="kw">fn </span>set_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, encoding: Encoding, data: Bytes) {
         <span class="self">self</span>.rle_left = <span class="number">0</span>;
         <span class="self">self</span>.rle_value = <span class="bool-val">false</span>;
         <span class="self">self</span>.packed_offset = <span class="number">0</span>;
         <span class="self">self</span>.packed_count = <span class="kw">match </span>encoding {
             Encoding::RLE =&gt; <span class="number">0</span>,
-            Encoding::BIT_PACKED =&gt; data.len() * <span class="number">8</span>,
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;invalid level encoding: {}&quot;</span>, encoding),
+            <span class="attr">#[allow(deprecated)]
+            </span>Encoding::BIT_PACKED =&gt; data.len() * <span class="number">8</span>,
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"invalid level encoding: {}"</span>, encoding),
         };
         <span class="self">self</span>.data = data;
         <span class="self">self</span>.data_offset = <span class="number">0</span>;
@@ -833,11 +774,10 @@
                     skipped_value += to_skip;
                 }
             } <span class="kw">else if </span><span class="self">self</span>.packed_count != <span class="self">self</span>.packed_offset {
-                <span class="kw">let </span>to_skip = (<span class="self">self</span>.packed_count - <span class="self">self</span>.packed_offset)
-                    .min(level_num - skipped_level);
+                <span class="kw">let </span>to_skip =
+                    (<span class="self">self</span>.packed_count - <span class="self">self</span>.packed_offset).min(level_num - skipped_level);
                 <span class="kw">let </span>offset = <span class="self">self</span>.data_offset * <span class="number">8 </span>+ <span class="self">self</span>.packed_offset;
-                <span class="kw">let </span>bit_chunk =
-                    UnalignedBitChunk::new(<span class="self">self</span>.data.as_ref(), offset, to_skip);
+                <span class="kw">let </span>bit_chunk = UnalignedBitChunk::new(<span class="self">self</span>.data.as_ref(), offset, to_skip);
                 skipped_value += bit_chunk.count_ones();
                 <span class="self">self</span>.packed_offset += to_skip;
                 skipped_level += to_skip;
@@ -877,7 +817,7 @@
 
         <span class="kw">let </span>encoded = encoder.consume();
         <span class="kw">let </span><span class="kw-2">mut </span>decoder = PackedDecoder::new();
-        decoder.set_data(Encoding::RLE, ByteBufferPtr::new(encoded));
+        decoder.set_data(Encoding::RLE, encoded.into());
 
         <span class="comment">// Decode data in random length intervals
         </span><span class="kw">let </span><span class="kw-2">mut </span>decoded = BooleanBufferBuilder::new(len);
@@ -916,7 +856,7 @@
 
         <span class="kw">let </span>encoded = encoder.consume();
         <span class="kw">let </span><span class="kw-2">mut </span>decoder = PackedDecoder::new();
-        decoder.set_data(Encoding::RLE, ByteBufferPtr::new(encoded));
+        decoder.set_data(Encoding::RLE, encoded.into());
 
         <span class="kw">let </span><span class="kw-2">mut </span>skip_value = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>read_value = <span class="number">0</span>;
@@ -931,14 +871,12 @@
             }
             <span class="kw">let </span>to_read_or_skip_level = rng.gen_range(<span class="number">1</span>..=remaining_levels);
             <span class="kw">if </span>rng.gen_bool(<span class="number">0.5</span>) {
-                <span class="kw">let </span>(skip_val_num, skip_level_num) =
-                    decoder.skip(to_read_or_skip_level).unwrap();
+                <span class="kw">let </span>(skip_val_num, skip_level_num) = decoder.skip(to_read_or_skip_level).unwrap();
                 skip_value += skip_val_num;
                 skip_level += skip_level_num
             } <span class="kw">else </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>decoded = BooleanBufferBuilder::new(to_read_or_skip_level);
-                <span class="kw">let </span>read_level_num =
-                    decoder.read(<span class="kw-2">&amp;mut </span>decoded, to_read_or_skip_level).unwrap();
+                <span class="kw">let </span>read_level_num = decoder.read(<span class="kw-2">&amp;mut </span>decoded, to_read_or_skip_level).unwrap();
                 read_level += read_level_num;
                 <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..read_level_num {
                     <span class="macro">assert!</span>(!decoded.is_empty());

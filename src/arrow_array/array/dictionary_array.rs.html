@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/dictionary_array.rs`."><title>dictionary_array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/array/dictionary_array.rs`."><title>dictionary_array.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1381,24 +1381,19 @@
 <a href="#1381" id="1381">1381</a>
 <a href="#1382" id="1382">1382</a>
 <a href="#1383" id="1383">1383</a>
-<a href="#1384" id="1384">1384</a>
-<a href="#1385" id="1385">1385</a>
-<a href="#1386" id="1386">1386</a>
-<a href="#1387" id="1387">1387</a>
-<a href="#1388" id="1388">1388</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -1408,8 +1403,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::iterator::ArrayIter;
 <span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::{
-    make_array, Array, ArrayAccessor, ArrayRef, ArrowNativeTypeOp, ArrowPrimitiveType,
-    PrimitiveArray, StringArray,
+    make_array, Array, ArrayAccessor, ArrayRef, ArrowNativeTypeOp, PrimitiveArray, Scalar,
+    StringArray,
 };
 <span class="kw">use </span>arrow_buffer::bit_util::set_bit;
 <span class="kw">use </span>arrow_buffer::buffer::NullBuffer;
@@ -1426,8 +1421,8 @@
 /// # use arrow_array::{Array, Int8DictionaryArray, Int8Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: Int8DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: Int8DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;Int8Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1442,8 +1437,8 @@
 /// # use arrow_array::{Array, Int16DictionaryArray, Int16Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: Int16DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: Int16DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;Int16Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1458,8 +1453,8 @@
 /// # use arrow_array::{Array, Int32DictionaryArray, Int32Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: Int32DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: Int32DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;Int32Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1474,8 +1469,8 @@
 /// # use arrow_array::{Array, Int64DictionaryArray, Int64Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: Int64DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: Int64DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;Int64Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1490,8 +1485,8 @@
 /// # use arrow_array::{Array, UInt8DictionaryArray, UInt8Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: UInt8DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: UInt8DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;UInt8Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1506,8 +1501,8 @@
 /// # use arrow_array::{Array, UInt16DictionaryArray, UInt16Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: UInt16DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: UInt16DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;UInt16Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1522,8 +1517,8 @@
 /// # use arrow_array::{Array, UInt32DictionaryArray, UInt32Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: UInt32DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: UInt32DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;UInt32Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1538,8 +1533,8 @@
 /// # use arrow_array::{Array, UInt64DictionaryArray, UInt64Array, StringArray};
 /// # use std::sync::Arc;
 ///
-/// let array: UInt64DictionaryArray = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
-/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+/// let array: UInt64DictionaryArray = vec!["a", "a", "b", "c"].into_iter().collect();
+/// let values: Arc&lt;dyn Array&gt; = Arc::new(StringArray::from(vec!["a", "b", "c"]));
 /// assert_eq!(array.keys(), &amp;UInt64Array::from(vec![0, 0, 1, 2]));
 /// assert_eq!(array.values(), &amp;values);
 /// ```
@@ -1584,8 +1579,8 @@
 ///
 /// ```
 /// # use arrow_array::{DictionaryArray, Int8Array, types::Int8Type};
-/// let test = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
-/// let array : DictionaryArray&lt;Int8Type&gt; = test.iter().map(|&amp;x| if x == &quot;b&quot; {None} else {Some(x)}).collect();
+/// let test = vec!["a", "a", "b", "c"];
+/// let array : DictionaryArray&lt;Int8Type&gt; = test.iter().map(|&amp;x| if x == "b" {None} else {Some(x)}).collect();
 /// assert_eq!(array.keys(), &amp;Int8Array::from(vec![Some(0), Some(0), None, Some(1)]));
 /// ```
 ///
@@ -1593,7 +1588,7 @@
 ///
 /// ```
 /// # use arrow_array::{DictionaryArray, Int8Array, types::Int8Type};
-/// let test = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+/// let test = vec!["a", "a", "b", "c"];
 /// let array : DictionaryArray&lt;Int8Type&gt; = test.into_iter().collect();
 /// assert_eq!(array.keys(), &amp;Int8Array::from(vec![0, 0, 1, 2]));
 /// ```
@@ -1605,10 +1600,10 @@
 /// # use arrow_array::{DictionaryArray, Int8Array, StringArray, types::Int8Type};
 /// // You can form your own DictionaryArray by providing the
 /// // values (dictionary) and keys (indexes into the dictionary):
-/// let values = StringArray::from_iter_values([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]);
+/// let values = StringArray::from_iter_values(["a", "b", "c"]);
 /// let keys = Int8Array::from_iter_values([0, 0, 1, 2]);
 /// let array = DictionaryArray::&lt;Int8Type&gt;::try_new(keys, Arc::new(values)).unwrap();
-/// let expected: DictionaryArray::&lt;Int8Type&gt; = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;].into_iter().collect();
+/// let expected: DictionaryArray::&lt;Int8Type&gt; = vec!["a", "a", "b", "c"].into_iter().collect();
 /// assert_eq!(&amp;array, &amp;expected);
 /// ```
 ///
@@ -1619,14 +1614,14 @@
 /// # use arrow_array::builder::StringDictionaryBuilder;
 /// # use arrow_array::types::Int32Type;
 /// let mut builder = StringDictionaryBuilder::&lt;Int32Type&gt;::new();
-/// builder.append_value(&quot;a&quot;);
+/// builder.append_value("a");
 /// builder.append_null();
-/// builder.append_value(&quot;a&quot;);
-/// builder.append_value(&quot;b&quot;);
+/// builder.append_value("a");
+/// builder.append_value("b");
 /// let array = builder.finish();
 ///
 /// let values: Vec&lt;_&gt; = array.downcast_dict::&lt;StringArray&gt;().unwrap().into_iter().collect();
-/// assert_eq!(&amp;values, &amp;[Some(&quot;a&quot;), None, Some(&quot;a&quot;), Some(&quot;b&quot;)]);
+/// assert_eq!(&amp;values, &amp;[Some("a"), None, Some("a"), Some("b")]);
 /// ```
 </span><span class="kw">pub struct </span>DictionaryArray&lt;K: ArrowDictionaryKeyType&gt; {
     data_type: DataType,
@@ -1674,10 +1669,7 @@
     /// # Errors
     ///
     /// Returns an error if any `keys[i] &gt;= values.len() || keys[i] &lt; 0`
-    </span><span class="kw">pub fn </span>try_new(
-        keys: PrimitiveArray&lt;K&gt;,
-        values: ArrayRef,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
+    </span><span class="kw">pub fn </span>try_new(keys: PrimitiveArray&lt;K&gt;, values: ArrayRef) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArrowError&gt; {
         <span class="kw">let </span>data_type = DataType::Dictionary(
             Box::new(keys.data_type().clone()),
             Box::new(values.data_type().clone()),
@@ -1686,11 +1678,13 @@
         <span class="kw">let </span>zero = K::Native::usize_as(<span class="number">0</span>);
         <span class="kw">let </span>values_len = values.len();
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>((idx, v)) = keys.values().iter().enumerate().find(|(idx, v)| {
-            (v.is_lt(zero) || v.as_usize() &gt;= values_len) &amp;&amp; keys.is_valid(<span class="kw-2">*</span>idx)
-        }) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((idx, v)) =
+            keys.values().iter().enumerate().find(|(idx, v)| {
+                (v.is_lt(zero) || v.as_usize() &gt;= values_len) &amp;&amp; keys.is_valid(<span class="kw-2">*</span>idx)
+            })
+        {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Invalid dictionary key {v:?} at index {idx}, expected 0 &lt;= key &lt; {values_len}&quot;</span>,
+                <span class="string">"Invalid dictionary key {v:?} at index {idx}, expected 0 &lt;= key &lt; {values_len}"</span>,
             )));
         }
 
@@ -1700,6 +1694,14 @@
             values,
             is_ordered: <span class="bool-val">false</span>,
         })
+    }
+
+    <span class="doccomment">/// Create a new [`Scalar`] from `value`
+    </span><span class="kw">pub fn </span>new_scalar&lt;T: Array + <span class="lifetime">'static</span>&gt;(value: Scalar&lt;T&gt;) -&gt; Scalar&lt;<span class="self">Self</span>&gt; {
+        Scalar::new(<span class="self">Self</span>::new(
+            PrimitiveArray::new(<span class="macro">vec!</span>[K::Native::usize_as(<span class="number">0</span>)].into(), <span class="prelude-val">None</span>),
+            Arc::new(value.into_inner()),
+        ))
     }
 
     <span class="doccomment">/// Create a new [`DictionaryArray`] without performing validation
@@ -1737,8 +1739,7 @@
     ///
     /// Panics if `values` is not a [`StringArray`].
     </span><span class="kw">pub fn </span>lookup_key(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;K::Native&gt; {
-        <span class="kw">let </span>rd_buf: <span class="kw-2">&amp;</span>StringArray =
-            <span class="self">self</span>.values.as_any().downcast_ref::&lt;StringArray&gt;().unwrap();
+        <span class="kw">let </span>rd_buf: <span class="kw-2">&amp;</span>StringArray = <span class="self">self</span>.values.as_any().downcast_ref::&lt;StringArray&gt;().unwrap();
 
         (<span class="number">0</span>..rd_buf.len())
             .position(|i| rd_buf.value(i) == value)
@@ -1771,7 +1772,7 @@
     }
 
     <span class="doccomment">/// Return an iterator over the keys (indexes into the dictionary)
-    </span><span class="kw">pub fn </span>keys_iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Option</span>&lt;usize&gt;&gt; + <span class="lifetime">&#39;_ </span>{
+    </span><span class="kw">pub fn </span>keys_iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Option</span>&lt;usize&gt;&gt; + <span class="lifetime">'_ </span>{
         <span class="self">self</span>.keys.iter().map(|key| key.map(|k| k.as_usize()))
     }
 
@@ -1796,15 +1797,15 @@
     /// ```
     /// use arrow_array::{Array, ArrayAccessor, DictionaryArray, StringArray, types::Int32Type};
     ///
-    /// let orig = [Some(&quot;a&quot;), Some(&quot;b&quot;), None];
+    /// let orig = [Some("a"), Some("b"), None];
     /// let dictionary = DictionaryArray::&lt;Int32Type&gt;::from_iter(orig);
     /// let typed = dictionary.downcast_dict::&lt;StringArray&gt;().unwrap();
-    /// assert_eq!(typed.value(0), &quot;a&quot;);
-    /// assert_eq!(typed.value(1), &quot;b&quot;);
+    /// assert_eq!(typed.value(0), "a");
+    /// assert_eq!(typed.value(1), "b");
     /// assert!(typed.is_null(2));
     /// ```
     ///
-    </span><span class="kw">pub fn </span>downcast_dict&lt;V: <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;TypedDictionaryArray&lt;<span class="lifetime">&#39;_</span>, K, V&gt;&gt; {
+    </span><span class="kw">pub fn </span>downcast_dict&lt;V: <span class="lifetime">'static</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;TypedDictionaryArray&lt;<span class="lifetime">'_</span>, K, V&gt;&gt; {
         <span class="kw">let </span>values = <span class="self">self</span>.values.as_any().downcast_ref()<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(TypedDictionaryArray {
             dictionary: <span class="self">self</span>,
@@ -1851,10 +1852,8 @@
     ///
     </span><span class="kw">pub fn </span>with_values(<span class="kw-2">&amp;</span><span class="self">self</span>, values: ArrayRef) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(values.len() &gt;= <span class="self">self</span>.values.len());
-        <span class="kw">let </span>data_type = DataType::Dictionary(
-            Box::new(K::DATA_TYPE),
-            Box::new(values.data_type().clone()),
-        );
+        <span class="kw">let </span>data_type =
+            DataType::Dictionary(Box::new(K::DATA_TYPE), Box::new(values.data_type().clone()));
         <span class="self">Self </span>{
             data_type,
             keys: <span class="self">self</span>.keys.clone(),
@@ -1865,9 +1864,7 @@
 
     <span class="doccomment">/// Returns `PrimitiveDictionaryBuilder` of this dictionary array for mutating
     /// its keys and values if the underlying data buffer is not shared by others.
-    </span><span class="kw">pub fn </span>into_primitive_dict_builder&lt;V&gt;(
-        <span class="self">self</span>,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;PrimitiveDictionaryBuilder&lt;K, V&gt;, <span class="self">Self</span>&gt;
+    </span><span class="kw">pub fn </span>into_primitive_dict_builder&lt;V&gt;(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PrimitiveDictionaryBuilder&lt;K, V&gt;, <span class="self">Self</span>&gt;
     <span class="kw">where
         </span>V: ArrowPrimitiveType,
     {
@@ -1928,8 +1925,7 @@
         </span>V: ArrowPrimitiveType,
         F: Fn(V::Native) -&gt; V::Native,
     {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder: PrimitiveDictionaryBuilder&lt;K, V&gt; =
-            <span class="self">self</span>.into_primitive_dict_builder()<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>builder: PrimitiveDictionaryBuilder&lt;K, V&gt; = <span class="self">self</span>.into_primitive_dict_builder()<span class="question-mark">?</span>;
         builder
             .values_slice_mut()
             .iter_mut()
@@ -1937,7 +1933,7 @@
         <span class="prelude-val">Ok</span>(builder.finish())
     }
 
-    <span class="doccomment">/// Computes an occupancy mask for this dictionary&#39;s values
+    <span class="doccomment">/// Computes an occupancy mask for this dictionary's values
     ///
     /// For each value in [`Self::values`] the corresponding bit will be set in the
     /// returned mask if it is referenced by a key in this [`DictionaryArray`]
@@ -1967,19 +1963,19 @@
         <span class="macro">assert_eq!</span>(
             data.buffers().len(),
             <span class="number">1</span>,
-            <span class="string">&quot;DictionaryArray data should contain a single buffer only (keys).&quot;
+            <span class="string">"DictionaryArray data should contain a single buffer only (keys)."
         </span>);
         <span class="macro">assert_eq!</span>(
             data.child_data().len(),
             <span class="number">1</span>,
-            <span class="string">&quot;DictionaryArray should contain a single child array (values).&quot;
+            <span class="string">"DictionaryArray should contain a single child array (values)."
         </span>);
 
         <span class="kw">if let </span>DataType::Dictionary(key_data_type, <span class="kw">_</span>) = data.data_type() {
             <span class="macro">assert_eq!</span>(
                 <span class="kw-2">&amp;</span>T::DATA_TYPE,
                 key_data_type.as_ref(),
-                <span class="string">&quot;DictionaryArray&#39;s data type must match, expected {} got {}&quot;</span>,
+                <span class="string">"DictionaryArray's data type must match, expected {} got {}"</span>,
                 T::DATA_TYPE,
                 key_data_type
             );
@@ -1987,7 +1983,7 @@
             <span class="kw">let </span>values = make_array(data.child_data()[<span class="number">0</span>].clone());
             <span class="kw">let </span>data_type = data.data_type().clone();
 
-            <span class="comment">// create a zero-copy of the keys&#39; data
+            <span class="comment">// create a zero-copy of the keys' data
             // SAFETY:
             // ArrayData is valid and verified type above
 
@@ -2005,7 +2001,7 @@
                 is_ordered: <span class="bool-val">false</span>,
             }
         } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;DictionaryArray must have Dictionary data type.&quot;</span>)
+            <span class="macro">panic!</span>(<span class="string">"DictionaryArray must have Dictionary data type."</span>)
         }
     }
 }
@@ -2029,18 +2025,18 @@
 /// ```
 /// use arrow_array::{DictionaryArray, PrimitiveArray, StringArray, types::Int8Type};
 ///
-/// let test = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+/// let test = vec!["a", "a", "b", "c"];
 /// let array: DictionaryArray&lt;Int8Type&gt; = test
 ///     .iter()
-///     .map(|&amp;x| if x == &quot;b&quot; { None } else { Some(x) })
+///     .map(|&amp;x| if x == "b" { None } else { Some(x) })
 ///     .collect();
 /// assert_eq!(
-///     &quot;DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  null,\n  1,\n] values: StringArray\n[\n  \&quot;a\&quot;,\n  \&quot;c\&quot;,\n]}\n&quot;,
-///     format!(&quot;{:?}&quot;, array)
+///     "DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  null,\n  1,\n] values: StringArray\n[\n  \"a\",\n  \"c\",\n]}\n",
+///     format!("{:?}", array)
 /// );
 /// ```
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: ArrowDictionaryKeyType&gt; FromIterator&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;&gt; <span class="kw">for </span>DictionaryArray&lt;T&gt; {
-    <span class="kw">fn </span>from_iter&lt;I: IntoIterator&lt;Item = <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: ArrowDictionaryKeyType&gt; FromIterator&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;&gt; <span class="kw">for </span>DictionaryArray&lt;T&gt; {
+    <span class="kw">fn </span>from_iter&lt;I: IntoIterator&lt;Item = <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>it = iter.into_iter();
         <span class="kw">let </span>(lower, <span class="kw">_</span>) = it.size_hint();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = StringDictionaryBuilder::with_capacity(lower, <span class="number">256</span>, <span class="number">1024</span>);
@@ -2056,22 +2052,22 @@
 /// ```
 /// use arrow_array::{DictionaryArray, PrimitiveArray, StringArray, types::Int8Type};
 ///
-/// let test = vec![&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+/// let test = vec!["a", "a", "b", "c"];
 /// let array: DictionaryArray&lt;Int8Type&gt; = test.into_iter().collect();
 /// assert_eq!(
-///     &quot;DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  1,\n  2,\n] values: StringArray\n[\n  \&quot;a\&quot;,\n  \&quot;b\&quot;,\n  \&quot;c\&quot;,\n]}\n&quot;,
-///     format!(&quot;{:?}&quot;, array)
+///     "DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  1,\n  2,\n] values: StringArray\n[\n  \"a\",\n  \"b\",\n  \"c\",\n]}\n",
+///     format!("{:?}", array)
 /// );
 /// ```
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: ArrowDictionaryKeyType&gt; FromIterator&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>DictionaryArray&lt;T&gt; {
-    <span class="kw">fn </span>from_iter&lt;I: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: ArrowDictionaryKeyType&gt; FromIterator&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>DictionaryArray&lt;T&gt; {
+    <span class="kw">fn </span>from_iter&lt;I: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>it = iter.into_iter();
         <span class="kw">let </span>(lower, <span class="kw">_</span>) = it.size_hint();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = StringDictionaryBuilder::with_capacity(lower, <span class="number">256</span>, <span class="number">1024</span>);
         it.for_each(|i| {
             builder
                 .append(i)
-                .expect(<span class="string">&quot;Unable to append a value to a dictionary array.&quot;</span>);
+                .expect(<span class="string">"Unable to append a value to a dictionary array."</span>);
         });
 
         builder.finish()
@@ -2155,7 +2151,7 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="macro">writeln!</span>(
             f,
-            <span class="string">&quot;DictionaryArray {{keys: {:?} values: {:?}}}&quot;</span>,
+            <span class="string">"DictionaryArray {{keys: {:?} values: {:?}}}"</span>,
             <span class="self">self</span>.keys, <span class="self">self</span>.values
         )
     }
@@ -2168,7 +2164,7 @@
 /// ```
 /// use arrow_array::{DictionaryArray, StringArray, types::Int32Type};
 ///
-/// let orig = [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;, &quot;b&quot;];
+/// let orig = ["a", "b", "a", "b"];
 /// let dictionary = DictionaryArray::&lt;Int32Type&gt;::from_iter(orig);
 ///
 /// // `TypedDictionaryArray` allows you to access the values directly
@@ -2178,43 +2174,41 @@
 ///     assert_eq!(maybe_val.unwrap(), orig)
 /// }
 /// ```
-</span><span class="kw">pub struct </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K: ArrowDictionaryKeyType, V&gt; {
+</span><span class="kw">pub struct </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K: ArrowDictionaryKeyType, V&gt; {
     <span class="doccomment">/// The dictionary array
-    </span>dictionary: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>DictionaryArray&lt;K&gt;,
+    </span>dictionary: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DictionaryArray&lt;K&gt;,
     <span class="doccomment">/// The values of the dictionary
-    </span>values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V,
+    </span>values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V,
 }
 
 <span class="comment">// Manually implement `Clone` to avoid `V: Clone` type constraint
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: ArrowDictionaryKeyType, V&gt; Clone <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: ArrowDictionaryKeyType, V&gt; Clone <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="kw-2">*</span><span class="self">self
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: ArrowDictionaryKeyType, V&gt; Copy <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: ArrowDictionaryKeyType, V&gt; Copy <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: ArrowDictionaryKeyType, V&gt; std::fmt::Debug
-    <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt;
-{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: ArrowDictionaryKeyType, V&gt; std::fmt::Debug <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;TypedDictionaryArray({:?})&quot;</span>, <span class="self">self</span>.dictionary)
+        <span class="macro">writeln!</span>(f, <span class="string">"TypedDictionaryArray({:?})"</span>, <span class="self">self</span>.dictionary)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: ArrowDictionaryKeyType, V&gt; TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: ArrowDictionaryKeyType, V&gt; TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="doccomment">/// Returns the keys of this [`TypedDictionaryArray`]
-    </span><span class="kw">pub fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PrimitiveArray&lt;K&gt; {
+    </span><span class="kw">pub fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>PrimitiveArray&lt;K&gt; {
         <span class="self">self</span>.dictionary.keys()
     }
 
     <span class="doccomment">/// Returns the values of this [`TypedDictionaryArray`]
-    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V {
+    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V {
         <span class="self">self</span>.values
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: ArrowDictionaryKeyType, V: Sync&gt; Array <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: ArrowDictionaryKeyType, V: Sync&gt; Array <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>as_any(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>Any {
         <span class="self">self</span>.dictionary
     }
@@ -2268,7 +2262,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V&gt; IntoIterator <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V&gt; IntoIterator <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt;
 <span class="kw">where
     </span>K: ArrowDictionaryKeyType,
     <span class="self">Self</span>: ArrayAccessor,
@@ -2281,19 +2275,19 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V&gt; ArrayAccessor <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">&#39;a</span>, K, V&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V&gt; ArrayAccessor <span class="kw">for </span>TypedDictionaryArray&lt;<span class="lifetime">'a</span>, K, V&gt;
 <span class="kw">where
     </span>K: ArrowDictionaryKeyType,
     V: Sync + Send,
-    <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V: ArrayAccessor,
-    &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V <span class="kw">as </span>ArrayAccessor&gt;::Item: Default,
+    <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V: ArrayAccessor,
+    &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V <span class="kw">as </span>ArrayAccessor&gt;::Item: Default,
 {
-    <span class="kw">type </span>Item = &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V <span class="kw">as </span>ArrayAccessor&gt;::Item;
+    <span class="kw">type </span>Item = &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V <span class="kw">as </span>ArrayAccessor&gt;::Item;
 
     <span class="kw">fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="self">Self</span>::Item {
         <span class="macro">assert!</span>(
             index &lt; <span class="self">self</span>.len(),
-            <span class="string">&quot;Trying to access an element at index {} from a TypedDictionaryArray of length {}&quot;</span>,
+            <span class="string">"Trying to access an element at index {} from a TypedDictionaryArray of length {}"</span>,
             index,
             <span class="self">self</span>.len()
         );
@@ -2335,14 +2329,14 @@
 ///         return Ok(d.with_values(r));
 ///     }
 ///     downcast_primitive_array! {
-///         a =&gt; Ok(Arc::new(a.iter().map(|x| x.map(|x| x.to_string())).collect::&lt;StringArray&gt;())),
-///         d =&gt; Err(ArrowError::InvalidArgumentError(format!(&quot;{d:?} not supported&quot;)))
+///         a =&gt; Ok(Arc::new(a.iter().map(|x| x.map(|x| format!("{x:?}"))).collect::&lt;StringArray&gt;())),
+///         d =&gt; Err(ArrowError::InvalidArgumentError(format!("{d:?} not supported")))
 ///     }
 /// }
 ///
 /// let result = to_string(&amp;Int32Array::from(vec![1, 2, 3])).unwrap();
 /// let actual = result.as_string::&lt;i32&gt;().iter().map(Option::unwrap).collect::&lt;Vec&lt;_&gt;&gt;();
-/// assert_eq!(actual, &amp;[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;]);
+/// assert_eq!(actual, &amp;["1", "2", "3"]);
 ///
 /// let mut dict = PrimitiveDictionaryBuilder::&lt;Int32Type, UInt16Type&gt;::new();
 /// dict.extend([Some(1), Some(1), Some(2), Some(3), Some(2)]);
@@ -2353,7 +2347,7 @@
 /// assert_eq!(r.keys(), dict.keys()); // Keys are the same
 ///
 /// let actual = r.into_iter().map(Option::unwrap).collect::&lt;Vec&lt;_&gt;&gt;();
-/// assert_eq!(actual, &amp;[&quot;1&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;2&quot;]);
+/// assert_eq!(actual, &amp;["1", "1", "2", "3", "2"]);
 /// ```
 ///
 /// See [`AsArray::as_any_dictionary_opt`] and [`AsArray::as_any_dictionary`]
@@ -2393,7 +2387,7 @@
         <span class="kw">let </span>v_len = <span class="self">self</span>.values().len();
         <span class="macro">assert_ne!</span>(v_len, <span class="number">0</span>);
         <span class="kw">let </span>iter = <span class="self">self</span>.keys().values().iter();
-        iter.map(|x| x.as_usize().min(v_len)).collect()
+        iter.map(|x| x.as_usize().min(v_len - <span class="number">1</span>)).collect()
     }
 
     <span class="kw">fn </span>with_values(<span class="kw-2">&amp;</span><span class="self">self</span>, values: ArrayRef) -&gt; ArrayRef {
@@ -2404,12 +2398,9 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::builder::PrimitiveDictionaryBuilder;
     <span class="kw">use </span><span class="kw">crate</span>::cast::as_dictionary_array;
-    <span class="kw">use </span><span class="kw">crate</span>::types::{Int32Type, Int8Type, UInt32Type, UInt8Type};
     <span class="kw">use crate</span>::{Int16Array, Int32Array, Int8Array};
     <span class="kw">use </span>arrow_buffer::{Buffer, ToByteSlice};
-    <span class="kw">use </span>std::sync::Arc;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_array() {
@@ -2428,8 +2419,7 @@
         <span class="comment">// Construct a dictionary array from the above two
         </span><span class="kw">let </span>key_type = DataType::Int16;
         <span class="kw">let </span>value_type = DataType::Int8;
-        <span class="kw">let </span>dict_data_type =
-            DataType::Dictionary(Box::new(key_type), Box::new(value_type));
+        <span class="kw">let </span>dict_data_type = DataType::Dictionary(Box::new(key_type), Box::new(value_type));
         <span class="kw">let </span>dict_data = ArrayData::builder(dict_data_type.clone())
             .len(<span class="number">3</span>)
             .add_buffer(keys.clone())
@@ -2467,66 +2457,64 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_array_fmt_debug() {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            PrimitiveDictionaryBuilder::&lt;UInt8Type, UInt32Type&gt;::with_capacity(<span class="number">3</span>, <span class="number">2</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = PrimitiveDictionaryBuilder::&lt;UInt8Type, UInt32Type&gt;::with_capacity(<span class="number">3</span>, <span class="number">2</span>);
         builder.append(<span class="number">12345678</span>).unwrap();
         builder.append_null();
         builder.append(<span class="number">22345678</span>).unwrap();
         <span class="kw">let </span>array = builder.finish();
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;DictionaryArray {keys: PrimitiveArray&lt;UInt8&gt;\n[\n  0,\n  null,\n  1,\n] values: PrimitiveArray&lt;UInt32&gt;\n[\n  12345678,\n  22345678,\n]}\n&quot;</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;{array:?}&quot;</span>)
+            <span class="string">"DictionaryArray {keys: PrimitiveArray&lt;UInt8&gt;\n[\n  0,\n  null,\n  1,\n] values: PrimitiveArray&lt;UInt32&gt;\n[\n  12345678,\n  22345678,\n]}\n"</span>,
+            <span class="macro">format!</span>(<span class="string">"{array:?}"</span>)
         );
 
-        <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            PrimitiveDictionaryBuilder::&lt;UInt8Type, UInt32Type&gt;::with_capacity(<span class="number">20</span>, <span class="number">2</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = PrimitiveDictionaryBuilder::&lt;UInt8Type, UInt32Type&gt;::with_capacity(<span class="number">20</span>, <span class="number">2</span>);
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">20 </span>{
             builder.append(<span class="number">1</span>).unwrap();
         }
         <span class="kw">let </span>array = builder.finish();
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;DictionaryArray {keys: PrimitiveArray&lt;UInt8&gt;\n[\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n] values: PrimitiveArray&lt;UInt32&gt;\n[\n  1,\n]}\n&quot;</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;{array:?}&quot;</span>)
+            <span class="string">"DictionaryArray {keys: PrimitiveArray&lt;UInt8&gt;\n[\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n  0,\n] values: PrimitiveArray&lt;UInt32&gt;\n[\n  1,\n]}\n"</span>,
+            <span class="macro">format!</span>(<span class="string">"{array:?}"</span>)
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_array_from_iter() {
-        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>];
+        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>];
         <span class="kw">let </span>array: DictionaryArray&lt;Int8Type&gt; = test
             .iter()
-            .map(|<span class="kw-2">&amp;</span>x| <span class="kw">if </span>x == <span class="string">&quot;b&quot; </span>{ <span class="prelude-val">None </span>} <span class="kw">else </span>{ <span class="prelude-val">Some</span>(x) })
+            .map(|<span class="kw-2">&amp;</span>x| <span class="kw">if </span>x == <span class="string">"b" </span>{ <span class="prelude-val">None </span>} <span class="kw">else </span>{ <span class="prelude-val">Some</span>(x) })
             .collect();
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  null,\n  1,\n] values: StringArray\n[\n  \&quot;a\&quot;,\n  \&quot;c\&quot;,\n]}\n&quot;</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;{array:?}&quot;</span>)
+            <span class="string">"DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  null,\n  1,\n] values: StringArray\n[\n  \"a\",\n  \"c\",\n]}\n"</span>,
+            <span class="macro">format!</span>(<span class="string">"{array:?}"</span>)
         );
 
         <span class="kw">let </span>array: DictionaryArray&lt;Int8Type&gt; = test.into_iter().collect();
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  1,\n  2,\n] values: StringArray\n[\n  \&quot;a\&quot;,\n  \&quot;b\&quot;,\n  \&quot;c\&quot;,\n]}\n&quot;</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;{array:?}&quot;</span>)
+            <span class="string">"DictionaryArray {keys: PrimitiveArray&lt;Int8&gt;\n[\n  0,\n  0,\n  1,\n  2,\n] values: StringArray\n[\n  \"a\",\n  \"b\",\n  \"c\",\n]}\n"</span>,
+            <span class="macro">format!</span>(<span class="string">"{array:?}"</span>)
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_array_reverse_lookup_key() {
-        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>];
+        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>];
         <span class="kw">let </span>array: DictionaryArray&lt;Int8Type&gt; = test.into_iter().collect();
 
-        <span class="macro">assert_eq!</span>(array.lookup_key(<span class="string">&quot;c&quot;</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(array.lookup_key(<span class="string">"c"</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
         <span class="comment">// Direction of building a dictionary is the iterator direction
-        </span><span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">&quot;t3&quot;</span>, <span class="string">&quot;t3&quot;</span>, <span class="string">&quot;t2&quot;</span>, <span class="string">&quot;t2&quot;</span>, <span class="string">&quot;t1&quot;</span>, <span class="string">&quot;t3&quot;</span>, <span class="string">&quot;t4&quot;</span>, <span class="string">&quot;t1&quot;</span>, <span class="string">&quot;t0&quot;</span>];
+        </span><span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">"t3"</span>, <span class="string">"t3"</span>, <span class="string">"t2"</span>, <span class="string">"t2"</span>, <span class="string">"t1"</span>, <span class="string">"t3"</span>, <span class="string">"t4"</span>, <span class="string">"t1"</span>, <span class="string">"t0"</span>];
         <span class="kw">let </span>array: DictionaryArray&lt;Int8Type&gt; = test.into_iter().collect();
 
-        <span class="macro">assert_eq!</span>(array.lookup_key(<span class="string">&quot;t1&quot;</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>));
-        <span class="macro">assert_eq!</span>(array.lookup_key(<span class="string">&quot;non-existent&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(array.lookup_key(<span class="string">"t1"</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(array.lookup_key(<span class="string">"non-existent"</span>), <span class="prelude-val">None</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_keys_as_primitive_array() {
-        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;a&quot;</span>];
+        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"a"</span>];
         <span class="kw">let </span>array: DictionaryArray&lt;Int8Type&gt; = test.into_iter().collect();
 
         <span class="kw">let </span>keys = array.keys();
@@ -2537,7 +2525,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_keys_as_primitive_array_with_null() {
-        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;b&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>)];
+        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">"a"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"b"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"a"</span>)];
         <span class="kw">let </span>array: DictionaryArray&lt;Int32Type&gt; = test.into_iter().collect();
 
         <span class="kw">let </span>keys = array.keys();
@@ -2563,7 +2551,7 @@
         array
             .into_data()
             .validate_full()
-            .expect(<span class="string">&quot;All null array has valid array data&quot;</span>);
+            .expect(<span class="string">"All null array has valid array data"</span>);
     }
 
     <span class="attr">#[test]
@@ -2596,7 +2584,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_iter_with_null() {
-        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;b&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;a&quot;</span>)];
+        <span class="kw">let </span>test = <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">"a"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"b"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"a"</span>)];
         <span class="kw">let </span>array: DictionaryArray&lt;Int32Type&gt; = test.into_iter().collect();
 
         <span class="kw">let </span><span class="kw-2">mut </span>iter = array
@@ -2606,19 +2594,19 @@
             .unwrap()
             .take_iter(array.keys_iter());
 
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;a&quot;</span>, iter.next().unwrap().unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"a"</span>, iter.next().unwrap().unwrap());
         <span class="macro">assert!</span>(iter.next().unwrap().is_none());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;b&quot;</span>, iter.next().unwrap().unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"b"</span>, iter.next().unwrap().unwrap());
         <span class="macro">assert!</span>(iter.next().unwrap().is_none());
         <span class="macro">assert!</span>(iter.next().unwrap().is_none());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;a&quot;</span>, iter.next().unwrap().unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"a"</span>, iter.next().unwrap().unwrap());
         <span class="macro">assert!</span>(iter.next().is_none());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_dictionary_key() {
         <span class="kw">let </span>keys = Int8Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)]);
-        <span class="kw">let </span>values = StringArray::from(<span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>, <span class="string">&quot;blarg&quot;</span>]);
+        <span class="kw">let </span>values = StringArray::from(<span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"baz"</span>, <span class="string">"blarg"</span>]);
 
         <span class="kw">let </span>array = DictionaryArray::new(keys, Arc::new(values));
         <span class="macro">assert_eq!</span>(array.key(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>));
@@ -2628,7 +2616,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_try_new() {
-        <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;bar&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;baz&quot;</span>)]
+        <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">Some</span>(<span class="string">"bar"</span>), <span class="prelude-val">Some</span>(<span class="string">"baz"</span>)]
             .into_iter()
             .collect();
         <span class="kw">let </span>keys: Int32Array = [<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)].into_iter().collect();
@@ -2649,38 +2637,32 @@
         <span class="macro">assert_eq!</span>(array.keys().value(<span class="number">3</span>), <span class="number">1</span>);
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;DictionaryArray {keys: PrimitiveArray&lt;Int32&gt;\n[\n  0,\n  2,\n  null,\n  1,\n] values: StringArray\n[\n  \&quot;foo\&quot;,\n  \&quot;bar\&quot;,\n  \&quot;baz\&quot;,\n]}\n&quot;</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;{array:?}&quot;</span>)
+            <span class="string">"DictionaryArray {keys: PrimitiveArray&lt;Int32&gt;\n[\n  0,\n  2,\n  null,\n  1,\n] values: StringArray\n[\n  \"foo\",\n  \"bar\",\n  \"baz\",\n]}\n"</span>,
+            <span class="macro">format!</span>(<span class="string">"{array:?}"</span>)
         );
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;Invalid dictionary key 3 at index 1, expected 0 &lt;= key &lt; 2&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"Invalid dictionary key 3 at index 1, expected 0 &lt;= key &lt; 2"</span>)]
     </span><span class="kw">fn </span>test_try_new_index_too_large() {
-        <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;bar&quot;</span>)].into_iter().collect();
+        <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">Some</span>(<span class="string">"bar"</span>)].into_iter().collect();
         <span class="comment">// dictionary only has 2 values, so offset 3 is out of bounds
         </span><span class="kw">let </span>keys: Int32Array = [<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)].into_iter().collect();
         DictionaryArray::new(keys, Arc::new(values));
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;Invalid dictionary key -100 at index 0, expected 0 &lt;= key &lt; 2&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"Invalid dictionary key -100 at index 0, expected 0 &lt;= key &lt; 2"</span>)]
     </span><span class="kw">fn </span>test_try_new_index_too_small() {
-        <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;bar&quot;</span>)].into_iter().collect();
+        <span class="kw">let </span>values: StringArray = [<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">Some</span>(<span class="string">"bar"</span>)].into_iter().collect();
         <span class="kw">let </span>keys: Int32Array = [<span class="prelude-val">Some</span>(-<span class="number">100</span>)].into_iter().collect();
         DictionaryArray::new(keys, Arc::new(values));
     }
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;DictionaryArray&#39;s data type must match, expected Int64 got Int32&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"DictionaryArray's data type must match, expected Int64 got Int32"</span>)]
     </span><span class="kw">fn </span>test_from_array_data_validation() {
-        <span class="kw">let </span>a = DictionaryArray::&lt;Int32Type&gt;::from_iter([<span class="string">&quot;32&quot;</span>]);
+        <span class="kw">let </span>a = DictionaryArray::&lt;Int32Type&gt;::from_iter([<span class="string">"32"</span>]);
         <span class="kw">let _ </span>= DictionaryArray::&lt;Int64Type&gt;::from(a.into_data());
     }
 
@@ -2723,8 +2705,7 @@
 
         <span class="kw">let </span>boxed: ArrayRef = Arc::new(dict_array);
 
-        <span class="kw">let </span>col: DictionaryArray&lt;Int8Type&gt; =
-            DictionaryArray::&lt;Int8Type&gt;::from(boxed.to_data());
+        <span class="kw">let </span>col: DictionaryArray&lt;Int8Type&gt; = DictionaryArray::&lt;Int8Type&gt;::from(boxed.to_data());
         <span class="kw">let </span>err = col.into_primitive_dict_builder::&lt;Int32Type&gt;();
 
         <span class="kw">let </span>returned = err.unwrap_err();
@@ -2743,7 +2724,7 @@
         <span class="kw">let </span>dict = DictionaryArray::new(keys, Arc::new(values));
         <span class="kw">for </span>(idx, v) <span class="kw">in </span>dict.occupancy().iter().enumerate() {
             <span class="kw">let </span>expected = (<span class="number">100</span>..<span class="number">200</span>).contains(<span class="kw-2">&amp;</span>idx);
-            <span class="macro">assert_eq!</span>(v, expected, <span class="string">&quot;{idx}&quot;</span>);
+            <span class="macro">assert_eq!</span>(v, expected, <span class="string">"{idx}"</span>);
         }
 
         <span class="kw">let </span>keys = Int32Array::new(
@@ -2754,7 +2735,7 @@
         <span class="kw">let </span>dict = DictionaryArray::new(keys, Arc::new(values));
         <span class="kw">for </span>(idx, v) <span class="kw">in </span>dict.occupancy().iter().enumerate() {
             <span class="kw">let </span>expected = idx % <span class="number">4 </span>== <span class="number">0 </span>&amp;&amp; idx &lt; <span class="number">100</span>;
-            <span class="macro">assert_eq!</span>(v, expected, <span class="string">&quot;{idx}&quot;</span>);
+            <span class="macro">assert_eq!</span>(v, expected, <span class="string">"{idx}"</span>);
         }
     }
 
@@ -2772,6 +2753,15 @@
             .into_iter()
             .collect();
         <span class="macro">assert_eq!</span>(values, <span class="kw-2">&amp;</span>[<span class="prelude-val">Some</span>(<span class="number">50</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>)])
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_normalized_keys() {
+        <span class="kw">let </span>values = <span class="macro">vec!</span>[<span class="number">132</span>, <span class="number">0</span>, <span class="number">1</span>].into();
+        <span class="kw">let </span>nulls = NullBuffer::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]);
+        <span class="kw">let </span>keys = Int32Array::new(values, <span class="prelude-val">Some</span>(nulls));
+        <span class="kw">let </span>dictionary = DictionaryArray::new(keys, Arc::new(Int32Array::new_null(<span class="number">2</span>)));
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dictionary.normalized_keys(), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>])
     }
 }
 </code></pre></div></section></main></body></html>

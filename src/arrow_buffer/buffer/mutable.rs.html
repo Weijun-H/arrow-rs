@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-buffer/src/buffer/mutable.rs`."><title>mutable.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_buffer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_buffer/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-buffer/src/buffer/mutable.rs`."><title>mutable.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_buffer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1008,19 +1008,37 @@
 <a href="#1008" id="1008">1008</a>
 <a href="#1009" id="1009">1009</a>
 <a href="#1010" id="1010">1010</a>
+<a href="#1011" id="1011">1011</a>
+<a href="#1012" id="1012">1012</a>
+<a href="#1013" id="1013">1013</a>
+<a href="#1014" id="1014">1014</a>
+<a href="#1015" id="1015">1015</a>
+<a href="#1016" id="1016">1016</a>
+<a href="#1017" id="1017">1017</a>
+<a href="#1018" id="1018">1018</a>
+<a href="#1019" id="1019">1019</a>
+<a href="#1020" id="1020">1020</a>
+<a href="#1021" id="1021">1021</a>
+<a href="#1022" id="1022">1022</a>
+<a href="#1023" id="1023">1023</a>
+<a href="#1024" id="1024">1024</a>
+<a href="#1025" id="1025">1025</a>
+<a href="#1026" id="1026">1026</a>
+<a href="#1027" id="1027">1027</a>
+<a href="#1028" id="1028">1028</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -1038,7 +1056,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::Buffer;
 
-<span class="doccomment">/// A [`MutableBuffer`] is Arrow&#39;s interface to build a [`Buffer`] out of items or slices of items.
+<span class="doccomment">/// A [`MutableBuffer`] is Arrow's interface to build a [`Buffer`] out of items or slices of items.
 ///
 /// [`Buffer`]s created from [`MutableBuffer`] (via `into`) are guaranteed to have its pointer aligned
 /// along cache lines and in multiple of 64 bytes.
@@ -1071,16 +1089,24 @@
 
 <span class="kw">impl </span>MutableBuffer {
     <span class="doccomment">/// Allocate a new [MutableBuffer] with initial capacity to be at least `capacity`.
+    ///
+    /// See [`MutableBuffer::with_capacity`].
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>new(capacity: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::with_capacity(capacity)
     }
 
     <span class="doccomment">/// Allocate a new [MutableBuffer] with initial capacity to be at least `capacity`.
+    ///
+    /// # Panics
+    ///
+    /// If `capacity`, when rounded up to the nearest multiple of [`ALIGNMENT`], is greater
+    /// then `isize::MAX`, then this function will panic.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>capacity = bit_util::round_upto_multiple_of_64(capacity);
-        <span class="kw">let </span>layout = Layout::from_size_align(capacity, ALIGNMENT).unwrap();
+        <span class="kw">let </span>layout = Layout::from_size_align(capacity, ALIGNMENT)
+            .expect(<span class="string">"failed to create layout for MutableBuffer"</span>);
         <span class="kw">let </span>data = <span class="kw">match </span>layout.size() {
             <span class="number">0 </span>=&gt; dangling_ptr(),
             <span class="kw">_ </span>=&gt; {
@@ -1122,7 +1148,7 @@
 
     <span class="doccomment">/// Create a [`MutableBuffer`] from the provided [`Vec`] without copying
     </span><span class="attr">#[inline]
-    #[deprecated(note = <span class="string">&quot;Use From&lt;Vec&lt;T&gt;&gt;&quot;</span>)]
+    #[deprecated(note = <span class="string">"Use From&lt;Vec&lt;T&gt;&gt;"</span>)]
     </span><span class="kw">pub fn </span>from_vec&lt;T: ArrowNativeType&gt;(vec: Vec&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from(vec)
     }
@@ -1172,8 +1198,8 @@
     </span><span class="kw">pub fn </span>set_null_bits(<span class="kw-2">&amp;mut </span><span class="self">self</span>, start: usize, count: usize) {
         <span class="macro">assert!</span>(
             start.saturating_add(count) &lt;= <span class="self">self</span>.layout.size(),
-            <span class="string">&quot;range start index {start} and count {count} out of bounds for \
-            buffer of length {}&quot;</span>,
+            <span class="string">"range start index {start} and count {count} out of bounds for \
+            buffer of length {}"</span>,
             <span class="self">self</span>.layout.size(),
         );
 
@@ -1230,7 +1256,7 @@
 
     <span class="doccomment">/// Truncates this buffer to `len` bytes
     ///
-    /// If `len` is greater than the buffer&#39;s current length, this has no effect
+    /// If `len` is greater than the buffer's current length, this has no effect
     </span><span class="attr">#[inline(always)]
     </span><span class="kw">pub fn </span>truncate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) {
         <span class="kw">if </span>len &gt; <span class="self">self</span>.len {
@@ -1319,14 +1345,14 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns a raw pointer to this buffer&#39;s internal memory
+    <span class="doccomment">/// Returns a raw pointer to this buffer's internal memory
     /// This pointer is guaranteed to be aligned along cache-lines.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub const fn </span>as_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*const </span>u8 {
         <span class="self">self</span>.data.as_ptr()
     }
 
-    <span class="doccomment">/// Returns a mutable raw pointer to this buffer&#39;s internal memory
+    <span class="doccomment">/// Returns a mutable raw pointer to this buffer's internal memory
     /// This pointer is guaranteed to be aligned along cache-lines.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>as_mut_ptr(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>u8 {
@@ -1334,8 +1360,8 @@
     }
 
     <span class="attr">#[deprecated(
-        since = <span class="string">&quot;2.0.0&quot;</span>,
-        note = <span class="string">&quot;This method is deprecated in favour of `into` from the trait `Into`.&quot;
+        since = <span class="string">"2.0.0"</span>,
+        note = <span class="string">"This method is deprecated in favour of `into` from the trait `Into`."
     </span>)]
     </span><span class="doccomment">/// Freezes this buffer and return an immutable version of it.
     </span><span class="kw">pub fn </span>freeze(<span class="self">self</span>) -&gt; Buffer {
@@ -1344,9 +1370,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>into_buffer(<span class="self">self</span>) -&gt; Buffer {
-        <span class="kw">let </span>bytes = <span class="kw">unsafe </span>{
-            Bytes::new(<span class="self">self</span>.data, <span class="self">self</span>.len, Deallocation::Standard(<span class="self">self</span>.layout))
-        };
+        <span class="kw">let </span>bytes = <span class="kw">unsafe </span>{ Bytes::new(<span class="self">self</span>.data, <span class="self">self</span>.len, Deallocation::Standard(<span class="self">self</span>.layout)) };
         std::mem::forget(<span class="self">self</span>);
         Buffer::from_bytes(bytes)
     }
@@ -1361,8 +1385,7 @@
         <span class="comment">// SAFETY
         // ArrowNativeType is trivially transmutable, is sealed to prevent potentially incorrect
         // implementation outside this crate, and this method checks alignment
-        </span><span class="kw">let </span>(prefix, offsets, suffix) =
-            <span class="kw">unsafe </span>{ <span class="self">self</span>.as_slice_mut().align_to_mut::&lt;T&gt;() };
+        </span><span class="kw">let </span>(prefix, offsets, suffix) = <span class="kw">unsafe </span>{ <span class="self">self</span>.as_slice_mut().align_to_mut::&lt;T&gt;() };
         <span class="macro">assert!</span>(prefix.is_empty() &amp;&amp; suffix.is_empty());
         offsets
     }
@@ -1493,7 +1516,15 @@
     <span class="comment">// SAFETY: ALIGNMENT is a non-zero usize which is then casted
     // to a *mut T. Therefore, `ptr` is not null and the conditions for
     // calling new_unchecked() are respected.
-    </span><span class="kw">unsafe </span>{ NonNull::new_unchecked(ALIGNMENT <span class="kw">as </span><span class="kw-2">*mut </span>u8) }
+    </span><span class="attr">#[cfg(miri)]
+    </span>{
+        <span class="comment">// Since miri implies a nightly rust version we can use the unstable strict_provenance feature
+        </span><span class="kw">unsafe </span>{ NonNull::new_unchecked(std::ptr::without_provenance_mut(ALIGNMENT)) }
+    }
+    <span class="attr">#[cfg(not(miri))]
+    </span>{
+        <span class="kw">unsafe </span>{ NonNull::new_unchecked(ALIGNMENT <span class="kw">as </span><span class="kw-2">*mut </span>u8) }
+    }
 }
 
 <span class="kw">impl</span>&lt;A: ArrowNativeType&gt; Extend&lt;A&gt; <span class="kw">for </span>MutableBuffer {
@@ -1563,11 +1594,11 @@
     /// assert_eq!(buffer.len(), 4) // u32 has 4 bytes
     /// ```
     /// # Safety
-    /// This method assumes that the iterator&#39;s size is correct and is undefined behavior
+    /// This method assumes that the iterator's size is correct and is undefined behavior
     /// to use it on an iterator that reports an incorrect length.
     </span><span class="comment">// This implementation is required for two reasons:
     // 1. there is no trait `TrustedLen` in stable rust and therefore
-    //    we can&#39;t specialize `extend` for `TrustedLen` like `Vec` does.
+    //    we can't specialize `extend` for `TrustedLen` like `Vec` does.
     // 2. `from_trusted_len_iter` is faster.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>from_trusted_len_iter&lt;T: ArrowNativeType, I: Iterator&lt;Item = T&gt;&gt;(
@@ -1575,7 +1606,7 @@
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>item_size = std::mem::size_of::&lt;T&gt;();
         <span class="kw">let </span>(<span class="kw">_</span>, upper) = iterator.size_hint();
-        <span class="kw">let </span>upper = upper.expect(<span class="string">&quot;from_trusted_len_iter requires an upper limit&quot;</span>);
+        <span class="kw">let </span>upper = upper.expect(<span class="string">"from_trusted_len_iter requires an upper limit"</span>);
         <span class="kw">let </span>len = upper * item_size;
 
         <span class="kw">let </span><span class="kw-2">mut </span>buffer = MutableBuffer::new(len);
@@ -1590,7 +1621,7 @@
         <span class="macro">assert_eq!</span>(
             dst.offset_from(buffer.data.as_ptr()) <span class="kw">as </span>usize,
             len,
-            <span class="string">&quot;Trusted iterator length was not accurately reported&quot;
+            <span class="string">"Trusted iterator length was not accurately reported"
         </span>);
         buffer.len = len;
         buffer
@@ -1607,18 +1638,16 @@
     /// assert_eq!(buffer.len(), 1) // 3 booleans have 1 byte
     /// ```
     /// # Safety
-    /// This method assumes that the iterator&#39;s size is correct and is undefined behavior
+    /// This method assumes that the iterator's size is correct and is undefined behavior
     /// to use it on an iterator that reports an incorrect length.
     </span><span class="comment">// This implementation is required for two reasons:
     // 1. there is no trait `TrustedLen` in stable rust and therefore
-    //    we can&#39;t specialize `extend` for `TrustedLen` like `Vec` does.
+    //    we can't specialize `extend` for `TrustedLen` like `Vec` does.
     // 2. `from_trusted_len_iter_bool` is faster.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub unsafe fn </span>from_trusted_len_iter_bool&lt;I: Iterator&lt;Item = bool&gt;&gt;(
-        <span class="kw-2">mut </span>iterator: I,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub unsafe fn </span>from_trusted_len_iter_bool&lt;I: Iterator&lt;Item = bool&gt;&gt;(<span class="kw-2">mut </span>iterator: I) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(<span class="kw">_</span>, upper) = iterator.size_hint();
-        <span class="kw">let </span>len = upper.expect(<span class="string">&quot;from_trusted_len_iter requires an upper limit&quot;</span>);
+        <span class="kw">let </span>len = upper.expect(<span class="string">"from_trusted_len_iter requires an upper limit"</span>);
 
         <span class="self">Self</span>::collect_bool(len, |<span class="kw">_</span>| iterator.next().unwrap())
     }
@@ -1627,7 +1656,7 @@
     /// if any of the items of the iterator is an error.
     /// Prefer this to `collect` whenever possible, as it is faster ~60% faster.
     /// # Safety
-    /// This method assumes that the iterator&#39;s size is correct and is undefined behavior
+    /// This method assumes that the iterator's size is correct and is undefined behavior
     /// to use it on an iterator that reports an incorrect length.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>try_from_trusted_len_iter&lt;
@@ -1639,7 +1668,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, E&gt; {
         <span class="kw">let </span>item_size = std::mem::size_of::&lt;T&gt;();
         <span class="kw">let </span>(<span class="kw">_</span>, upper) = iterator.size_hint();
-        <span class="kw">let </span>upper = upper.expect(<span class="string">&quot;try_from_trusted_len_iter requires an upper limit&quot;</span>);
+        <span class="kw">let </span>upper = upper.expect(<span class="string">"try_from_trusted_len_iter requires an upper limit"</span>);
         <span class="kw">let </span>len = upper * item_size;
 
         <span class="kw">let </span><span class="kw-2">mut </span>buffer = MutableBuffer::new(len);
@@ -1658,7 +1687,7 @@
             <span class="macro">assert_eq!</span>(
                 dst.offset_from(buffer.data.as_ptr()) <span class="kw">as </span>usize,
                 len,
-                <span class="string">&quot;Trusted iterator length was not accurately reported&quot;
+                <span class="string">"Trusted iterator length was not accurately reported"
             </span>);
             buffer.len = len;
         }
@@ -1711,14 +1740,14 @@
 <span class="kw">unsafe impl </span>Sync <span class="kw">for </span>MutableBuffer {}
 <span class="kw">unsafe impl </span>Send <span class="kw">for </span>MutableBuffer {}
 
-<span class="kw">struct </span>SetLenOnDrop&lt;<span class="lifetime">&#39;a</span>&gt; {
-    len: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>usize,
+<span class="kw">struct </span>SetLenOnDrop&lt;<span class="lifetime">'a</span>&gt; {
+    len: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>usize,
     local_len: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SetLenOnDrop&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SetLenOnDrop&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(len: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>usize) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>new(len: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>usize) -&gt; <span class="self">Self </span>{
         SetLenOnDrop {
             local_len: <span class="kw-2">*</span>len,
             len,
@@ -1726,7 +1755,7 @@
     }
 }
 
-<span class="kw">impl </span>Drop <span class="kw">for </span>SetLenOnDrop&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Drop <span class="kw">for </span>SetLenOnDrop&lt;<span class="lifetime">'_</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw-2">*</span><span class="self">self</span>.len = <span class="self">self</span>.local_len;
@@ -1816,27 +1845,27 @@
         <span class="macro">assert!</span>(buf.is_empty());
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MutableBuffer::default();
-        buf.extend_from_slice(<span class="string">b&quot;hello&quot;</span>);
+        buf.extend_from_slice(<span class="string">b"hello"</span>);
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, buf.len());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;hello&quot;</span>, buf.as_slice());
+        <span class="macro">assert_eq!</span>(<span class="string">b"hello"</span>, buf.as_slice());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_mutable_extend_from_slice() {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MutableBuffer::new(<span class="number">100</span>);
-        buf.extend_from_slice(<span class="string">b&quot;hello&quot;</span>);
+        buf.extend_from_slice(<span class="string">b"hello"</span>);
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, buf.len());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;hello&quot;</span>, buf.as_slice());
+        <span class="macro">assert_eq!</span>(<span class="string">b"hello"</span>, buf.as_slice());
 
-        buf.extend_from_slice(<span class="string">b&quot; world&quot;</span>);
+        buf.extend_from_slice(<span class="string">b" world"</span>);
         <span class="macro">assert_eq!</span>(<span class="number">11</span>, buf.len());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;hello world&quot;</span>, buf.as_slice());
+        <span class="macro">assert_eq!</span>(<span class="string">b"hello world"</span>, buf.as_slice());
 
         buf.clear();
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, buf.len());
-        buf.extend_from_slice(<span class="string">b&quot;hello arrow&quot;</span>);
+        buf.extend_from_slice(<span class="string">b"hello arrow"</span>);
         <span class="macro">assert_eq!</span>(<span class="number">11</span>, buf.len());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;hello arrow&quot;</span>, buf.as_slice());
+        <span class="macro">assert_eq!</span>(<span class="string">b"hello arrow"</span>, buf.as_slice());
     }
 
     <span class="attr">#[test]
@@ -1946,15 +1975,15 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_mutable_into() {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MutableBuffer::new(<span class="number">1</span>);
-        buf.extend_from_slice(<span class="string">b&quot;aaaa bbbb cccc dddd&quot;</span>);
+        buf.extend_from_slice(<span class="string">b"aaaa bbbb cccc dddd"</span>);
         <span class="macro">assert_eq!</span>(<span class="number">19</span>, buf.len());
         <span class="macro">assert_eq!</span>(<span class="number">64</span>, buf.capacity());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;aaaa bbbb cccc dddd&quot;</span>, buf.as_slice());
+        <span class="macro">assert_eq!</span>(<span class="string">b"aaaa bbbb cccc dddd"</span>, buf.as_slice());
 
         <span class="kw">let </span>immutable_buf: Buffer = buf.into();
         <span class="macro">assert_eq!</span>(<span class="number">19</span>, immutable_buf.len());
         <span class="macro">assert_eq!</span>(<span class="number">64</span>, immutable_buf.capacity());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;aaaa bbbb cccc dddd&quot;</span>, immutable_buf.as_slice());
+        <span class="macro">assert_eq!</span>(<span class="string">b"aaaa bbbb cccc dddd"</span>, immutable_buf.as_slice());
     }
 
     <span class="attr">#[test]
@@ -1998,14 +2027,14 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic = <span class="string">&quot;out of bounds for buffer of length&quot;</span>]
+    #[should_panic = <span class="string">"out of bounds for buffer of length"</span>]
     </span><span class="kw">fn </span>test_mutable_set_null_bits_oob() {
         <span class="kw">let </span><span class="kw-2">mut </span>buffer = MutableBuffer::new(<span class="number">64</span>);
         buffer.set_null_bits(<span class="number">1</span>, buffer.capacity());
     }
 
     <span class="attr">#[test]
-    #[should_panic = <span class="string">&quot;out of bounds for buffer of length&quot;</span>]
+    #[should_panic = <span class="string">"out of bounds for buffer of length"</span>]
     </span><span class="kw">fn </span>test_mutable_set_null_bits_oob_by_overflow() {
         <span class="kw">let </span><span class="kw-2">mut </span>buffer = MutableBuffer::new(<span class="number">0</span>);
         buffer.set_null_bits(<span class="number">1</span>, usize::MAX);
@@ -2016,6 +2045,13 @@
         <span class="kw">let </span>buffer = [<span class="number">1u16</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>].into_iter().collect::&lt;MutableBuffer&gt;();
         <span class="macro">assert_eq!</span>(buffer.len(), <span class="number">4 </span>* mem::size_of::&lt;u16&gt;());
         <span class="macro">assert_eq!</span>(buffer.as_slice(), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>]);
+    }
+
+    <span class="attr">#[test]
+    #[should_panic(expected = <span class="string">"failed to create layout for MutableBuffer: LayoutError"</span>)]
+    </span><span class="kw">fn </span>test_with_capacity_panics_above_max_capacity() {
+        <span class="kw">let </span>max_capacity = isize::MAX <span class="kw">as </span>usize - (isize::MAX <span class="kw">as </span>usize % ALIGNMENT);
+        <span class="kw">let _ </span>= MutableBuffer::with_capacity(max_capacity + <span class="number">1</span>);
     }
 }
 </code></pre></div></section></main></body></html>

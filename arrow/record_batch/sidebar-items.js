@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["RecordBatch","RecordBatchOptions"],"trait":["RecordBatchReader","RecordBatchWriter"]};
+window.SIDEBAR_ITEMS = {"struct":["RecordBatch","RecordBatchIterator","RecordBatchOptions"],"trait":["RecordBatchReader","RecordBatchWriter"]};

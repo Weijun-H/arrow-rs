@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/arrow/arrow_writer/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="parquet" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../parquet/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parquet/src/arrow/arrow_writer/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="parquet" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2658,19 +2658,469 @@
 <a href="#2658" id="2658">2658</a>
 <a href="#2659" id="2659">2659</a>
 <a href="#2660" id="2660">2660</a>
+<a href="#2661" id="2661">2661</a>
+<a href="#2662" id="2662">2662</a>
+<a href="#2663" id="2663">2663</a>
+<a href="#2664" id="2664">2664</a>
+<a href="#2665" id="2665">2665</a>
+<a href="#2666" id="2666">2666</a>
+<a href="#2667" id="2667">2667</a>
+<a href="#2668" id="2668">2668</a>
+<a href="#2669" id="2669">2669</a>
+<a href="#2670" id="2670">2670</a>
+<a href="#2671" id="2671">2671</a>
+<a href="#2672" id="2672">2672</a>
+<a href="#2673" id="2673">2673</a>
+<a href="#2674" id="2674">2674</a>
+<a href="#2675" id="2675">2675</a>
+<a href="#2676" id="2676">2676</a>
+<a href="#2677" id="2677">2677</a>
+<a href="#2678" id="2678">2678</a>
+<a href="#2679" id="2679">2679</a>
+<a href="#2680" id="2680">2680</a>
+<a href="#2681" id="2681">2681</a>
+<a href="#2682" id="2682">2682</a>
+<a href="#2683" id="2683">2683</a>
+<a href="#2684" id="2684">2684</a>
+<a href="#2685" id="2685">2685</a>
+<a href="#2686" id="2686">2686</a>
+<a href="#2687" id="2687">2687</a>
+<a href="#2688" id="2688">2688</a>
+<a href="#2689" id="2689">2689</a>
+<a href="#2690" id="2690">2690</a>
+<a href="#2691" id="2691">2691</a>
+<a href="#2692" id="2692">2692</a>
+<a href="#2693" id="2693">2693</a>
+<a href="#2694" id="2694">2694</a>
+<a href="#2695" id="2695">2695</a>
+<a href="#2696" id="2696">2696</a>
+<a href="#2697" id="2697">2697</a>
+<a href="#2698" id="2698">2698</a>
+<a href="#2699" id="2699">2699</a>
+<a href="#2700" id="2700">2700</a>
+<a href="#2701" id="2701">2701</a>
+<a href="#2702" id="2702">2702</a>
+<a href="#2703" id="2703">2703</a>
+<a href="#2704" id="2704">2704</a>
+<a href="#2705" id="2705">2705</a>
+<a href="#2706" id="2706">2706</a>
+<a href="#2707" id="2707">2707</a>
+<a href="#2708" id="2708">2708</a>
+<a href="#2709" id="2709">2709</a>
+<a href="#2710" id="2710">2710</a>
+<a href="#2711" id="2711">2711</a>
+<a href="#2712" id="2712">2712</a>
+<a href="#2713" id="2713">2713</a>
+<a href="#2714" id="2714">2714</a>
+<a href="#2715" id="2715">2715</a>
+<a href="#2716" id="2716">2716</a>
+<a href="#2717" id="2717">2717</a>
+<a href="#2718" id="2718">2718</a>
+<a href="#2719" id="2719">2719</a>
+<a href="#2720" id="2720">2720</a>
+<a href="#2721" id="2721">2721</a>
+<a href="#2722" id="2722">2722</a>
+<a href="#2723" id="2723">2723</a>
+<a href="#2724" id="2724">2724</a>
+<a href="#2725" id="2725">2725</a>
+<a href="#2726" id="2726">2726</a>
+<a href="#2727" id="2727">2727</a>
+<a href="#2728" id="2728">2728</a>
+<a href="#2729" id="2729">2729</a>
+<a href="#2730" id="2730">2730</a>
+<a href="#2731" id="2731">2731</a>
+<a href="#2732" id="2732">2732</a>
+<a href="#2733" id="2733">2733</a>
+<a href="#2734" id="2734">2734</a>
+<a href="#2735" id="2735">2735</a>
+<a href="#2736" id="2736">2736</a>
+<a href="#2737" id="2737">2737</a>
+<a href="#2738" id="2738">2738</a>
+<a href="#2739" id="2739">2739</a>
+<a href="#2740" id="2740">2740</a>
+<a href="#2741" id="2741">2741</a>
+<a href="#2742" id="2742">2742</a>
+<a href="#2743" id="2743">2743</a>
+<a href="#2744" id="2744">2744</a>
+<a href="#2745" id="2745">2745</a>
+<a href="#2746" id="2746">2746</a>
+<a href="#2747" id="2747">2747</a>
+<a href="#2748" id="2748">2748</a>
+<a href="#2749" id="2749">2749</a>
+<a href="#2750" id="2750">2750</a>
+<a href="#2751" id="2751">2751</a>
+<a href="#2752" id="2752">2752</a>
+<a href="#2753" id="2753">2753</a>
+<a href="#2754" id="2754">2754</a>
+<a href="#2755" id="2755">2755</a>
+<a href="#2756" id="2756">2756</a>
+<a href="#2757" id="2757">2757</a>
+<a href="#2758" id="2758">2758</a>
+<a href="#2759" id="2759">2759</a>
+<a href="#2760" id="2760">2760</a>
+<a href="#2761" id="2761">2761</a>
+<a href="#2762" id="2762">2762</a>
+<a href="#2763" id="2763">2763</a>
+<a href="#2764" id="2764">2764</a>
+<a href="#2765" id="2765">2765</a>
+<a href="#2766" id="2766">2766</a>
+<a href="#2767" id="2767">2767</a>
+<a href="#2768" id="2768">2768</a>
+<a href="#2769" id="2769">2769</a>
+<a href="#2770" id="2770">2770</a>
+<a href="#2771" id="2771">2771</a>
+<a href="#2772" id="2772">2772</a>
+<a href="#2773" id="2773">2773</a>
+<a href="#2774" id="2774">2774</a>
+<a href="#2775" id="2775">2775</a>
+<a href="#2776" id="2776">2776</a>
+<a href="#2777" id="2777">2777</a>
+<a href="#2778" id="2778">2778</a>
+<a href="#2779" id="2779">2779</a>
+<a href="#2780" id="2780">2780</a>
+<a href="#2781" id="2781">2781</a>
+<a href="#2782" id="2782">2782</a>
+<a href="#2783" id="2783">2783</a>
+<a href="#2784" id="2784">2784</a>
+<a href="#2785" id="2785">2785</a>
+<a href="#2786" id="2786">2786</a>
+<a href="#2787" id="2787">2787</a>
+<a href="#2788" id="2788">2788</a>
+<a href="#2789" id="2789">2789</a>
+<a href="#2790" id="2790">2790</a>
+<a href="#2791" id="2791">2791</a>
+<a href="#2792" id="2792">2792</a>
+<a href="#2793" id="2793">2793</a>
+<a href="#2794" id="2794">2794</a>
+<a href="#2795" id="2795">2795</a>
+<a href="#2796" id="2796">2796</a>
+<a href="#2797" id="2797">2797</a>
+<a href="#2798" id="2798">2798</a>
+<a href="#2799" id="2799">2799</a>
+<a href="#2800" id="2800">2800</a>
+<a href="#2801" id="2801">2801</a>
+<a href="#2802" id="2802">2802</a>
+<a href="#2803" id="2803">2803</a>
+<a href="#2804" id="2804">2804</a>
+<a href="#2805" id="2805">2805</a>
+<a href="#2806" id="2806">2806</a>
+<a href="#2807" id="2807">2807</a>
+<a href="#2808" id="2808">2808</a>
+<a href="#2809" id="2809">2809</a>
+<a href="#2810" id="2810">2810</a>
+<a href="#2811" id="2811">2811</a>
+<a href="#2812" id="2812">2812</a>
+<a href="#2813" id="2813">2813</a>
+<a href="#2814" id="2814">2814</a>
+<a href="#2815" id="2815">2815</a>
+<a href="#2816" id="2816">2816</a>
+<a href="#2817" id="2817">2817</a>
+<a href="#2818" id="2818">2818</a>
+<a href="#2819" id="2819">2819</a>
+<a href="#2820" id="2820">2820</a>
+<a href="#2821" id="2821">2821</a>
+<a href="#2822" id="2822">2822</a>
+<a href="#2823" id="2823">2823</a>
+<a href="#2824" id="2824">2824</a>
+<a href="#2825" id="2825">2825</a>
+<a href="#2826" id="2826">2826</a>
+<a href="#2827" id="2827">2827</a>
+<a href="#2828" id="2828">2828</a>
+<a href="#2829" id="2829">2829</a>
+<a href="#2830" id="2830">2830</a>
+<a href="#2831" id="2831">2831</a>
+<a href="#2832" id="2832">2832</a>
+<a href="#2833" id="2833">2833</a>
+<a href="#2834" id="2834">2834</a>
+<a href="#2835" id="2835">2835</a>
+<a href="#2836" id="2836">2836</a>
+<a href="#2837" id="2837">2837</a>
+<a href="#2838" id="2838">2838</a>
+<a href="#2839" id="2839">2839</a>
+<a href="#2840" id="2840">2840</a>
+<a href="#2841" id="2841">2841</a>
+<a href="#2842" id="2842">2842</a>
+<a href="#2843" id="2843">2843</a>
+<a href="#2844" id="2844">2844</a>
+<a href="#2845" id="2845">2845</a>
+<a href="#2846" id="2846">2846</a>
+<a href="#2847" id="2847">2847</a>
+<a href="#2848" id="2848">2848</a>
+<a href="#2849" id="2849">2849</a>
+<a href="#2850" id="2850">2850</a>
+<a href="#2851" id="2851">2851</a>
+<a href="#2852" id="2852">2852</a>
+<a href="#2853" id="2853">2853</a>
+<a href="#2854" id="2854">2854</a>
+<a href="#2855" id="2855">2855</a>
+<a href="#2856" id="2856">2856</a>
+<a href="#2857" id="2857">2857</a>
+<a href="#2858" id="2858">2858</a>
+<a href="#2859" id="2859">2859</a>
+<a href="#2860" id="2860">2860</a>
+<a href="#2861" id="2861">2861</a>
+<a href="#2862" id="2862">2862</a>
+<a href="#2863" id="2863">2863</a>
+<a href="#2864" id="2864">2864</a>
+<a href="#2865" id="2865">2865</a>
+<a href="#2866" id="2866">2866</a>
+<a href="#2867" id="2867">2867</a>
+<a href="#2868" id="2868">2868</a>
+<a href="#2869" id="2869">2869</a>
+<a href="#2870" id="2870">2870</a>
+<a href="#2871" id="2871">2871</a>
+<a href="#2872" id="2872">2872</a>
+<a href="#2873" id="2873">2873</a>
+<a href="#2874" id="2874">2874</a>
+<a href="#2875" id="2875">2875</a>
+<a href="#2876" id="2876">2876</a>
+<a href="#2877" id="2877">2877</a>
+<a href="#2878" id="2878">2878</a>
+<a href="#2879" id="2879">2879</a>
+<a href="#2880" id="2880">2880</a>
+<a href="#2881" id="2881">2881</a>
+<a href="#2882" id="2882">2882</a>
+<a href="#2883" id="2883">2883</a>
+<a href="#2884" id="2884">2884</a>
+<a href="#2885" id="2885">2885</a>
+<a href="#2886" id="2886">2886</a>
+<a href="#2887" id="2887">2887</a>
+<a href="#2888" id="2888">2888</a>
+<a href="#2889" id="2889">2889</a>
+<a href="#2890" id="2890">2890</a>
+<a href="#2891" id="2891">2891</a>
+<a href="#2892" id="2892">2892</a>
+<a href="#2893" id="2893">2893</a>
+<a href="#2894" id="2894">2894</a>
+<a href="#2895" id="2895">2895</a>
+<a href="#2896" id="2896">2896</a>
+<a href="#2897" id="2897">2897</a>
+<a href="#2898" id="2898">2898</a>
+<a href="#2899" id="2899">2899</a>
+<a href="#2900" id="2900">2900</a>
+<a href="#2901" id="2901">2901</a>
+<a href="#2902" id="2902">2902</a>
+<a href="#2903" id="2903">2903</a>
+<a href="#2904" id="2904">2904</a>
+<a href="#2905" id="2905">2905</a>
+<a href="#2906" id="2906">2906</a>
+<a href="#2907" id="2907">2907</a>
+<a href="#2908" id="2908">2908</a>
+<a href="#2909" id="2909">2909</a>
+<a href="#2910" id="2910">2910</a>
+<a href="#2911" id="2911">2911</a>
+<a href="#2912" id="2912">2912</a>
+<a href="#2913" id="2913">2913</a>
+<a href="#2914" id="2914">2914</a>
+<a href="#2915" id="2915">2915</a>
+<a href="#2916" id="2916">2916</a>
+<a href="#2917" id="2917">2917</a>
+<a href="#2918" id="2918">2918</a>
+<a href="#2919" id="2919">2919</a>
+<a href="#2920" id="2920">2920</a>
+<a href="#2921" id="2921">2921</a>
+<a href="#2922" id="2922">2922</a>
+<a href="#2923" id="2923">2923</a>
+<a href="#2924" id="2924">2924</a>
+<a href="#2925" id="2925">2925</a>
+<a href="#2926" id="2926">2926</a>
+<a href="#2927" id="2927">2927</a>
+<a href="#2928" id="2928">2928</a>
+<a href="#2929" id="2929">2929</a>
+<a href="#2930" id="2930">2930</a>
+<a href="#2931" id="2931">2931</a>
+<a href="#2932" id="2932">2932</a>
+<a href="#2933" id="2933">2933</a>
+<a href="#2934" id="2934">2934</a>
+<a href="#2935" id="2935">2935</a>
+<a href="#2936" id="2936">2936</a>
+<a href="#2937" id="2937">2937</a>
+<a href="#2938" id="2938">2938</a>
+<a href="#2939" id="2939">2939</a>
+<a href="#2940" id="2940">2940</a>
+<a href="#2941" id="2941">2941</a>
+<a href="#2942" id="2942">2942</a>
+<a href="#2943" id="2943">2943</a>
+<a href="#2944" id="2944">2944</a>
+<a href="#2945" id="2945">2945</a>
+<a href="#2946" id="2946">2946</a>
+<a href="#2947" id="2947">2947</a>
+<a href="#2948" id="2948">2948</a>
+<a href="#2949" id="2949">2949</a>
+<a href="#2950" id="2950">2950</a>
+<a href="#2951" id="2951">2951</a>
+<a href="#2952" id="2952">2952</a>
+<a href="#2953" id="2953">2953</a>
+<a href="#2954" id="2954">2954</a>
+<a href="#2955" id="2955">2955</a>
+<a href="#2956" id="2956">2956</a>
+<a href="#2957" id="2957">2957</a>
+<a href="#2958" id="2958">2958</a>
+<a href="#2959" id="2959">2959</a>
+<a href="#2960" id="2960">2960</a>
+<a href="#2961" id="2961">2961</a>
+<a href="#2962" id="2962">2962</a>
+<a href="#2963" id="2963">2963</a>
+<a href="#2964" id="2964">2964</a>
+<a href="#2965" id="2965">2965</a>
+<a href="#2966" id="2966">2966</a>
+<a href="#2967" id="2967">2967</a>
+<a href="#2968" id="2968">2968</a>
+<a href="#2969" id="2969">2969</a>
+<a href="#2970" id="2970">2970</a>
+<a href="#2971" id="2971">2971</a>
+<a href="#2972" id="2972">2972</a>
+<a href="#2973" id="2973">2973</a>
+<a href="#2974" id="2974">2974</a>
+<a href="#2975" id="2975">2975</a>
+<a href="#2976" id="2976">2976</a>
+<a href="#2977" id="2977">2977</a>
+<a href="#2978" id="2978">2978</a>
+<a href="#2979" id="2979">2979</a>
+<a href="#2980" id="2980">2980</a>
+<a href="#2981" id="2981">2981</a>
+<a href="#2982" id="2982">2982</a>
+<a href="#2983" id="2983">2983</a>
+<a href="#2984" id="2984">2984</a>
+<a href="#2985" id="2985">2985</a>
+<a href="#2986" id="2986">2986</a>
+<a href="#2987" id="2987">2987</a>
+<a href="#2988" id="2988">2988</a>
+<a href="#2989" id="2989">2989</a>
+<a href="#2990" id="2990">2990</a>
+<a href="#2991" id="2991">2991</a>
+<a href="#2992" id="2992">2992</a>
+<a href="#2993" id="2993">2993</a>
+<a href="#2994" id="2994">2994</a>
+<a href="#2995" id="2995">2995</a>
+<a href="#2996" id="2996">2996</a>
+<a href="#2997" id="2997">2997</a>
+<a href="#2998" id="2998">2998</a>
+<a href="#2999" id="2999">2999</a>
+<a href="#3000" id="3000">3000</a>
+<a href="#3001" id="3001">3001</a>
+<a href="#3002" id="3002">3002</a>
+<a href="#3003" id="3003">3003</a>
+<a href="#3004" id="3004">3004</a>
+<a href="#3005" id="3005">3005</a>
+<a href="#3006" id="3006">3006</a>
+<a href="#3007" id="3007">3007</a>
+<a href="#3008" id="3008">3008</a>
+<a href="#3009" id="3009">3009</a>
+<a href="#3010" id="3010">3010</a>
+<a href="#3011" id="3011">3011</a>
+<a href="#3012" id="3012">3012</a>
+<a href="#3013" id="3013">3013</a>
+<a href="#3014" id="3014">3014</a>
+<a href="#3015" id="3015">3015</a>
+<a href="#3016" id="3016">3016</a>
+<a href="#3017" id="3017">3017</a>
+<a href="#3018" id="3018">3018</a>
+<a href="#3019" id="3019">3019</a>
+<a href="#3020" id="3020">3020</a>
+<a href="#3021" id="3021">3021</a>
+<a href="#3022" id="3022">3022</a>
+<a href="#3023" id="3023">3023</a>
+<a href="#3024" id="3024">3024</a>
+<a href="#3025" id="3025">3025</a>
+<a href="#3026" id="3026">3026</a>
+<a href="#3027" id="3027">3027</a>
+<a href="#3028" id="3028">3028</a>
+<a href="#3029" id="3029">3029</a>
+<a href="#3030" id="3030">3030</a>
+<a href="#3031" id="3031">3031</a>
+<a href="#3032" id="3032">3032</a>
+<a href="#3033" id="3033">3033</a>
+<a href="#3034" id="3034">3034</a>
+<a href="#3035" id="3035">3035</a>
+<a href="#3036" id="3036">3036</a>
+<a href="#3037" id="3037">3037</a>
+<a href="#3038" id="3038">3038</a>
+<a href="#3039" id="3039">3039</a>
+<a href="#3040" id="3040">3040</a>
+<a href="#3041" id="3041">3041</a>
+<a href="#3042" id="3042">3042</a>
+<a href="#3043" id="3043">3043</a>
+<a href="#3044" id="3044">3044</a>
+<a href="#3045" id="3045">3045</a>
+<a href="#3046" id="3046">3046</a>
+<a href="#3047" id="3047">3047</a>
+<a href="#3048" id="3048">3048</a>
+<a href="#3049" id="3049">3049</a>
+<a href="#3050" id="3050">3050</a>
+<a href="#3051" id="3051">3051</a>
+<a href="#3052" id="3052">3052</a>
+<a href="#3053" id="3053">3053</a>
+<a href="#3054" id="3054">3054</a>
+<a href="#3055" id="3055">3055</a>
+<a href="#3056" id="3056">3056</a>
+<a href="#3057" id="3057">3057</a>
+<a href="#3058" id="3058">3058</a>
+<a href="#3059" id="3059">3059</a>
+<a href="#3060" id="3060">3060</a>
+<a href="#3061" id="3061">3061</a>
+<a href="#3062" id="3062">3062</a>
+<a href="#3063" id="3063">3063</a>
+<a href="#3064" id="3064">3064</a>
+<a href="#3065" id="3065">3065</a>
+<a href="#3066" id="3066">3066</a>
+<a href="#3067" id="3067">3067</a>
+<a href="#3068" id="3068">3068</a>
+<a href="#3069" id="3069">3069</a>
+<a href="#3070" id="3070">3070</a>
+<a href="#3071" id="3071">3071</a>
+<a href="#3072" id="3072">3072</a>
+<a href="#3073" id="3073">3073</a>
+<a href="#3074" id="3074">3074</a>
+<a href="#3075" id="3075">3075</a>
+<a href="#3076" id="3076">3076</a>
+<a href="#3077" id="3077">3077</a>
+<a href="#3078" id="3078">3078</a>
+<a href="#3079" id="3079">3079</a>
+<a href="#3080" id="3080">3080</a>
+<a href="#3081" id="3081">3081</a>
+<a href="#3082" id="3082">3082</a>
+<a href="#3083" id="3083">3083</a>
+<a href="#3084" id="3084">3084</a>
+<a href="#3085" id="3085">3085</a>
+<a href="#3086" id="3086">3086</a>
+<a href="#3087" id="3087">3087</a>
+<a href="#3088" id="3088">3088</a>
+<a href="#3089" id="3089">3089</a>
+<a href="#3090" id="3090">3090</a>
+<a href="#3091" id="3091">3091</a>
+<a href="#3092" id="3092">3092</a>
+<a href="#3093" id="3093">3093</a>
+<a href="#3094" id="3094">3094</a>
+<a href="#3095" id="3095">3095</a>
+<a href="#3096" id="3096">3096</a>
+<a href="#3097" id="3097">3097</a>
+<a href="#3098" id="3098">3098</a>
+<a href="#3099" id="3099">3099</a>
+<a href="#3100" id="3100">3100</a>
+<a href="#3101" id="3101">3101</a>
+<a href="#3102" id="3102">3102</a>
+<a href="#3103" id="3103">3103</a>
+<a href="#3104" id="3104">3104</a>
+<a href="#3105" id="3105">3105</a>
+<a href="#3106" id="3106">3106</a>
+<a href="#3107" id="3107">3107</a>
+<a href="#3108" id="3108">3108</a>
+<a href="#3109" id="3109">3109</a>
+<a href="#3110" id="3110">3110</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -2678,22 +3128,21 @@
 </span><span class="doccomment">//! Contains writer which writes arrow data into parquet data.
 
 </span><span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::io::{Read, Write};
 <span class="kw">use </span>std::iter::Peekable;
 <span class="kw">use </span>std::slice::Iter;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 <span class="kw">use </span>std::vec::IntoIter;
-<span class="kw">use </span>thrift::protocol::{TCompactOutputProtocol, TSerializable};
+<span class="kw">use </span>thrift::protocol::TCompactOutputProtocol;
 
 <span class="kw">use </span>arrow_array::cast::AsArray;
 <span class="kw">use </span>arrow_array::types::<span class="kw-2">*</span>;
-<span class="kw">use </span>arrow_array::{Array, FixedSizeListArray, RecordBatch, RecordBatchWriter};
-<span class="kw">use </span>arrow_schema::{ArrowError, DataType <span class="kw">as </span>ArrowDataType, IntervalUnit, SchemaRef};
+<span class="kw">use </span>arrow_array::{ArrayRef, RecordBatch, RecordBatchWriter};
+<span class="kw">use </span>arrow_schema::{ArrowError, DataType <span class="kw">as </span>ArrowDataType, Field, IntervalUnit, SchemaRef};
 
 <span class="kw">use </span><span class="kw">super</span>::schema::{
     add_encoded_arrow_schema_to_metadata, arrow_to_parquet_schema,
-    decimal_length_from_precision,
+    arrow_to_parquet_schema_with_root, decimal_length_from_precision,
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::arrow::arrow_writer::byte_array::ByteArrayEncoder;
@@ -2707,14 +3156,15 @@
 <span class="kw">use </span><span class="kw">crate</span>::file::metadata::{ColumnChunkMetaData, KeyValue, RowGroupMetaDataPtr};
 <span class="kw">use </span><span class="kw">crate</span>::file::properties::{WriterProperties, WriterPropertiesPtr};
 <span class="kw">use </span><span class="kw">crate</span>::file::reader::{ChunkReader, Length};
-<span class="kw">use </span><span class="kw">crate</span>::file::writer::SerializedFileWriter;
+<span class="kw">use </span><span class="kw">crate</span>::file::writer::{SerializedFileWriter, SerializedRowGroupWriter};
 <span class="kw">use </span><span class="kw">crate</span>::schema::types::{ColumnDescPtr, SchemaDescriptor};
-<span class="kw">use </span>levels::{calculate_array_levels, LevelInfo};
+<span class="kw">use </span><span class="kw">crate</span>::thrift::TSerializable;
+<span class="kw">use </span>levels::{calculate_array_levels, ArrayLevels};
 
 <span class="kw">mod </span>byte_array;
 <span class="kw">mod </span>levels;
 
-<span class="doccomment">/// Arrow writer
+<span class="doccomment">/// Encodes [`RecordBatch`] to parquet
 ///
 /// Writes Arrow `RecordBatch`es to a Parquet writer. Multiple [`RecordBatch`] will be encoded
 /// to the same row group, up to `max_row_group_size` rows. Any remaining rows will be
@@ -2729,7 +3179,7 @@
 /// # use parquet::arrow::arrow_writer::ArrowWriter;
 /// # use parquet::arrow::arrow_reader::ParquetRecordBatchReader;
 /// let col = Arc::new(Int64Array::from_iter_values([1, 2, 3])) as ArrayRef;
-/// let to_write = RecordBatch::try_from_iter([(&quot;col&quot;, col)]).unwrap();
+/// let to_write = RecordBatch::try_from_iter([("col", col)]).unwrap();
 ///
 /// let mut buffer = Vec::new();
 /// let mut writer = ArrowWriter::try_new(&amp;mut buffer, to_write.schema(), None).unwrap();
@@ -2741,6 +3191,32 @@
 ///
 /// assert_eq!(to_write, read);
 /// ```
+///
+/// ## Memory Limiting
+///
+/// The nature of parquet forces buffering of an entire row group before it can be flushed
+/// to the underlying writer. Data is buffered in its encoded form, to reduce memory usage,
+/// but if writing rows containing large strings or very nested data, this may still result in
+/// non-trivial memory usage.
+///
+/// [`ArrowWriter::in_progress_size`] can be used to track the size of the buffered row group,
+/// and potentially trigger an early flush of a row group based on a memory threshold and/or
+/// global memory pressure. However, users should be aware that smaller row groups will result
+/// in higher metadata overheads, and may worsen compression ratios and query performance.
+///
+/// ```no_run
+/// # use std::io::Write;
+/// # use arrow_array::RecordBatch;
+/// # use parquet::arrow::ArrowWriter;
+/// # let mut writer: ArrowWriter&lt;Vec&lt;u8&gt;&gt; = todo!();
+/// # let batch: RecordBatch = todo!();
+/// writer.write(&amp;batch).unwrap();
+/// // Trigger an early flush if buffered size exceeds 1_000_000
+/// if writer.in_progress_size() &gt; 1_000_000 {
+///     writer.flush().unwrap();
+/// }
+/// ```
+///
 </span><span class="kw">pub struct </span>ArrowWriter&lt;W: Write&gt; {
     <span class="doccomment">/// Underlying Parquet writer
     </span>writer: SerializedFileWriter&lt;W&gt;,
@@ -2757,15 +3233,15 @@
     </span>max_row_group_size: usize,
 }
 
-<span class="kw">impl</span>&lt;W: Write + Send&gt; Debug <span class="kw">for </span>ArrowWriter&lt;W&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+<span class="kw">impl</span>&lt;W: Write + Send&gt; std::fmt::Debug <span class="kw">for </span>ArrowWriter&lt;W&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">let </span>buffered_memory = <span class="self">self</span>.in_progress_size();
-        f.debug_struct(<span class="string">&quot;ArrowWriter&quot;</span>)
-            .field(<span class="string">&quot;writer&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.writer)
-            .field(<span class="string">&quot;in_progress_size&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{buffered_memory} bytes&quot;</span>))
-            .field(<span class="string">&quot;in_progress_rows&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.in_progress_rows())
-            .field(<span class="string">&quot;arrow_schema&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.arrow_schema)
-            .field(<span class="string">&quot;max_row_group_size&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_row_group_size)
+        f.debug_struct(<span class="string">"ArrowWriter"</span>)
+            .field(<span class="string">"writer"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.writer)
+            .field(<span class="string">"in_progress_size"</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">"{buffered_memory} bytes"</span>))
+            .field(<span class="string">"in_progress_rows"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.in_progress_rows())
+            .field(<span class="string">"arrow_schema"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.arrow_schema)
+            .field(<span class="string">"max_row_group_size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_row_group_size)
             .finish()
     }
 }
@@ -2781,10 +3257,29 @@
         arrow_schema: SchemaRef,
         props: <span class="prelude-ty">Option</span>&lt;WriterProperties&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>schema = arrow_to_parquet_schema(<span class="kw-2">&amp;</span>arrow_schema)<span class="question-mark">?</span>;
-        <span class="comment">// add serialized arrow schema
-        </span><span class="kw">let </span><span class="kw-2">mut </span>props = props.unwrap_or_default();
-        add_encoded_arrow_schema_to_metadata(<span class="kw-2">&amp;</span>arrow_schema, <span class="kw-2">&amp;mut </span>props);
+        <span class="kw">let </span>options = ArrowWriterOptions::new().with_properties(props.unwrap_or_default());
+        <span class="self">Self</span>::try_new_with_options(writer, arrow_schema, options)
+    }
+
+    <span class="doccomment">/// Try to create a new Arrow writer with [`ArrowWriterOptions`].
+    ///
+    /// The writer will fail if:
+    ///  * a `SerializedFileWriter` cannot be created from the ParquetWriter
+    ///  * the Arrow schema contains unsupported datatypes such as Unions
+    </span><span class="kw">pub fn </span>try_new_with_options(
+        writer: W,
+        arrow_schema: SchemaRef,
+        options: ArrowWriterOptions,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>schema = <span class="kw">match </span>options.schema_root {
+            <span class="prelude-val">Some</span>(s) =&gt; arrow_to_parquet_schema_with_root(<span class="kw-2">&amp;</span>arrow_schema, <span class="kw-2">&amp;</span>s)<span class="question-mark">?</span>,
+            <span class="prelude-val">None </span>=&gt; arrow_to_parquet_schema(<span class="kw-2">&amp;</span>arrow_schema)<span class="question-mark">?</span>,
+        };
+        <span class="kw">let </span><span class="kw-2">mut </span>props = options.properties;
+        <span class="kw">if </span>!options.skip_arrow_metadata {
+            <span class="comment">// add serialized arrow schema
+            </span>add_encoded_arrow_schema_to_metadata(<span class="kw-2">&amp;</span>arrow_schema, <span class="kw-2">&amp;mut </span>props);
+        }
 
         <span class="kw">let </span>max_row_group_size = props.max_row_group_size();
 
@@ -2810,7 +3305,7 @@
             <span class="prelude-val">Some</span>(in_progress) =&gt; in_progress
                 .writers
                 .iter()
-                .map(|(<span class="kw">_</span>, x)| x.get_estimated_total_bytes() <span class="kw">as </span>usize)
+                .map(|x| x.get_estimated_total_bytes())
                 .sum(),
             <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
         }
@@ -2824,11 +3319,18 @@
             .unwrap_or_default()
     }
 
+    <span class="doccomment">/// Returns the number of bytes written by this instance
+    </span><span class="kw">pub fn </span>bytes_written(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.writer.bytes_written()
+    }
+
     <span class="doccomment">/// Encodes the provided [`RecordBatch`]
     ///
     /// If this would cause the current row group to exceed [`WriterProperties::max_row_group_size`]
     /// rows, the contents of `batch` will be written to one or more row groups such that all but
-    /// the final row group in the file contain [`WriterProperties::max_row_group_size`] rows
+    /// the final row group in the file contain [`WriterProperties::max_row_group_size`] rows.
+    ///
+    /// This will fail if the `batch`'s schema does not match the writer's schema.
     </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;</span>RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span>batch.num_rows() == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
@@ -2868,8 +3370,8 @@
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>row_group_writer = <span class="self">self</span>.writer.next_row_group()<span class="question-mark">?</span>;
-        <span class="kw">for </span>(chunk, close) <span class="kw">in </span>in_progress.close()<span class="question-mark">? </span>{
-            row_group_writer.append_column(<span class="kw-2">&amp;</span>chunk, close)<span class="question-mark">?</span>;
+        <span class="kw">for </span>chunk <span class="kw">in </span>in_progress.close()<span class="question-mark">? </span>{
+            chunk.append_to_row_group(<span class="kw-2">&amp;mut </span>row_group_writer)<span class="question-mark">?</span>;
         }
         row_group_writer.close()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
@@ -2882,6 +3384,19 @@
         <span class="self">self</span>.writer.append_key_value_metadata(kv_metadata)
     }
 
+    <span class="doccomment">/// Returns a reference to the underlying writer.
+    </span><span class="kw">pub fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>W {
+        <span class="self">self</span>.writer.inner()
+    }
+
+    <span class="doccomment">/// Returns a mutable reference to the underlying writer.
+    ///
+    /// It is inadvisable to directly write to the underlying writer, doing so
+    /// will likely result in a corrupt parquet file
+    </span><span class="kw">pub fn </span>inner_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>W {
+        <span class="self">self</span>.writer.inner_mut()
+    }
+
     <span class="doccomment">/// Flushes any outstanding data and returns the underlying writer.
     </span><span class="kw">pub fn </span>into_inner(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;W&gt; {
         <span class="self">self</span>.flush()<span class="question-mark">?</span>;
@@ -2889,9 +3404,18 @@
     }
 
     <span class="doccomment">/// Close and finalize the underlying Parquet writer
-    </span><span class="kw">pub fn </span>close(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::format::FileMetaData&gt; {
+    ///
+    /// Unlike [`Self::close`] this does not consume self
+    ///
+    /// Attempting to write after calling finish will result in an error
+    </span><span class="kw">pub fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::format::FileMetaData&gt; {
         <span class="self">self</span>.flush()<span class="question-mark">?</span>;
-        <span class="self">self</span>.writer.close()
+        <span class="self">self</span>.writer.finish()
+    }
+
+    <span class="doccomment">/// Close and finalize the underlying Parquet writer
+    </span><span class="kw">pub fn </span>close(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::format::FileMetaData&gt; {
+        <span class="self">self</span>.finish()
     }
 }
 
@@ -2906,25 +3430,70 @@
     }
 }
 
-<span class="doccomment">/// A list of [`Bytes`] comprising a single column chunk
+<span class="doccomment">/// Arrow-specific configuration settings for writing parquet files.
+///
+/// See [`ArrowWriter`] for how to configure the writer.
+</span><span class="attr">#[derive(Debug, Clone, Default)]
+</span><span class="kw">pub struct </span>ArrowWriterOptions {
+    properties: WriterProperties,
+    skip_arrow_metadata: bool,
+    schema_root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>ArrowWriterOptions {
+    <span class="doccomment">/// Creates a new [`ArrowWriterOptions`] with the default settings.
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
+    }
+
+    <span class="doccomment">/// Sets the [`WriterProperties`] for writing parquet files.
+    </span><span class="kw">pub fn </span>with_properties(<span class="self">self</span>, properties: WriterProperties) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ properties, ..<span class="self">self </span>}
+    }
+
+    <span class="doccomment">/// Parquet files generated by the [`ArrowWriter`] contain embedded arrow schema
+    /// by default.
+    ///
+    /// Set `skip_arrow_metadata` to true, to skip encoding this.
+    </span><span class="kw">pub fn </span>with_skip_arrow_metadata(<span class="self">self</span>, skip_arrow_metadata: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            skip_arrow_metadata,
+            ..<span class="self">self
+        </span>}
+    }
+
+    <span class="doccomment">/// Overrides the name of the root parquet schema element
+    ///
+    /// Defaults to `"arrow_schema"`
+    </span><span class="kw">pub fn </span>with_schema_root(<span class="self">self</span>, name: String) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            schema_root: <span class="prelude-val">Some</span>(name),
+            ..<span class="self">self
+        </span>}
+    }
+}
+
+<span class="doccomment">/// A single column chunk produced by [`ArrowColumnWriter`]
 </span><span class="attr">#[derive(Default)]
-</span><span class="kw">struct </span>ArrowColumnChunk {
+</span><span class="kw">struct </span>ArrowColumnChunkData {
     length: usize,
     data: Vec&lt;Bytes&gt;,
 }
 
-<span class="kw">impl </span>Length <span class="kw">for </span>ArrowColumnChunk {
+<span class="kw">impl </span>Length <span class="kw">for </span>ArrowColumnChunkData {
     <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="self">self</span>.length <span class="kw">as _
     </span>}
 }
 
-<span class="kw">impl </span>ChunkReader <span class="kw">for </span>ArrowColumnChunk {
-    <span class="kw">type </span>T = ChainReader;
+<span class="kw">impl </span>ChunkReader <span class="kw">for </span>ArrowColumnChunkData {
+    <span class="kw">type </span>T = ArrowColumnChunkReader;
 
     <span class="kw">fn </span>get_read(<span class="kw-2">&amp;</span><span class="self">self</span>, start: u64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::T&gt; {
         <span class="macro">assert_eq!</span>(start, <span class="number">0</span>); <span class="comment">// Assume append_column writes all data in one-shot
-        </span><span class="prelude-val">Ok</span>(ChainReader(<span class="self">self</span>.data.clone().into_iter().peekable()))
+        </span><span class="prelude-val">Ok</span>(ArrowColumnChunkReader(
+            <span class="self">self</span>.data.clone().into_iter().peekable(),
+        ))
     }
 
     <span class="kw">fn </span>get_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, _start: u64, _length: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
@@ -2932,10 +3501,10 @@
     }
 }
 
-<span class="doccomment">/// A [`Read`] for an iterator of [`Bytes`]
-</span><span class="kw">struct </span>ChainReader(Peekable&lt;IntoIter&lt;Bytes&gt;&gt;);
+<span class="doccomment">/// A [`Read`] for [`ArrowColumnChunkData`]
+</span><span class="kw">struct </span>ArrowColumnChunkReader(Peekable&lt;IntoIter&lt;Bytes&gt;&gt;);
 
-<span class="kw">impl </span>Read <span class="kw">for </span>ChainReader {
+<span class="kw">impl </span>Read <span class="kw">for </span>ArrowColumnChunkReader {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, out: <span class="kw-2">&amp;mut </span>[u8]) -&gt; std::io::Result&lt;usize&gt; {
         <span class="kw">let </span>buffer = <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.<span class="number">0</span>.peek_mut() {
@@ -2955,11 +3524,11 @@
     }
 }
 
-<span class="doccomment">/// A shared [`ArrowColumnChunk`]
+<span class="doccomment">/// A shared [`ArrowColumnChunkData`]
 ///
 /// This allows it to be owned by [`ArrowPageWriter`] whilst allowing access via
 /// [`ArrowRowGroupWriter`] on flush, without requiring self-referential borrows
-</span><span class="kw">type </span>SharedColumnChunk = Arc&lt;Mutex&lt;ArrowColumnChunk&gt;&gt;;
+</span><span class="kw">type </span>SharedColumnChunk = Arc&lt;Mutex&lt;ArrowColumnChunkData&gt;&gt;;
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">struct </span>ArrowPageWriter {
@@ -2990,13 +3559,13 @@
 
         buf.length += compressed_size;
         buf.data.push(header);
-        buf.data.push(data.into());
+        buf.data.push(data);
 
         <span class="prelude-val">Ok</span>(spec)
     }
 
     <span class="kw">fn </span>write_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _metadata: <span class="kw-2">&amp;</span>ColumnChunkMetaData) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="comment">// Skip writing metadata as won&#39;t be copied anyway
+        <span class="comment">// Skip writing metadata as won't be copied anyway
         </span><span class="prelude-val">Ok</span>(())
     }
 
@@ -3005,25 +3574,169 @@
     }
 }
 
-<span class="doccomment">/// Encodes a leaf column to [`ArrowPageWriter`]
-</span><span class="kw">enum </span>ArrowColumnWriter {
-    ByteArray(GenericColumnWriter&lt;<span class="lifetime">&#39;static</span>, ByteArrayEncoder&gt;),
-    Column(ColumnWriter&lt;<span class="lifetime">&#39;static</span>&gt;),
+<span class="doccomment">/// A leaf column that can be encoded by [`ArrowColumnWriter`]
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">pub struct </span>ArrowLeafColumn(ArrayLevels);
+
+<span class="doccomment">/// Computes the [`ArrowLeafColumn`] for a potentially nested [`ArrayRef`]
+</span><span class="kw">pub fn </span>compute_leaves(field: <span class="kw-2">&amp;</span>Field, array: <span class="kw-2">&amp;</span>ArrayRef) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ArrowLeafColumn&gt;&gt; {
+    <span class="kw">let </span>levels = calculate_array_levels(array, field)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(levels.into_iter().map(ArrowLeafColumn).collect())
+}
+
+<span class="doccomment">/// The data for a single column chunk, see [`ArrowColumnWriter`]
+</span><span class="kw">pub struct </span>ArrowColumnChunk {
+    data: ArrowColumnChunkData,
+    close: ColumnCloseResult,
+}
+
+<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>ArrowColumnChunk {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"ArrowColumnChunk"</span>)
+            .field(<span class="string">"length"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.data.length)
+            .finish_non_exhaustive()
+    }
+}
+
+<span class="kw">impl </span>ArrowColumnChunk {
+    <span class="doccomment">/// Calls [`SerializedRowGroupWriter::append_column`] with this column's data
+    </span><span class="kw">pub fn </span>append_to_row_group&lt;W: Write + Send&gt;(
+        <span class="self">self</span>,
+        writer: <span class="kw-2">&amp;mut </span>SerializedRowGroupWriter&lt;<span class="lifetime">'_</span>, W&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        writer.append_column(<span class="kw-2">&amp;</span><span class="self">self</span>.data, <span class="self">self</span>.close)
+    }
+}
+
+<span class="doccomment">/// Encodes [`ArrowLeafColumn`] to [`ArrowColumnChunk`]
+///
+/// Note: This is a low-level interface for applications that require fine-grained control
+/// of encoding, see [`ArrowWriter`] for a higher-level interface
+///
+/// ```
+/// // The arrow schema
+/// # use std::sync::Arc;
+/// # use arrow_array::*;
+/// # use arrow_schema::*;
+/// # use parquet::arrow::arrow_to_parquet_schema;
+/// # use parquet::arrow::arrow_writer::{ArrowLeafColumn, compute_leaves, get_column_writers};
+/// # use parquet::file::properties::WriterProperties;
+/// # use parquet::file::writer::SerializedFileWriter;
+/// #
+/// let schema = Arc::new(Schema::new(vec![
+///     Field::new("i32", DataType::Int32, false),
+///     Field::new("f32", DataType::Float32, false),
+/// ]));
+///
+/// // Compute the parquet schema
+/// let parquet_schema = arrow_to_parquet_schema(schema.as_ref()).unwrap();
+/// let props = Arc::new(WriterProperties::default());
+///
+/// // Create writers for each of the leaf columns
+/// let col_writers = get_column_writers(&amp;parquet_schema, &amp;props, &amp;schema).unwrap();
+///
+/// // Spawn a worker thread for each column
+/// // This is for demonstration purposes, a thread-pool e.g. rayon or tokio, would be better
+/// let mut workers: Vec&lt;_&gt; = col_writers
+///     .into_iter()
+///     .map(|mut col_writer| {
+///         let (send, recv) = std::sync::mpsc::channel::&lt;ArrowLeafColumn&gt;();
+///         let handle = std::thread::spawn(move || {
+///             for col in recv {
+///                 col_writer.write(&amp;col)?;
+///             }
+///             col_writer.close()
+///         });
+///         (handle, send)
+///     })
+///     .collect();
+///
+/// // Create parquet writer
+/// let root_schema = parquet_schema.root_schema_ptr();
+/// let mut out = Vec::with_capacity(1024); // This could be a File
+/// let mut writer = SerializedFileWriter::new(&amp;mut out, root_schema, props.clone()).unwrap();
+///
+/// // Start row group
+/// let mut row_group = writer.next_row_group().unwrap();
+///
+/// // Columns to encode
+/// let to_write = vec![
+///     Arc::new(Int32Array::from_iter_values([1, 2, 3])) as _,
+///     Arc::new(Float32Array::from_iter_values([1., 45., -1.])) as _,
+/// ];
+///
+/// // Spawn work to encode columns
+/// let mut worker_iter = workers.iter_mut();
+/// for (arr, field) in to_write.iter().zip(&amp;schema.fields) {
+///     for leaves in compute_leaves(field, arr).unwrap() {
+///         worker_iter.next().unwrap().1.send(leaves).unwrap();
+///     }
+/// }
+///
+/// // Finish up parallel column encoding
+/// for (handle, send) in workers {
+///     drop(send); // Drop send side to signal termination
+///     let chunk = handle.join().unwrap().unwrap();
+///     chunk.append_to_row_group(&amp;mut row_group).unwrap();
+/// }
+/// row_group.close().unwrap();
+///
+/// let metadata = writer.close().unwrap();
+/// assert_eq!(metadata.num_rows, 3);
+/// ```
+</span><span class="kw">pub struct </span>ArrowColumnWriter {
+    writer: ArrowColumnWriterImpl,
+    chunk: SharedColumnChunk,
+}
+
+<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>ArrowColumnWriter {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"ArrowColumnWriter"</span>).finish_non_exhaustive()
+    }
+}
+
+<span class="kw">enum </span>ArrowColumnWriterImpl {
+    ByteArray(GenericColumnWriter&lt;<span class="lifetime">'static</span>, ByteArrayEncoder&gt;),
+    Column(ColumnWriter&lt;<span class="lifetime">'static</span>&gt;),
 }
 
 <span class="kw">impl </span>ArrowColumnWriter {
+    <span class="doccomment">/// Write an [`ArrowLeafColumn`]
+    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, col: <span class="kw-2">&amp;</span>ArrowLeafColumn) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.writer {
+            ArrowColumnWriterImpl::Column(c) =&gt; {
+                write_leaf(c, <span class="kw-2">&amp;</span>col.<span class="number">0</span>)<span class="question-mark">?</span>;
+            }
+            ArrowColumnWriterImpl::ByteArray(c) =&gt; {
+                write_primitive(c, col.<span class="number">0</span>.array().as_ref(), <span class="kw-2">&amp;</span>col.<span class="number">0</span>)<span class="question-mark">?</span>;
+            }
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Close this column returning the written [`ArrowColumnChunk`]
+    </span><span class="kw">pub fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ArrowColumnChunk&gt; {
+        <span class="kw">let </span>close = <span class="kw">match </span><span class="self">self</span>.writer {
+            ArrowColumnWriterImpl::ByteArray(c) =&gt; c.close()<span class="question-mark">?</span>,
+            ArrowColumnWriterImpl::Column(c) =&gt; c.close()<span class="question-mark">?</span>,
+        };
+        <span class="kw">let </span>chunk = Arc::try_unwrap(<span class="self">self</span>.chunk).ok().unwrap();
+        <span class="kw">let </span>data = chunk.into_inner().unwrap();
+        <span class="prelude-val">Ok</span>(ArrowColumnChunk { data, close })
+    }
+
     <span class="doccomment">/// Returns the estimated total bytes for this column writer
-    </span><span class="kw">fn </span>get_estimated_total_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="kw">match </span><span class="self">self </span>{
-            ArrowColumnWriter::ByteArray(c) =&gt; c.get_estimated_total_bytes(),
-            ArrowColumnWriter::Column(c) =&gt; c.get_estimated_total_bytes(),
+    </span><span class="kw">pub fn </span>get_estimated_total_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.writer {
+            ArrowColumnWriterImpl::ByteArray(c) =&gt; c.get_estimated_total_bytes() <span class="kw">as _</span>,
+            ArrowColumnWriterImpl::Column(c) =&gt; c.get_estimated_total_bytes() <span class="kw">as _</span>,
         }
     }
 }
 
 <span class="doccomment">/// Encodes [`RecordBatch`] to a parquet row group
 </span><span class="kw">struct </span>ArrowRowGroupWriter {
-    writers: Vec&lt;(SharedColumnChunk, ArrowColumnWriter)&gt;,
+    writers: Vec&lt;ArrowColumnWriter&gt;,
     schema: SchemaRef,
     buffered_rows: usize,
 }
@@ -3034,11 +3747,7 @@
         props: <span class="kw-2">&amp;</span>WriterPropertiesPtr,
         arrow: <span class="kw-2">&amp;</span>SchemaRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>writers = Vec::with_capacity(arrow.fields.len());
-        <span class="kw">let </span><span class="kw-2">mut </span>leaves = parquet.columns().iter();
-        <span class="kw">for </span>field <span class="kw">in </span><span class="kw-2">&amp;</span>arrow.fields {
-            get_arrow_column_writer(field.data_type(), props, <span class="kw-2">&amp;mut </span>leaves, <span class="kw-2">&amp;mut </span>writers)<span class="question-mark">?</span>;
-        }
+        <span class="kw">let </span>writers = get_column_writers(parquet, props, arrow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             writers,
             schema: arrow.clone(),
@@ -3048,49 +3757,62 @@
 
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;</span>RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.buffered_rows += batch.num_rows();
-        <span class="kw">let </span><span class="kw-2">mut </span>writers = <span class="self">self</span>.writers.iter_mut().map(|(<span class="kw">_</span>, x)| x);
-        <span class="kw">for </span>(array, field) <span class="kw">in </span>batch.columns().iter().zip(<span class="kw-2">&amp;</span><span class="self">self</span>.schema.fields) {
-            <span class="kw">let </span><span class="kw-2">mut </span>levels = calculate_array_levels(array, field)<span class="question-mark">?</span>.into_iter();
-            write_leaves(<span class="kw-2">&amp;mut </span>writers, <span class="kw-2">&amp;mut </span>levels, array.as_ref())<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>writers = <span class="self">self</span>.writers.iter_mut();
+        <span class="kw">for </span>(field, column) <span class="kw">in </span><span class="self">self</span>.schema.fields().iter().zip(batch.columns()) {
+            <span class="kw">for </span>leaf <span class="kw">in </span>compute_leaves(field.as_ref(), column)<span class="question-mark">? </span>{
+                writers.next().unwrap().write(<span class="kw-2">&amp;</span>leaf)<span class="question-mark">?
+            </span>}
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ArrowColumnChunk, ColumnCloseResult)&gt;&gt; {
+    <span class="kw">fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ArrowColumnChunk&gt;&gt; {
         <span class="self">self</span>.writers
             .into_iter()
-            .map(|(chunk, writer)| {
-                <span class="kw">let </span>close_result = <span class="kw">match </span>writer {
-                    ArrowColumnWriter::ByteArray(c) =&gt; c.close()<span class="question-mark">?</span>,
-                    ArrowColumnWriter::Column(c) =&gt; c.close()<span class="question-mark">?</span>,
-                };
-
-                <span class="kw">let </span>chunk = Arc::try_unwrap(chunk).ok().unwrap().into_inner().unwrap();
-                <span class="prelude-val">Ok</span>((chunk, close_result))
-            })
+            .map(|writer| writer.close())
             .collect()
     }
 }
 
-<span class="doccomment">/// Get an [`ArrowColumnWriter`] along with a reference to its [`SharedColumnChunk`]
+<span class="doccomment">/// Returns the [`ArrowColumnWriter`] for a given schema
+</span><span class="kw">pub fn </span>get_column_writers(
+    parquet: <span class="kw-2">&amp;</span>SchemaDescriptor,
+    props: <span class="kw-2">&amp;</span>WriterPropertiesPtr,
+    arrow: <span class="kw-2">&amp;</span>SchemaRef,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ArrowColumnWriter&gt;&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>writers = Vec::with_capacity(arrow.fields.len());
+    <span class="kw">let </span><span class="kw-2">mut </span>leaves = parquet.columns().iter();
+    <span class="kw">for </span>field <span class="kw">in </span><span class="kw-2">&amp;</span>arrow.fields {
+        get_arrow_column_writer(field.data_type(), props, <span class="kw-2">&amp;mut </span>leaves, <span class="kw-2">&amp;mut </span>writers)<span class="question-mark">?</span>;
+    }
+    <span class="prelude-val">Ok</span>(writers)
+}
+
+<span class="doccomment">/// Gets the [`ArrowColumnWriter`] for the given `data_type`
 </span><span class="kw">fn </span>get_arrow_column_writer(
     data_type: <span class="kw-2">&amp;</span>ArrowDataType,
     props: <span class="kw-2">&amp;</span>WriterPropertiesPtr,
-    leaves: <span class="kw-2">&amp;mut </span>Iter&lt;<span class="lifetime">&#39;_</span>, ColumnDescPtr&gt;,
-    out: <span class="kw-2">&amp;mut </span>Vec&lt;(SharedColumnChunk, ArrowColumnWriter)&gt;,
+    leaves: <span class="kw-2">&amp;mut </span>Iter&lt;<span class="lifetime">'_</span>, ColumnDescPtr&gt;,
+    out: <span class="kw-2">&amp;mut </span>Vec&lt;ArrowColumnWriter&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>col = |desc: <span class="kw-2">&amp;</span>ColumnDescPtr| {
         <span class="kw">let </span>page_writer = Box::&lt;ArrowPageWriter&gt;::default();
         <span class="kw">let </span>chunk = page_writer.buffer.clone();
         <span class="kw">let </span>writer = get_column_writer(desc.clone(), props.clone(), page_writer);
-        (chunk, ArrowColumnWriter::Column(writer))
+        ArrowColumnWriter {
+            chunk,
+            writer: ArrowColumnWriterImpl::Column(writer),
+        }
     };
 
     <span class="kw">let </span>bytes = |desc: <span class="kw-2">&amp;</span>ColumnDescPtr| {
         <span class="kw">let </span>page_writer = Box::&lt;ArrowPageWriter&gt;::default();
         <span class="kw">let </span>chunk = page_writer.buffer.clone();
         <span class="kw">let </span>writer = GenericColumnWriter::new(desc.clone(), props.clone(), page_writer);
-        (chunk, ArrowColumnWriter::ByteArray(writer))
+        ArrowColumnWriter {
+            chunk,
+            writer: ArrowColumnWriterImpl::ByteArray(writer),
+        }
     };
 
     <span class="kw">match </span>data_type {
@@ -3099,7 +3821,9 @@
         ArrowDataType::LargeBinary
         | ArrowDataType::Binary
         | ArrowDataType::Utf8
-        | ArrowDataType::LargeUtf8 =&gt; {
+        | ArrowDataType::LargeUtf8
+        | ArrowDataType::BinaryView
+        | ArrowDataType::Utf8View =&gt; {
             out.push(bytes(leaves.next().unwrap()))
         }
         ArrowDataType::List(f)
@@ -3117,10 +3841,13 @@
                 get_arrow_column_writer(f[<span class="number">0</span>].data_type(), props, leaves, out)<span class="question-mark">?</span>;
                 get_arrow_column_writer(f[<span class="number">1</span>].data_type(), props, leaves, out)<span class="question-mark">?
             </span>}
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;invalid map type&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"invalid map type"</span>),
         }
         ArrowDataType::Dictionary(<span class="kw">_</span>, value_type) =&gt; <span class="kw">match </span>value_type.as_ref() {
             ArrowDataType::Utf8 | ArrowDataType::LargeUtf8 | ArrowDataType::Binary | ArrowDataType::LargeBinary =&gt; {
+                out.push(bytes(leaves.next().unwrap()))
+            }
+            ArrowDataType::Utf8View | ArrowDataType::BinaryView =&gt; {
                 out.push(bytes(leaves.next().unwrap()))
             }
             <span class="kw">_ </span>=&gt; {
@@ -3129,59 +3856,15 @@
         }
        <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParquetError::NYI(
            <span class="macro">format!</span>(
-               <span class="string">&quot;Attempting to write an Arrow type {data_type:?} to parquet that is not yet implemented&quot;
+               <span class="string">"Attempting to write an Arrow type {data_type:?} to parquet that is not yet implemented"
            </span>)
        ))
     }
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// Write the leaves of `array` in depth-first order to `writers` with `levels`
-</span><span class="kw">fn </span>write_leaves&lt;<span class="lifetime">&#39;a</span>, W&gt;(
-    writers: <span class="kw-2">&amp;mut </span>W,
-    levels: <span class="kw-2">&amp;mut </span>IntoIter&lt;LevelInfo&gt;,
-    array: <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>Array + <span class="lifetime">&#39;static</span>),
-) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
-<span class="kw">where
-    </span>W: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ArrowColumnWriter&gt;,
-{
-    <span class="kw">match </span>array.data_type() {
-        ArrowDataType::List(<span class="kw">_</span>) =&gt; {
-            write_leaves(writers, levels, array.as_list::&lt;i32&gt;().values().as_ref())<span class="question-mark">?
-        </span>}
-        ArrowDataType::LargeList(<span class="kw">_</span>) =&gt; {
-            write_leaves(writers, levels, array.as_list::&lt;i64&gt;().values().as_ref())<span class="question-mark">?
-        </span>}
-        ArrowDataType::FixedSizeList(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
-            <span class="kw">let </span>array = array.as_any().downcast_ref::&lt;FixedSizeListArray&gt;().unwrap();
-            write_leaves(writers, levels, array.values().as_ref())<span class="question-mark">?
-        </span>}
-        ArrowDataType::Struct(<span class="kw">_</span>) =&gt; {
-            <span class="kw">for </span>column <span class="kw">in </span>array.as_struct().columns() {
-                write_leaves(writers, levels, column.as_ref())<span class="question-mark">?
-            </span>}
-        }
-        ArrowDataType::Map(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
-            <span class="kw">let </span>map = array.as_map();
-            write_leaves(writers, levels, map.keys().as_ref())<span class="question-mark">?</span>;
-            write_leaves(writers, levels, map.values().as_ref())<span class="question-mark">?
-        </span>}
-        <span class="kw">_ </span>=&gt; {
-            <span class="kw">let </span>levels = levels.next().unwrap();
-            <span class="kw">match </span>writers.next().unwrap() {
-                ArrowColumnWriter::Column(c) =&gt; write_leaf(c, array, levels)<span class="question-mark">?</span>,
-                ArrowColumnWriter::ByteArray(c) =&gt; write_primitive(c, array, levels)<span class="question-mark">?</span>,
-            };
-        }
-    }
-    <span class="prelude-val">Ok</span>(())
-}
-
-<span class="kw">fn </span>write_leaf(
-    writer: <span class="kw-2">&amp;mut </span>ColumnWriter&lt;<span class="lifetime">&#39;_</span>&gt;,
-    column: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Array,
-    levels: LevelInfo,
-) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+<span class="kw">fn </span>write_leaf(writer: <span class="kw-2">&amp;mut </span>ColumnWriter&lt;<span class="lifetime">'_</span>&gt;, levels: <span class="kw-2">&amp;</span>ArrayLevels) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">let </span>column = levels.array().as_ref();
     <span class="kw">let </span>indices = levels.non_null_indices();
     <span class="kw">match </span>writer {
         ColumnWriter::Int32ColumnWriter(<span class="kw-2">ref mut </span>typed) =&gt; {
@@ -3265,7 +3948,7 @@
             }
         }
         ColumnWriter::Int96ColumnWriter(<span class="kw-2">ref mut </span>_typed) =&gt; {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;Currently unreachable because data type not supported&quot;</span>)
+            <span class="macro">unreachable!</span>(<span class="string">"Currently unreachable because data type not supported"</span>)
         }
         ColumnWriter::FloatColumnWriter(<span class="kw-2">ref mut </span>typed) =&gt; {
             <span class="kw">let </span>array = column.as_primitive::&lt;Float32Type&gt;();
@@ -3276,7 +3959,7 @@
             write_primitive(typed, array.values(), levels)
         }
         ColumnWriter::ByteArrayColumnWriter(<span class="kw">_</span>) =&gt; {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;should use ByteArrayWriter&quot;</span>)
+            <span class="macro">unreachable!</span>(<span class="string">"should use ByteArrayWriter"</span>)
         }
         ColumnWriter::FixedLenByteArrayColumnWriter(<span class="kw-2">ref mut </span>typed) =&gt; {
             <span class="kw">let </span>bytes = <span class="kw">match </span>column.data_type() {
@@ -3298,7 +3981,7 @@
                     <span class="kw">_ </span>=&gt; {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ParquetError::NYI(
                             <span class="macro">format!</span>(
-                                <span class="string">&quot;Attempting to write an Arrow interval type {interval_unit:?} to parquet that is not yet implemented&quot;
+                                <span class="string">"Attempting to write an Arrow interval type {interval_unit:?} to parquet that is not yet implemented"
                             </span>)
                         ));
                     }
@@ -3321,10 +4004,13 @@
                         .unwrap();
                     get_decimal_256_array_slice(array, indices)
                 }
+                ArrowDataType::Float16 =&gt; {
+                    <span class="kw">let </span>array = column.as_primitive::&lt;Float16Type&gt;();
+                    get_float_16_array_slice(array, indices)
+                }
                 <span class="kw">_ </span>=&gt; {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(ParquetError::NYI(
-                        <span class="string">&quot;Attempting to write an Arrow type that is not yet implemented&quot;
-                            </span>.to_string(),
+                        <span class="string">"Attempting to write an Arrow type that is not yet implemented"</span>.to_string(),
                     ));
                 }
             };
@@ -3336,7 +4022,7 @@
 <span class="kw">fn </span>write_primitive&lt;E: ColumnValueEncoder&gt;(
     writer: <span class="kw-2">&amp;mut </span>GenericColumnWriter&lt;E&gt;,
     values: <span class="kw-2">&amp;</span>E::Values,
-    levels: LevelInfo,
+    levels: <span class="kw-2">&amp;</span>ArrayLevels,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
     writer.write_batch_internal(
         values,
@@ -3349,10 +4035,7 @@
     )
 }
 
-<span class="kw">fn </span>get_bool_array_slice(
-    array: <span class="kw-2">&amp;</span>arrow_array::BooleanArray,
-    indices: <span class="kw-2">&amp;</span>[usize],
-) -&gt; Vec&lt;bool&gt; {
+<span class="kw">fn </span>get_bool_array_slice(array: <span class="kw-2">&amp;</span>arrow_array::BooleanArray, indices: <span class="kw-2">&amp;</span>[usize]) -&gt; Vec&lt;bool&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(indices.len());
     <span class="kw">for </span>i <span class="kw">in </span>indices {
         values.push(array.value(<span class="kw-2">*</span>i))
@@ -3384,11 +4067,11 @@
 ) -&gt; Vec&lt;FixedLenByteArray&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(indices.len());
     <span class="kw">for </span>i <span class="kw">in </span>indices {
-        <span class="kw">let </span><span class="kw-2">mut </span>prefix = <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">4</span>];
-        <span class="kw">let </span><span class="kw-2">mut </span>value = array.value(<span class="kw-2">*</span>i).to_le_bytes().to_vec();
-        prefix.append(<span class="kw-2">&amp;mut </span>value);
-        <span class="macro">debug_assert_eq!</span>(prefix.len(), <span class="number">12</span>);
-        values.push(FixedLenByteArray::from(ByteArray::from(prefix)));
+        <span class="kw">let </span><span class="kw-2">mut </span>out = [<span class="number">0</span>; <span class="number">12</span>];
+        <span class="kw">let </span>value = array.value(<span class="kw-2">*</span>i);
+        out[<span class="number">4</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>value.days.to_le_bytes());
+        out[<span class="number">8</span>..<span class="number">12</span>].copy_from_slice(<span class="kw-2">&amp;</span>value.milliseconds.to_le_bytes());
+        values.push(FixedLenByteArray::from(ByteArray::from(out.to_vec())));
     }
     values
 }
@@ -3421,6 +4104,18 @@
     values
 }
 
+<span class="kw">fn </span>get_float_16_array_slice(
+    array: <span class="kw-2">&amp;</span>arrow_array::Float16Array,
+    indices: <span class="kw-2">&amp;</span>[usize],
+) -&gt; Vec&lt;FixedLenByteArray&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(indices.len());
+    <span class="kw">for </span>i <span class="kw">in </span>indices {
+        <span class="kw">let </span>value = array.value(<span class="kw-2">*</span>i).to_le_bytes().to_vec();
+        values.push(FixedLenByteArray::from(ByteArray::from(value)));
+    }
+    values
+}
+
 <span class="kw">fn </span>get_fsb_array_slice(
     array: <span class="kw-2">&amp;</span>arrow_array::FixedSizeBinaryArray,
     indices: <span class="kw-2">&amp;</span>[usize],
@@ -3437,27 +4132,24 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>std::fs::File;
-    <span class="kw">use </span>std::sync::Arc;
 
-    <span class="kw">use </span><span class="kw">crate</span>::arrow::arrow_reader::{
-        ParquetRecordBatchReader, ParquetRecordBatchReaderBuilder,
-    };
+    <span class="kw">use </span><span class="kw">crate</span>::arrow::arrow_reader::{ParquetRecordBatchReader, ParquetRecordBatchReaderBuilder};
+    <span class="kw">use </span><span class="kw">crate</span>::arrow::ARROW_SCHEMA_META_KEY;
     <span class="kw">use </span>arrow::datatypes::ToByteSlice;
-    <span class="kw">use </span>arrow::datatypes::{DataType, Field, Schema, UInt32Type, UInt8Type};
+    <span class="kw">use </span>arrow::datatypes::{DataType, Schema};
     <span class="kw">use </span>arrow::error::Result <span class="kw">as </span>ArrowResult;
     <span class="kw">use </span>arrow::util::pretty::pretty_format_batches;
     <span class="kw">use </span>arrow::{array::<span class="kw-2">*</span>, buffer::Buffer};
-    <span class="kw">use </span>arrow_array::RecordBatch;
-    <span class="kw">use </span>arrow_buffer::NullBuffer;
+    <span class="kw">use </span>arrow_buffer::{IntervalDayTime, IntervalMonthDayNano, NullBuffer};
     <span class="kw">use </span>arrow_schema::Fields;
 
     <span class="kw">use </span><span class="kw">crate</span>::basic::Encoding;
     <span class="kw">use </span><span class="kw">crate</span>::data_type::AsBytes;
     <span class="kw">use </span><span class="kw">crate</span>::file::metadata::ParquetMetaData;
+    <span class="kw">use </span><span class="kw">crate</span>::file::page_index::index::Index;
     <span class="kw">use </span><span class="kw">crate</span>::file::page_index::index_reader::read_pages_locations;
-    <span class="kw">use </span><span class="kw">crate</span>::file::properties::{ReaderProperties, WriterVersion};
+    <span class="kw">use </span><span class="kw">crate</span>::file::properties::{EnabledStatistics, ReaderProperties, WriterVersion};
     <span class="kw">use </span><span class="kw">crate</span>::file::serialized_reader::ReadOptionsBuilder;
     <span class="kw">use </span><span class="kw">crate</span>::file::{
         reader::{FileReader, SerializedFileReader},
@@ -3468,8 +4160,8 @@
     </span><span class="kw">fn </span>arrow_writer() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int32, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Int32, <span class="bool-val">true</span>),
         ]);
 
         <span class="comment">// create some data
@@ -3477,9 +4169,7 @@
         <span class="kw">let </span>b = Int32Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="prelude-val">Some</span>(<span class="number">5</span>)]);
 
         <span class="comment">// build a record batch
-        </span><span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)])
-                .unwrap();
+        </span><span class="kw">let </span>batch = RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a), Arc::new(b)]).unwrap();
 
         roundtrip(batch, <span class="prelude-val">Some</span>(SMALL_SIZE / <span class="number">2</span>));
     }
@@ -3494,10 +4184,7 @@
         buffer
     }
 
-    <span class="kw">fn </span>get_bytes_by_into_inner(
-        schema: SchemaRef,
-        expected_batch: <span class="kw-2">&amp;</span>RecordBatch,
-    ) -&gt; Vec&lt;u8&gt; {
+    <span class="kw">fn </span>get_bytes_by_into_inner(schema: SchemaRef, expected_batch: <span class="kw-2">&amp;</span>RecordBatch) -&gt; Vec&lt;u8&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(Vec::new(), schema, <span class="prelude-val">None</span>).unwrap();
         writer.write(expected_batch).unwrap();
         writer.into_inner().unwrap()
@@ -3507,8 +4194,8 @@
     </span><span class="kw">fn </span>roundtrip_bytes() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int32, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Int32, <span class="bool-val">true</span>),
         ]));
 
         <span class="comment">// create some data
@@ -3524,13 +4211,12 @@
             get_bytes_by_into_inner(schema, <span class="kw-2">&amp;</span>expected_batch),
         ] {
             <span class="kw">let </span>cursor = Bytes::from(buffer);
-            <span class="kw">let </span><span class="kw-2">mut </span>record_batch_reader =
-                ParquetRecordBatchReader::try_new(cursor, <span class="number">1024</span>).unwrap();
+            <span class="kw">let </span><span class="kw-2">mut </span>record_batch_reader = ParquetRecordBatchReader::try_new(cursor, <span class="number">1024</span>).unwrap();
 
             <span class="kw">let </span>actual_batch = record_batch_reader
                 .next()
-                .expect(<span class="string">&quot;No batch found&quot;</span>)
-                .expect(<span class="string">&quot;Unable to get batch&quot;</span>);
+                .expect(<span class="string">"No batch found"</span>)
+                .expect(<span class="string">"Unable to get batch"</span>);
 
             <span class="macro">assert_eq!</span>(expected_batch.schema(), actual_batch.schema());
             <span class="macro">assert_eq!</span>(expected_batch.num_columns(), actual_batch.num_columns());
@@ -3547,7 +4233,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_non_null() {
         <span class="comment">// define schema
-        </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
 
         <span class="comment">// create some data
         </span><span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
@@ -3562,8 +4248,8 @@
     </span><span class="kw">fn </span>arrow_writer_list() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;a&quot;</span>,
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>))),
+            <span class="string">"a"</span>,
+            DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>))),
             <span class="bool-val">true</span>,
         )]);
 
@@ -3572,12 +4258,11 @@
 
         <span class="comment">// Construct a buffer for value offsets, for the nested array:
         //  [[1], [2, 3], null, [4, 5, 6], [7, 8, 9, 10]]
-        </span><span class="kw">let </span>a_value_offsets =
-            arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
+        </span><span class="kw">let </span>a_value_offsets = arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
 
         <span class="comment">// Construct a list array from the above two
         </span><span class="kw">let </span>a_list_data = ArrayData::builder(DataType::List(Arc::new(Field::new(
-            <span class="string">&quot;item&quot;</span>,
+            <span class="string">"item"</span>,
             DataType::Int32,
             <span class="bool-val">false</span>,
         ))))
@@ -3594,7 +4279,7 @@
 
         <span class="macro">assert_eq!</span>(batch.column(<span class="number">0</span>).null_count(), <span class="number">1</span>);
 
-        <span class="comment">// This test fails if the max row group size is less than the batch&#39;s length
+        <span class="comment">// This test fails if the max row group size is less than the batch's length
         // see https://github.com/apache/arrow-rs/issues/518
         </span>roundtrip(batch, <span class="prelude-val">None</span>);
     }
@@ -3603,8 +4288,8 @@
     </span><span class="kw">fn </span>arrow_writer_list_non_null() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;a&quot;</span>,
-            DataType::List(Arc::new(Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int32, <span class="bool-val">false</span>))),
+            <span class="string">"a"</span>,
+            DataType::List(Arc::new(Field::new(<span class="string">"item"</span>, DataType::Int32, <span class="bool-val">false</span>))),
             <span class="bool-val">false</span>,
         )]);
 
@@ -3613,12 +4298,11 @@
 
         <span class="comment">// Construct a buffer for value offsets, for the nested array:
         //  [[1], [2, 3], [], [4, 5, 6], [7, 8, 9, 10]]
-        </span><span class="kw">let </span>a_value_offsets =
-            arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
+        </span><span class="kw">let </span>a_value_offsets = arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
 
         <span class="comment">// Construct a list array from the above two
         </span><span class="kw">let </span>a_list_data = ArrayData::builder(DataType::List(Arc::new(Field::new(
-            <span class="string">&quot;item&quot;</span>,
+            <span class="string">"item"</span>,
             DataType::Int32,
             <span class="bool-val">false</span>,
         ))))
@@ -3632,7 +4316,7 @@
         <span class="comment">// build a record batch
         </span><span class="kw">let </span>batch = RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(a)]).unwrap();
 
-        <span class="comment">// This test fails if the max row group size is less than the batch&#39;s length
+        <span class="comment">// This test fails if the max row group size is less than the batch's length
         // see https://github.com/apache/arrow-rs/issues/518
         </span><span class="macro">assert_eq!</span>(batch.column(<span class="number">0</span>).null_count(), <span class="number">0</span>);
 
@@ -3641,16 +4325,16 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_binary() {
-        <span class="kw">let </span>string_field = Field::new(<span class="string">&quot;a&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>);
-        <span class="kw">let </span>binary_field = Field::new(<span class="string">&quot;b&quot;</span>, DataType::Binary, <span class="bool-val">false</span>);
+        <span class="kw">let </span>string_field = Field::new(<span class="string">"a"</span>, DataType::Utf8, <span class="bool-val">false</span>);
+        <span class="kw">let </span>binary_field = Field::new(<span class="string">"b"</span>, DataType::Binary, <span class="bool-val">false</span>);
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[string_field, binary_field]);
 
-        <span class="kw">let </span>raw_string_values = <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>, <span class="string">&quot;quux&quot;</span>];
-        <span class="kw">let </span>raw_binary_values = <span class="macro">vec!</span>[
-            <span class="string">b&quot;foo&quot;</span>.to_vec(),
-            <span class="string">b&quot;bar&quot;</span>.to_vec(),
-            <span class="string">b&quot;baz&quot;</span>.to_vec(),
-            <span class="string">b&quot;quux&quot;</span>.to_vec(),
+        <span class="kw">let </span>raw_string_values = <span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"baz"</span>, <span class="string">"quux"</span>];
+        <span class="kw">let </span>raw_binary_values = [
+            <span class="string">b"foo"</span>.to_vec(),
+            <span class="string">b"bar"</span>.to_vec(),
+            <span class="string">b"baz"</span>.to_vec(),
+            <span class="string">b"quux"</span>.to_vec(),
         ];
         <span class="kw">let </span>raw_binary_value_refs = raw_binary_values
             .iter()
@@ -3668,9 +4352,42 @@
         roundtrip(batch, <span class="prelude-val">Some</span>(SMALL_SIZE / <span class="number">2</span>));
     }
 
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>arrow_writer_binary_view() {
+        <span class="kw">let </span>string_field = Field::new(<span class="string">"a"</span>, DataType::Utf8View, <span class="bool-val">false</span>);
+        <span class="kw">let </span>binary_field = Field::new(<span class="string">"b"</span>, DataType::BinaryView, <span class="bool-val">false</span>);
+        <span class="kw">let </span>nullable_string_field = Field::new(<span class="string">"a"</span>, DataType::Utf8View, <span class="bool-val">true</span>);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[string_field, binary_field, nullable_string_field]);
+
+        <span class="kw">let </span>raw_string_values = <span class="macro">vec!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"large payload over 12 bytes"</span>, <span class="string">"lulu"</span>];
+        <span class="kw">let </span>raw_binary_values = <span class="macro">vec!</span>[
+            <span class="string">b"foo"</span>.to_vec(),
+            <span class="string">b"bar"</span>.to_vec(),
+            <span class="string">b"large payload over 12 bytes"</span>.to_vec(),
+            <span class="string">b"lulu"</span>.to_vec(),
+        ];
+        <span class="kw">let </span>nullable_string_values =
+            <span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">"foo"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"large payload over 12 bytes"</span>), <span class="prelude-val">None</span>];
+
+        <span class="kw">let </span>string_view_values = StringViewArray::from(raw_string_values);
+        <span class="kw">let </span>binary_view_values = BinaryViewArray::from_iter_values(raw_binary_values);
+        <span class="kw">let </span>nullable_string_view_values = StringViewArray::from(nullable_string_values);
+        <span class="kw">let </span>batch = RecordBatch::try_new(
+            Arc::new(schema),
+            <span class="macro">vec!</span>[
+                Arc::new(string_view_values),
+                Arc::new(binary_view_values),
+                Arc::new(nullable_string_view_values),
+            ],
+        )
+        .unwrap();
+
+        roundtrip(batch.clone(), <span class="prelude-val">Some</span>(SMALL_SIZE / <span class="number">2</span>));
+        roundtrip(batch, <span class="prelude-val">None</span>);
+    }
+
     <span class="kw">fn </span>get_decimal_batch(precision: u8, scale: i8) -&gt; RecordBatch {
-        <span class="kw">let </span>decimal_field =
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Decimal128(precision, scale), <span class="bool-val">false</span>);
+        <span class="kw">let </span>decimal_field = Field::new(<span class="string">"a"</span>, DataType::Decimal128(precision, scale), <span class="bool-val">false</span>);
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[decimal_field]);
 
         <span class="kw">let </span>decimal_values = <span class="macro">vec!</span>[<span class="number">10_000</span>, <span class="number">50_000</span>, <span class="number">0</span>, -<span class="number">100</span>]
@@ -3699,20 +4416,20 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_complex() {
         <span class="comment">// define schema
-        </span><span class="kw">let </span>struct_field_d = Arc::new(Field::new(<span class="string">&quot;d&quot;</span>, DataType::Float64, <span class="bool-val">true</span>));
-        <span class="kw">let </span>struct_field_f = Arc::new(Field::new(<span class="string">&quot;f&quot;</span>, DataType::Float32, <span class="bool-val">true</span>));
+        </span><span class="kw">let </span>struct_field_d = Arc::new(Field::new(<span class="string">"d"</span>, DataType::Float64, <span class="bool-val">true</span>));
+        <span class="kw">let </span>struct_field_f = Arc::new(Field::new(<span class="string">"f"</span>, DataType::Float32, <span class="bool-val">true</span>));
         <span class="kw">let </span>struct_field_g = Arc::new(Field::new_list(
-            <span class="string">&quot;g&quot;</span>,
-            Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int16, <span class="bool-val">true</span>),
+            <span class="string">"g"</span>,
+            Field::new(<span class="string">"item"</span>, DataType::Int16, <span class="bool-val">true</span>),
             <span class="bool-val">false</span>,
         ));
         <span class="kw">let </span>struct_field_h = Arc::new(Field::new_list(
-            <span class="string">&quot;h&quot;</span>,
-            Field::new(<span class="string">&quot;item&quot;</span>, DataType::Int16, <span class="bool-val">false</span>),
+            <span class="string">"h"</span>,
+            Field::new(<span class="string">"item"</span>, DataType::Int16, <span class="bool-val">false</span>),
             <span class="bool-val">true</span>,
         ));
         <span class="kw">let </span>struct_field_e = Arc::new(Field::new_struct(
-            <span class="string">&quot;e&quot;</span>,
+            <span class="string">"e"</span>,
             <span class="macro">vec!</span>[
                 struct_field_f.clone(),
                 struct_field_g.clone(),
@@ -3721,10 +4438,10 @@
             <span class="bool-val">false</span>,
         ));
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int32, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Int32, <span class="bool-val">true</span>),
             Field::new_struct(
-                <span class="string">&quot;c&quot;</span>,
+                <span class="string">"c"</span>,
                 <span class="macro">vec!</span>[struct_field_d.clone(), struct_field_e.clone()],
                 <span class="bool-val">false</span>,
             ),
@@ -3740,8 +4457,7 @@
 
         <span class="comment">// Construct a buffer for value offsets, for the nested array:
         //  [[1], [2, 3], [], [4, 5, 6], [7, 8, 9, 10]]
-        </span><span class="kw">let </span>g_value_offsets =
-            arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
+        </span><span class="kw">let </span>g_value_offsets = arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
 
         <span class="comment">// Construct a list array from the above two
         </span><span class="kw">let </span>g_list_data = ArrayData::builder(struct_field_g.data_type().clone())
@@ -3789,11 +4505,11 @@
         // It was subsequently fixed while investigating https://github.com/apache/arrow-rs/issues/245.
 
         // define schema
-        </span><span class="kw">let </span>offset_field = Arc::new(Field::new(<span class="string">&quot;offset&quot;</span>, DataType::Int32, <span class="bool-val">false</span>));
-        <span class="kw">let </span>partition_field = Arc::new(Field::new(<span class="string">&quot;partition&quot;</span>, DataType::Int64, <span class="bool-val">true</span>));
-        <span class="kw">let </span>topic_field = Arc::new(Field::new(<span class="string">&quot;topic&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>));
+        </span><span class="kw">let </span>offset_field = Arc::new(Field::new(<span class="string">"offset"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>partition_field = Arc::new(Field::new(<span class="string">"partition"</span>, DataType::Int64, <span class="bool-val">true</span>));
+        <span class="kw">let </span>topic_field = Arc::new(Field::new(<span class="string">"topic"</span>, DataType::Utf8, <span class="bool-val">true</span>));
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;some_nested_object&quot;</span>,
+            <span class="string">"some_nested_object"</span>,
             DataType::Struct(Fields::from(<span class="macro">vec!</span>[
                 offset_field.clone(),
                 partition_field.clone(),
@@ -3805,7 +4521,7 @@
         <span class="comment">// create some data
         </span><span class="kw">let </span>offset = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
         <span class="kw">let </span>partition = Int64Array::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="prelude-val">Some</span>(<span class="number">5</span>)]);
-        <span class="kw">let </span>topic = StringArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">&quot;A&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>]);
+        <span class="kw">let </span>topic = StringArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="string">"A"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"A"</span>), <span class="prelude-val">Some</span>(<span class="string">""</span>), <span class="prelude-val">None</span>]);
 
         <span class="kw">let </span>some_nested_object = StructArray::from(<span class="macro">vec!</span>[
             (offset_field, Arc::new(offset) <span class="kw">as </span>ArrayRef),
@@ -3815,8 +4531,7 @@
 
         <span class="comment">// build a record batch
         </span><span class="kw">let </span>batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(some_nested_object)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[Arc::new(some_nested_object)]).unwrap();
 
         roundtrip(batch, <span class="prelude-val">Some</span>(SMALL_SIZE / <span class="number">2</span>));
     }
@@ -3824,19 +4539,19 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_map() {
         <span class="comment">// Note: we are using the JSON Arrow reader for brevity
-        </span><span class="kw">let </span>json_content = <span class="string">r#&quot;
-        {&quot;stocks&quot;:{&quot;long&quot;: &quot;$AAA&quot;, &quot;short&quot;: &quot;$BBB&quot;}}
-        {&quot;stocks&quot;:{&quot;long&quot;: null, &quot;long&quot;: &quot;$CCC&quot;, &quot;short&quot;: null}}
-        {&quot;stocks&quot;:{&quot;hedged&quot;: &quot;$YYY&quot;, &quot;long&quot;: null, &quot;short&quot;: &quot;$D&quot;}}
-        &quot;#</span>;
+        </span><span class="kw">let </span>json_content = <span class="string">r#"
+        {"stocks":{"long": "$AAA", "short": "$BBB"}}
+        {"stocks":{"long": null, "long": "$CCC", "short": null}}
+        {"stocks":{"hedged": "$YYY", "long": null, "short": "$D"}}
+        "#</span>;
         <span class="kw">let </span>entries_struct_type = DataType::Struct(Fields::from(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;key&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>),
-            Field::new(<span class="string">&quot;value&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"key"</span>, DataType::Utf8, <span class="bool-val">false</span>),
+            Field::new(<span class="string">"value"</span>, DataType::Utf8, <span class="bool-val">true</span>),
         ]));
         <span class="kw">let </span>stocks_field = Field::new(
-            <span class="string">&quot;stocks&quot;</span>,
+            <span class="string">"stocks"</span>,
             DataType::Map(
-                Arc::new(Field::new(<span class="string">&quot;entries&quot;</span>, entries_struct_type, <span class="bool-val">false</span>)),
+                Arc::new(Field::new(<span class="string">"entries"</span>, entries_struct_type, <span class="bool-val">false</span>)),
                 <span class="bool-val">false</span>,
             ),
             <span class="bool-val">true</span>,
@@ -3852,10 +4567,10 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_2_level_struct() {
         <span class="comment">// tests writing &lt;struct&lt;struct&lt;primitive&gt;&gt;
-        </span><span class="kw">let </span>field_c = Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">true</span>);
-        <span class="kw">let </span>field_b = Field::new(<span class="string">&quot;b&quot;</span>, DataType::Struct(<span class="macro">vec!</span>[field_c].into()), <span class="bool-val">true</span>);
+        </span><span class="kw">let </span>field_c = Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">true</span>);
+        <span class="kw">let </span>field_b = Field::new(<span class="string">"b"</span>, DataType::Struct(<span class="macro">vec!</span>[field_c].into()), <span class="bool-val">true</span>);
         <span class="kw">let </span>type_a = DataType::Struct(<span class="macro">vec!</span>[field_b.clone()].into());
-        <span class="kw">let </span>field_a = Field::new(<span class="string">&quot;a&quot;</span>, type_a, <span class="bool-val">true</span>);
+        <span class="kw">let </span>field_a = Field::new(<span class="string">"a"</span>, type_a, <span class="bool-val">true</span>);
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[field_a.clone()]);
 
         <span class="comment">// create data
@@ -3887,11 +4602,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_2_level_struct_non_null() {
         <span class="comment">// tests writing &lt;struct&lt;struct&lt;primitive&gt;&gt;
-        </span><span class="kw">let </span>field_c = Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">false</span>);
+        </span><span class="kw">let </span>field_c = Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>);
         <span class="kw">let </span>type_b = DataType::Struct(<span class="macro">vec!</span>[field_c].into());
-        <span class="kw">let </span>field_b = Field::new(<span class="string">&quot;b&quot;</span>, type_b.clone(), <span class="bool-val">false</span>);
+        <span class="kw">let </span>field_b = Field::new(<span class="string">"b"</span>, type_b.clone(), <span class="bool-val">false</span>);
         <span class="kw">let </span>type_a = DataType::Struct(<span class="macro">vec!</span>[field_b].into());
-        <span class="kw">let </span>field_a = Field::new(<span class="string">&quot;a&quot;</span>, type_a.clone(), <span class="bool-val">false</span>);
+        <span class="kw">let </span>field_a = Field::new(<span class="string">"a"</span>, type_a.clone(), <span class="bool-val">false</span>);
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[field_a]);
 
         <span class="comment">// create data
@@ -3921,11 +4636,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_2_level_struct_mixed_null() {
         <span class="comment">// tests writing &lt;struct&lt;struct&lt;primitive&gt;&gt;
-        </span><span class="kw">let </span>field_c = Field::new(<span class="string">&quot;c&quot;</span>, DataType::Int32, <span class="bool-val">false</span>);
+        </span><span class="kw">let </span>field_c = Field::new(<span class="string">"c"</span>, DataType::Int32, <span class="bool-val">false</span>);
         <span class="kw">let </span>type_b = DataType::Struct(<span class="macro">vec!</span>[field_c].into());
-        <span class="kw">let </span>field_b = Field::new(<span class="string">&quot;b&quot;</span>, type_b.clone(), <span class="bool-val">true</span>);
+        <span class="kw">let </span>field_b = Field::new(<span class="string">"b"</span>, type_b.clone(), <span class="bool-val">true</span>);
         <span class="kw">let </span>type_a = DataType::Struct(<span class="macro">vec!</span>[field_b].into());
-        <span class="kw">let </span>field_a = Field::new(<span class="string">&quot;a&quot;</span>, type_a.clone(), <span class="bool-val">false</span>);
+        <span class="kw">let </span>field_a = Field::new(<span class="string">"a"</span>, type_a.clone(), <span class="bool-val">false</span>);
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[field_a]);
 
         <span class="comment">// create data
@@ -3956,8 +4671,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>arrow_writer_page_size() {
-        <span class="kw">let </span>schema =
-            Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;col&quot;</span>, DataType::Utf8, <span class="bool-val">false</span>)]));
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"col"</span>, DataType::Utf8, <span class="bool-val">false</span>)]));
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = StringBuilder::with_capacity(<span class="number">100</span>, <span class="number">329 </span>* <span class="number">10_000</span>);
 
@@ -3988,7 +4702,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>writer =
             ArrowWriter::try_new(file.try_clone().unwrap(), batch.schema(), <span class="prelude-val">Some</span>(props))
-                .expect(<span class="string">&quot;Unable to write file&quot;</span>);
+                .expect(<span class="string">"Unable to write file"</span>);
         writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
         writer.close().unwrap();
 
@@ -4002,7 +4716,7 @@
         // dictionary page.
         </span><span class="macro">assert!</span>(
             column[<span class="number">0</span>].dictionary_page_offset().is_some(),
-            <span class="string">&quot;Expected a dictionary page&quot;
+            <span class="string">"Expected a dictionary page"
         </span>);
 
         <span class="kw">let </span>page_locations = read_pages_locations(<span class="kw-2">&amp;</span>file, column).unwrap();
@@ -4014,17 +4728,14 @@
         </span><span class="macro">assert_eq!</span>(
             offset_index.len(),
             <span class="number">10</span>,
-            <span class="string">&quot;Expected 9 pages but got {offset_index:#?}&quot;
+            <span class="string">"Expected 9 pages but got {offset_index:#?}"
         </span>);
     }
 
     <span class="kw">const </span>SMALL_SIZE: usize = <span class="number">7</span>;
     <span class="kw">const </span>MEDIUM_SIZE: usize = <span class="number">63</span>;
 
-    <span class="kw">fn </span>roundtrip(
-        expected_batch: RecordBatch,
-        max_row_group_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    ) -&gt; Vec&lt;File&gt; {
+    <span class="kw">fn </span>roundtrip(expected_batch: RecordBatch, max_row_group_size: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; Vec&lt;File&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>files = <span class="macro">vec!</span>[];
         <span class="kw">for </span>version <span class="kw">in </span>[WriterVersion::PARQUET_1_0, WriterVersion::PARQUET_2_0] {
             <span class="kw">let </span><span class="kw-2">mut </span>props = WriterProperties::builder().set_writer_version(version);
@@ -4054,7 +4765,7 @@
             expected_batch.schema(),
             <span class="prelude-val">Some</span>(props),
         )
-        .expect(<span class="string">&quot;Unable to write file&quot;</span>);
+        .expect(<span class="string">"Unable to write file"</span>);
         writer.write(expected_batch).unwrap();
         writer.close().unwrap();
 
@@ -4063,8 +4774,8 @@
 
         <span class="kw">let </span>actual_batch = record_batch_reader
             .next()
-            .expect(<span class="string">&quot;No batch found&quot;</span>)
-            .expect(<span class="string">&quot;Unable to get batch&quot;</span>);
+            .expect(<span class="string">"No batch found"</span>)
+            .expect(<span class="string">"Unable to get batch"</span>);
 
         <span class="macro">assert_eq!</span>(expected_batch.schema(), actual_batch.schema());
         <span class="macro">assert_eq!</span>(expected_batch.num_columns(), actual_batch.num_columns());
@@ -4079,9 +4790,7 @@
     }
 
     <span class="kw">fn </span>roundtrip_opts(expected_batch: <span class="kw-2">&amp;</span>RecordBatch, props: WriterProperties) -&gt; File {
-        roundtrip_opts_with_array_validation(expected_batch, props, |a, b| {
-            <span class="macro">assert_eq!</span>(a, b)
-        })
+        roundtrip_opts_with_array_validation(expected_batch, props, |a, b| <span class="macro">assert_eq!</span>(a, b))
     }
 
     <span class="kw">struct </span>RoundTripOptions {
@@ -4093,7 +4802,7 @@
     <span class="kw">impl </span>RoundTripOptions {
         <span class="kw">fn </span>new(values: ArrayRef, nullable: bool) -&gt; <span class="self">Self </span>{
             <span class="kw">let </span>data_type = values.data_type().clone();
-            <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;col&quot;</span>, data_type, nullable)]);
+            <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"col"</span>, data_type, nullable)]);
             <span class="self">Self </span>{
                 values,
                 schema: Arc::new(schema),
@@ -4106,10 +4815,7 @@
         one_column_roundtrip_with_options(RoundTripOptions::new(values, nullable))
     }
 
-    <span class="kw">fn </span>one_column_roundtrip_with_schema(
-        values: ArrayRef,
-        schema: SchemaRef,
-    ) -&gt; Vec&lt;File&gt; {
+    <span class="kw">fn </span>one_column_roundtrip_with_schema(values: ArrayRef, schema: SchemaRef) -&gt; Vec&lt;File&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>options = RoundTripOptions::new(values, <span class="bool-val">false</span>);
         options.schema = schema;
         one_column_roundtrip_with_options(options)
@@ -4123,14 +4829,13 @@
         } = options;
 
         <span class="kw">let </span>encodings = <span class="kw">match </span>values.data_type() {
-            DataType::Utf8
-            | DataType::LargeUtf8
-            | DataType::Binary
-            | DataType::LargeBinary =&gt; <span class="macro">vec!</span>[
-                Encoding::PLAIN,
-                Encoding::DELTA_BYTE_ARRAY,
-                Encoding::DELTA_LENGTH_BYTE_ARRAY,
-            ],
+            DataType::Utf8 | DataType::LargeUtf8 | DataType::Binary | DataType::LargeBinary =&gt; {
+                <span class="macro">vec!</span>[
+                    Encoding::PLAIN,
+                    Encoding::DELTA_BYTE_ARRAY,
+                    Encoding::DELTA_LENGTH_BYTE_ARRAY,
+                ]
+            }
             DataType::Int64
             | DataType::Int32
             | DataType::Int16
@@ -4139,6 +4844,9 @@
             | DataType::UInt32
             | DataType::UInt16
             | DataType::UInt8 =&gt; <span class="macro">vec!</span>[Encoding::PLAIN, Encoding::DELTA_BINARY_PACKED],
+            DataType::Float32 | DataType::Float64 =&gt; {
+                <span class="macro">vec!</span>[Encoding::PLAIN, Encoding::BYTE_STREAM_SPLIT]
+            }
             <span class="kw">_ </span>=&gt; <span class="macro">vec!</span>[Encoding::PLAIN],
         };
 
@@ -4170,7 +4878,7 @@
 
     <span class="kw">fn </span>values_required&lt;A, I&gt;(iter: I) -&gt; Vec&lt;File&gt;
     <span class="kw">where
-        </span>A: From&lt;Vec&lt;I::Item&gt;&gt; + Array + <span class="lifetime">&#39;static</span>,
+        </span>A: From&lt;Vec&lt;I::Item&gt;&gt; + Array + <span class="lifetime">'static</span>,
         I: IntoIterator,
     {
         <span class="kw">let </span>raw_values: Vec&lt;<span class="kw">_</span>&gt; = iter.into_iter().collect();
@@ -4180,7 +4888,7 @@
 
     <span class="kw">fn </span>values_optional&lt;A, I&gt;(iter: I) -&gt; Vec&lt;File&gt;
     <span class="kw">where
-        </span>A: From&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;I::Item&gt;&gt;&gt; + Array + <span class="lifetime">&#39;static</span>,
+        </span>A: From&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;I::Item&gt;&gt;&gt; + Array + <span class="lifetime">'static</span>,
         I: IntoIterator,
     {
         <span class="kw">let </span>optional_raw_values: Vec&lt;<span class="kw">_</span>&gt; = iter
@@ -4194,7 +4902,7 @@
 
     <span class="kw">fn </span>required_and_optional&lt;A, I&gt;(iter: I)
     <span class="kw">where
-        </span>A: From&lt;Vec&lt;I::Item&gt;&gt; + From&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;I::Item&gt;&gt;&gt; + Array + <span class="lifetime">&#39;static</span>,
+        </span>A: From&lt;Vec&lt;I::Item&gt;&gt; + From&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;I::Item&gt;&gt;&gt; + Array + <span class="lifetime">'static</span>,
         I: IntoIterator + Clone,
     {
         values_required::&lt;A, I&gt;(iter.clone());
@@ -4218,7 +4926,7 @@
                     )
                     .build(),
             )
-            .expect(<span class="string">&quot;Unable to open file as Parquet&quot;</span>);
+            .expect(<span class="string">"Unable to open file as Parquet"</span>);
             <span class="kw">let </span>metadata = file_reader.metadata();
 
             <span class="comment">// Gets bloom filters from all row groups.
@@ -4232,16 +4940,14 @@
                 {
                     <span class="kw">let </span>row_group_reader = file_reader
                         .get_row_group(ri)
-                        .expect(<span class="string">&quot;Unable to read row group&quot;</span>);
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(sbbf) =
-                        row_group_reader.get_column_bloom_filter(column_index)
-                    {
+                        .expect(<span class="string">"Unable to read row group"</span>);
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(sbbf) = row_group_reader.get_column_bloom_filter(column_index) {
                         bloom_filters.push(sbbf.clone());
                     } <span class="kw">else </span>{
-                        <span class="macro">panic!</span>(<span class="string">&quot;No bloom filter for column named {file_column} found&quot;</span>);
+                        <span class="macro">panic!</span>(<span class="string">"No bloom filter for column named {file_column} found"</span>);
                     }
                 } <span class="kw">else </span>{
-                    <span class="macro">panic!</span>(<span class="string">&quot;No column named {file_column} found&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"No column named {file_column} found"</span>);
                 }
             }
 
@@ -4249,8 +4955,8 @@
                 <span class="kw">let </span>found = bloom_filters.iter().find(|sbbf| sbbf.check(value));
                 <span class="macro">assert!</span>(
                     found.is_some(),
-                    <span class="string">&quot;{}&quot;</span>,
-                    <span class="macro">format!</span>(<span class="string">&quot;Value {:?} should be in bloom filter&quot;</span>, value.as_bytes())
+                    <span class="string">"{}"</span>,
+                    <span class="macro">format!</span>(<span class="string">"Value {:?} should be in bloom filter"</span>, value.as_bytes())
                 );
             });
 
@@ -4258,8 +4964,8 @@
                 <span class="kw">let </span>found = bloom_filters.iter().find(|sbbf| sbbf.check(value));
                 <span class="macro">assert!</span>(
                     found.is_none(),
-                    <span class="string">&quot;{}&quot;</span>,
-                    <span class="macro">format!</span>(<span class="string">&quot;Value {:?} should not be in bloom filter&quot;</span>, value.as_bytes())
+                    <span class="string">"{}"</span>,
+                    <span class="macro">format!</span>(<span class="string">"Value {:?} should not be in bloom filter"</span>, value.as_bytes())
                 );
             });
         });
@@ -4294,18 +5000,13 @@
                 .take(<span class="number">200_000</span>)
                 .collect::&lt;BooleanArray&gt;(),
         );
-        <span class="kw">let </span>schema =
-            Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;col&quot;</span>, values.data_type().clone(), <span class="bool-val">true</span>)]);
-        <span class="kw">let </span>expected_batch =
-            RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[values]).unwrap();
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"col"</span>, values.data_type().clone(), <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>expected_batch = RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[values]).unwrap();
         <span class="kw">let </span>file = tempfile::tempfile().unwrap();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(
-            file.try_clone().unwrap(),
-            expected_batch.schema(),
-            <span class="prelude-val">None</span>,
-        )
-        .expect(<span class="string">&quot;Unable to write file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer =
+            ArrowWriter::try_new(file.try_clone().unwrap(), expected_batch.schema(), <span class="prelude-val">None</span>)
+                .expect(<span class="string">"Unable to write file"</span>);
         writer.write(<span class="kw-2">&amp;</span>expected_batch).unwrap();
         writer.close().unwrap();
     }
@@ -4313,12 +5014,12 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_page_offset_index_with_nan() {
         <span class="kw">let </span>values = Arc::new(Float64Array::from(<span class="macro">vec!</span>[f64::NAN; <span class="number">10</span>]));
-        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;col&quot;</span>, DataType::Float64, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"col"</span>, DataType::Float64, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>batch = RecordBatch::try_new(Arc::new(schema), <span class="macro">vec!</span>[values]).unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>out = Vec::with_capacity(<span class="number">1024</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>out, batch.schema(), <span class="prelude-val">None</span>)
-            .expect(<span class="string">&quot;Unable to write file&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer =
+            ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>out, batch.schema(), <span class="prelude-val">None</span>).expect(<span class="string">"Unable to write file"</span>);
         writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
         <span class="kw">let </span>file_meta_data = writer.close().unwrap();
         <span class="kw">for </span>row_group <span class="kw">in </span>file_meta_data.row_groups {
@@ -4381,8 +5082,8 @@
         required_and_optional::&lt;Float64Array, <span class="kw">_</span>&gt;((<span class="number">0</span>..SMALL_SIZE).map(|i| i <span class="kw">as </span>f64));
     }
 
-    <span class="comment">// The timestamp array types don&#39;t implement From&lt;Vec&lt;T&gt;&gt; because they need the timezone
-    // argument, and they also doesn&#39;t support building from a Vec&lt;Option&lt;T&gt;&gt;, so call
+    <span class="comment">// The timestamp array types don't implement From&lt;Vec&lt;T&gt;&gt; because they need the timezone
+    // argument, and they also doesn't support building from a Vec&lt;Option&lt;T&gt;&gt;, so call
     // one_column_roundtrip manually instead of calling required_and_optional for these tests.
 
     </span><span class="attr">#[test]
@@ -4451,25 +5152,25 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Converting Duration to parquet not supported&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Converting Duration to parquet not supported"</span>)]
     </span><span class="kw">fn </span>duration_second_single_column() {
         required_and_optional::&lt;DurationSecondArray, <span class="kw">_</span>&gt;(<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i64);
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Converting Duration to parquet not supported&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Converting Duration to parquet not supported"</span>)]
     </span><span class="kw">fn </span>duration_millisecond_single_column() {
         required_and_optional::&lt;DurationMillisecondArray, <span class="kw">_</span>&gt;(<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i64);
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Converting Duration to parquet not supported&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Converting Duration to parquet not supported"</span>)]
     </span><span class="kw">fn </span>duration_microsecond_single_column() {
         required_and_optional::&lt;DurationMicrosecondArray, <span class="kw">_</span>&gt;(<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i64);
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;Converting Duration to parquet not supported&quot;</span>)]
+    #[should_panic(expected = <span class="string">"Converting Duration to parquet not supported"</span>)]
     </span><span class="kw">fn </span>duration_nanosecond_single_column() {
         required_and_optional::&lt;DurationNanosecondArray, <span class="kw">_</span>&gt;(<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i64);
     }
@@ -4481,15 +5182,25 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>interval_day_time_single_column() {
-        required_and_optional::&lt;IntervalDayTimeArray, <span class="kw">_</span>&gt;(<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i64);
+        required_and_optional::&lt;IntervalDayTimeArray, <span class="kw">_</span>&gt;(<span class="macro">vec!</span>[
+            IntervalDayTime::new(<span class="number">0</span>, <span class="number">1</span>),
+            IntervalDayTime::new(<span class="number">0</span>, <span class="number">3</span>),
+            IntervalDayTime::new(<span class="number">3</span>, -<span class="number">2</span>),
+            IntervalDayTime::new(-<span class="number">200</span>, <span class="number">4</span>),
+        ]);
     }
 
     <span class="attr">#[test]
     #[should_panic(
-        expected = <span class="string">&quot;Attempting to write an Arrow interval type MonthDayNano to parquet that is not yet implemented&quot;
+        expected = <span class="string">"Attempting to write an Arrow interval type MonthDayNano to parquet that is not yet implemented"
     </span>)]
     </span><span class="kw">fn </span>interval_month_day_nano_single_column() {
-        required_and_optional::&lt;IntervalMonthDayNanoArray, <span class="kw">_</span>&gt;(<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i128);
+        required_and_optional::&lt;IntervalMonthDayNanoArray, <span class="kw">_</span>&gt;(<span class="macro">vec!</span>[
+            IntervalMonthDayNano::new(<span class="number">0</span>, <span class="number">1</span>, <span class="number">5</span>),
+            IntervalMonthDayNano::new(<span class="number">0</span>, <span class="number">3</span>, <span class="number">2</span>),
+            IntervalMonthDayNano::new(<span class="number">3</span>, -<span class="number">2</span>, -<span class="number">5</span>),
+            IntervalMonthDayNano::new(-<span class="number">200</span>, <span class="number">4</span>, -<span class="number">1</span>),
+        ]);
     }
 
     <span class="attr">#[test]
@@ -4498,7 +5209,7 @@
         <span class="kw">let </span>many_vecs: Vec&lt;<span class="kw">_</span>&gt; = std::iter::repeat(one_vec).take(SMALL_SIZE).collect();
         <span class="kw">let </span>many_vecs_iter = many_vecs.iter().map(|v| v.as_slice());
 
-        <span class="comment">// BinaryArrays can&#39;t be built from Vec&lt;Option&lt;&amp;str&gt;&gt;, so only call `values_required`
+        <span class="comment">// BinaryArrays can't be built from Vec&lt;Option&lt;&amp;str&gt;&gt;, so only call `values_required`
         </span>values_required::&lt;BinaryArray, <span class="kw">_</span>&gt;(many_vecs_iter);
     }
 
@@ -4511,7 +5222,7 @@
         <span class="kw">let </span>files = one_column_roundtrip_with_options(options);
         check_bloom_filter(
             files,
-            <span class="string">&quot;col&quot;</span>.to_string(),
+            <span class="string">"col"</span>.to_string(),
             (<span class="number">0</span>..SMALL_SIZE <span class="kw">as </span>i32).collect(),
             (SMALL_SIZE <span class="kw">as </span>i32 + <span class="number">1</span>..SMALL_SIZE <span class="kw">as </span>i32 + <span class="number">10</span>).collect(),
         );
@@ -4530,7 +5241,7 @@
         <span class="kw">let </span>files = one_column_roundtrip_with_options(options);
         check_bloom_filter(
             files,
-            <span class="string">&quot;col&quot;</span>.to_string(),
+            <span class="string">"col"</span>.to_string(),
             many_vecs,
             <span class="macro">vec!</span>[<span class="macro">vec!</span>[(SMALL_SIZE + <span class="number">1</span>) <span class="kw">as </span>u8]],
         );
@@ -4553,7 +5264,7 @@
             .filter_map(|(i, v)| <span class="kw">if </span>i % <span class="number">2 </span>== <span class="number">0 </span>{ <span class="prelude-val">None </span>} <span class="kw">else </span>{ <span class="prelude-val">Some</span>(v.as_str()) })
             .collect();
         <span class="comment">// For null slots, empty string should not be in bloom filter.
-        </span>check_bloom_filter(files, <span class="string">&quot;col&quot;</span>.to_string(), optional_raw_values, <span class="macro">vec!</span>[<span class="string">&quot;&quot;</span>]);
+        </span>check_bloom_filter(files, <span class="string">"col"</span>.to_string(), optional_raw_values, <span class="macro">vec!</span>[<span class="string">""</span>]);
     }
 
     <span class="attr">#[test]
@@ -4562,17 +5273,17 @@
         <span class="kw">let </span>many_vecs: Vec&lt;<span class="kw">_</span>&gt; = std::iter::repeat(one_vec).take(SMALL_SIZE).collect();
         <span class="kw">let </span>many_vecs_iter = many_vecs.iter().map(|v| v.as_slice());
 
-        <span class="comment">// LargeBinaryArrays can&#39;t be built from Vec&lt;Option&lt;&amp;str&gt;&gt;, so only call `values_required`
+        <span class="comment">// LargeBinaryArrays can't be built from Vec&lt;Option&lt;&amp;str&gt;&gt;, so only call `values_required`
         </span>values_required::&lt;LargeBinaryArray, <span class="kw">_</span>&gt;(many_vecs_iter);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>fixed_size_binary_single_column() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = FixedSizeBinaryBuilder::new(<span class="number">4</span>);
-        builder.append_value(<span class="string">b&quot;0123&quot;</span>).unwrap();
+        builder.append_value(<span class="string">b"0123"</span>).unwrap();
         builder.append_null();
-        builder.append_value(<span class="string">b&quot;8910&quot;</span>).unwrap();
-        builder.append_value(<span class="string">b&quot;1112&quot;</span>).unwrap();
+        builder.append_value(<span class="string">b"8910"</span>).unwrap();
+        builder.append_value(<span class="string">b"1112"</span>).unwrap();
         <span class="kw">let </span>array = Arc::new(builder.finish());
 
         one_column_roundtrip(array, <span class="bool-val">true</span>);
@@ -4596,9 +5307,8 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>null_list_single_column() {
-        <span class="kw">let </span>null_field = Field::new(<span class="string">&quot;item&quot;</span>, DataType::Null, <span class="bool-val">true</span>);
-        <span class="kw">let </span>list_field =
-            Field::new(<span class="string">&quot;emptylist&quot;</span>, DataType::List(Arc::new(null_field)), <span class="bool-val">true</span>);
+        <span class="kw">let </span>null_field = Field::new(<span class="string">"item"</span>, DataType::Null, <span class="bool-val">true</span>);
+        <span class="kw">let </span>list_field = Field::new(<span class="string">"emptylist"</span>, DataType::List(Arc::new(null_field)), <span class="bool-val">true</span>);
 
         <span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[list_field]);
 
@@ -4606,7 +5316,7 @@
         </span><span class="kw">let </span>a_values = NullArray::new(<span class="number">2</span>);
         <span class="kw">let </span>a_value_offsets = arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>].to_byte_slice());
         <span class="kw">let </span>a_list_data = ArrayData::builder(DataType::List(Arc::new(Field::new(
-            <span class="string">&quot;item&quot;</span>,
+            <span class="string">"item"</span>,
             DataType::Null,
             <span class="bool-val">true</span>,
         ))))
@@ -4634,10 +5344,9 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>list_single_column() {
         <span class="kw">let </span>a_values = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]);
-        <span class="kw">let </span>a_value_offsets =
-            arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
+        <span class="kw">let </span>a_value_offsets = arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
         <span class="kw">let </span>a_list_data = ArrayData::builder(DataType::List(Arc::new(Field::new(
-            <span class="string">&quot;item&quot;</span>,
+            <span class="string">"item"</span>,
             DataType::Int32,
             <span class="bool-val">false</span>,
         ))))
@@ -4659,10 +5368,9 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>large_list_single_column() {
         <span class="kw">let </span>a_values = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]);
-        <span class="kw">let </span>a_value_offsets =
-            arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0i64</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
+        <span class="kw">let </span>a_value_offsets = arrow::buffer::Buffer::from(<span class="kw-2">&amp;</span>[<span class="number">0i64</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>].to_byte_slice());
         <span class="kw">let </span>a_list_data = ArrayData::builder(DataType::LargeList(Arc::new(Field::new(
-            <span class="string">&quot;large_item&quot;</span>,
+            <span class="string">"large_item"</span>,
             DataType::Int32,
             <span class="bool-val">true</span>,
         ))))
@@ -4704,7 +5412,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>struct_single_column() {
         <span class="kw">let </span>a_values = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]);
-        <span class="kw">let </span>struct_field_a = Arc::new(Field::new(<span class="string">&quot;f&quot;</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>struct_field_a = Arc::new(Field::new(<span class="string">"f"</span>, DataType::Int32, <span class="bool-val">false</span>));
         <span class="kw">let </span>s = StructArray::from(<span class="macro">vec!</span>[(struct_field_a, Arc::new(a_values) <span class="kw">as </span>ArrayRef)]);
 
         <span class="kw">let </span>values = Arc::new(s);
@@ -4721,7 +5429,7 @@
             Encoding::DELTA_LENGTH_BYTE_ARRAY,
         ];
         <span class="kw">let </span>data_type = values.data_type().clone();
-        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;col&quot;</span>, data_type, <span class="bool-val">false</span>)]));
+        <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"col"</span>, data_type, <span class="bool-val">false</span>)]));
         <span class="kw">let </span>expected_batch = RecordBatch::try_new(schema, <span class="macro">vec!</span>[values]).unwrap();
 
         <span class="kw">let </span>row_group_sizes = [<span class="number">1024</span>, SMALL_SIZE, SMALL_SIZE / <span class="number">2</span>, SMALL_SIZE / <span class="number">2 </span>+ <span class="number">1</span>, <span class="number">10</span>];
@@ -4742,11 +5450,12 @@
                 roundtrip_opts_with_array_validation(<span class="kw-2">&amp;</span>expected_batch, props, |a, b| {
                     <span class="kw">let </span>string_array_a = StringArray::from(a.clone());
                     <span class="kw">let </span>string_array_b = StringArray::from(b.clone());
-                    <span class="kw">let </span>vec_a: Vec&lt;<span class="kw-2">&amp;</span>str&gt; =
-                        string_array_a.iter().map(|v| v.unwrap()).collect();
-                    <span class="kw">let </span>vec_b: Vec&lt;<span class="kw-2">&amp;</span>str&gt; =
-                        string_array_b.iter().map(|v| v.unwrap()).collect();
-                    <span class="macro">assert_eq!</span>(vec_a, vec_b, <span class="string">&quot;failed for encoder: {encoding:?} and row_group_size: {row_group_size:?}&quot;</span>);
+                    <span class="kw">let </span>vec_a: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = string_array_a.iter().map(|v| v.unwrap()).collect();
+                    <span class="kw">let </span>vec_b: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = string_array_b.iter().map(|v| v.unwrap()).collect();
+                    <span class="macro">assert_eq!</span>(
+                        vec_a, vec_b,
+                        <span class="string">"failed for encoder: {encoding:?} and row_group_size: {row_group_size:?}"
+                    </span>);
                 });
             }
         }
@@ -4756,7 +5465,7 @@
     </span><span class="kw">fn </span>arrow_writer_string_dictionary() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new_dict(
-            <span class="string">&quot;dictionary&quot;</span>,
+            <span class="string">"dictionary"</span>,
             DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
             <span class="bool-val">true</span>,
             <span class="number">42</span>,
@@ -4764,7 +5473,7 @@
         )]));
 
         <span class="comment">// create some data
-        </span><span class="kw">let </span>d: Int32DictionaryArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;alpha&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;beta&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;alpha&quot;</span>)]
+        </span><span class="kw">let </span>d: Int32DictionaryArray = [<span class="prelude-val">Some</span>(<span class="string">"alpha"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"beta"</span>), <span class="prelude-val">Some</span>(<span class="string">"alpha"</span>)]
             .iter()
             .copied()
             .collect();
@@ -4777,7 +5486,7 @@
     </span><span class="kw">fn </span>arrow_writer_primitive_dictionary() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new_dict(
-            <span class="string">&quot;dictionary&quot;</span>,
+            <span class="string">"dictionary"</span>,
             DataType::Dictionary(Box::new(DataType::UInt8), Box::new(DataType::UInt32)),
             <span class="bool-val">true</span>,
             <span class="number">42</span>,
@@ -4799,7 +5508,7 @@
     </span><span class="kw">fn </span>arrow_writer_string_dictionary_unsigned_index() {
         <span class="comment">// define schema
         </span><span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new_dict(
-            <span class="string">&quot;dictionary&quot;</span>,
+            <span class="string">"dictionary"</span>,
             DataType::Dictionary(Box::new(DataType::UInt8), Box::new(DataType::Utf8)),
             <span class="bool-val">true</span>,
             <span class="number">42</span>,
@@ -4807,7 +5516,7 @@
         )]));
 
         <span class="comment">// create some data
-        </span><span class="kw">let </span>d: UInt8DictionaryArray = [<span class="prelude-val">Some</span>(<span class="string">&quot;alpha&quot;</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;beta&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;alpha&quot;</span>)]
+        </span><span class="kw">let </span>d: UInt8DictionaryArray = [<span class="prelude-val">Some</span>(<span class="string">"alpha"</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">"beta"</span>), <span class="prelude-val">Some</span>(<span class="string">"alpha"</span>)]
             .iter()
             .copied()
             .collect();
@@ -4850,7 +5559,7 @@
                     <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>stats.min() <span class="kw">as </span>u32, <span class="kw-2">*</span>src_slice.iter().min().unwrap());
                     <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>stats.max() <span class="kw">as </span>u32, <span class="kw-2">*</span>src_slice.iter().max().unwrap());
                 } <span class="kw">else </span>{
-                    <span class="macro">panic!</span>(<span class="string">&quot;Statistics::Int32 missing&quot;</span>)
+                    <span class="macro">panic!</span>(<span class="string">"Statistics::Int32 missing"</span>)
                 }
             }
         }
@@ -4891,7 +5600,7 @@
                     <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>stats.min() <span class="kw">as </span>u64, <span class="kw-2">*</span>src_slice.iter().min().unwrap());
                     <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>stats.max() <span class="kw">as </span>u64, <span class="kw-2">*</span>src_slice.iter().max().unwrap());
                 } <span class="kw">else </span>{
-                    <span class="macro">panic!</span>(<span class="string">&quot;Statistics::Int64 missing&quot;</span>)
+                    <span class="macro">panic!</span>(<span class="string">"Statistics::Int64 missing"</span>)
                 }
             }
         }
@@ -4899,7 +5608,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>statistics_null_counts_only_nulls() {
-        <span class="comment">// check that null-count statistics for &quot;only NULL&quot;-columns are correct
+        <span class="comment">// check that null-count statistics for "only NULL"-columns are correct
         </span><span class="kw">let </span>values = Arc::new(UInt64Array::from(<span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>]));
         <span class="kw">let </span>files = one_column_roundtrip(values, <span class="bool-val">true</span>);
 
@@ -4919,8 +5628,8 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_list_of_struct_roundtrip() {
         <span class="comment">// define schema
-        </span><span class="kw">let </span>int_field = Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">true</span>);
-        <span class="kw">let </span>int_field2 = Field::new(<span class="string">&quot;b&quot;</span>, DataType::Int32, <span class="bool-val">true</span>);
+        </span><span class="kw">let </span>int_field = Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">true</span>);
+        <span class="kw">let </span>int_field2 = Field::new(<span class="string">"b"</span>, DataType::Int32, <span class="bool-val">true</span>);
 
         <span class="kw">let </span>int_builder = Int32Builder::with_capacity(<span class="number">10</span>);
         <span class="kw">let </span>int_builder2 = Int32Builder::with_capacity(<span class="number">10</span>);
@@ -5019,7 +5728,7 @@
         ];
 
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;int&quot;</span>,
+            <span class="string">"int"</span>,
             ArrowDataType::Int32,
             <span class="bool-val">false</span>,
         )]));
@@ -5031,12 +5740,10 @@
             .build();
 
         <span class="kw">let </span><span class="kw-2">mut </span>writer =
-            ArrowWriter::try_new(file.try_clone().unwrap(), schema.clone(), <span class="prelude-val">Some</span>(props))
-                .unwrap();
+            ArrowWriter::try_new(file.try_clone().unwrap(), schema.clone(), <span class="prelude-val">Some</span>(props)).unwrap();
 
         <span class="kw">for </span>array <span class="kw">in </span>arrays {
-            <span class="kw">let </span>batch =
-                RecordBatch::try_new(schema.clone(), <span class="macro">vec!</span>[Arc::new(array)]).unwrap();
+            <span class="kw">let </span>batch = RecordBatch::try_new(schema.clone(), <span class="macro">vec!</span>[Arc::new(array)]).unwrap();
             writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
         }
 
@@ -5072,25 +5779,24 @@
             })
             .collect();
 
-        <span class="kw">let </span>expected_values: Vec&lt;<span class="kw">_</span>&gt; =
-            [<span class="number">0</span>..<span class="number">100</span>, <span class="number">0</span>..<span class="number">50</span>, <span class="number">200</span>..<span class="number">500</span>].into_iter().flatten().collect();
+        <span class="kw">let </span>expected_values: Vec&lt;<span class="kw">_</span>&gt; = [<span class="number">0</span>..<span class="number">100</span>, <span class="number">0</span>..<span class="number">50</span>, <span class="number">200</span>..<span class="number">500</span>].into_iter().flatten().collect();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>values, <span class="kw-2">&amp;</span>expected_values)
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>complex_aggregate() {
         <span class="comment">// Tests aggregating nested data
-        </span><span class="kw">let </span>field_a = Arc::new(Field::new(<span class="string">&quot;leaf_a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>));
-        <span class="kw">let </span>field_b = Arc::new(Field::new(<span class="string">&quot;leaf_b&quot;</span>, DataType::Int32, <span class="bool-val">true</span>));
+        </span><span class="kw">let </span>field_a = Arc::new(Field::new(<span class="string">"leaf_a"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span>field_b = Arc::new(Field::new(<span class="string">"leaf_b"</span>, DataType::Int32, <span class="bool-val">true</span>));
         <span class="kw">let </span>struct_a = Arc::new(Field::new(
-            <span class="string">&quot;struct_a&quot;</span>,
+            <span class="string">"struct_a"</span>,
             DataType::Struct(<span class="macro">vec!</span>[field_a.clone(), field_b.clone()].into()),
             <span class="bool-val">true</span>,
         ));
 
-        <span class="kw">let </span>list_a = Arc::new(Field::new(<span class="string">&quot;list&quot;</span>, DataType::List(struct_a), <span class="bool-val">true</span>));
+        <span class="kw">let </span>list_a = Arc::new(Field::new(<span class="string">"list"</span>, DataType::List(struct_a), <span class="bool-val">true</span>));
         <span class="kw">let </span>struct_b = Arc::new(Field::new(
-            <span class="string">&quot;struct_b&quot;</span>,
+            <span class="string">"struct_b"</span>,
             DataType::Struct(<span class="macro">vec!</span>[list_a.clone()].into()),
             <span class="bool-val">false</span>,
         ));
@@ -5122,11 +5828,9 @@
         <span class="kw">let </span>list_a_array = Arc::new(ListArray::from(list_data)) <span class="kw">as </span>ArrayRef;
         <span class="kw">let </span>struct_b_array = StructArray::from(<span class="macro">vec!</span>[(list_a.clone(), list_a_array)]);
 
-        <span class="kw">let </span>batch1 = RecordBatch::try_from_iter(<span class="macro">vec!</span>[(
-            <span class="string">&quot;struct_b&quot;</span>,
-            Arc::new(struct_b_array) <span class="kw">as </span>ArrayRef,
-        )])
-        .unwrap();
+        <span class="kw">let </span>batch1 =
+            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">"struct_b"</span>, Arc::new(struct_b_array) <span class="kw">as </span>ArrayRef)])
+                .unwrap();
 
         <span class="kw">let </span>field_a_array = Int32Array::from(<span class="macro">vec!</span>[<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]);
         <span class="kw">let </span>field_b_array = Int32Array::from_iter(<span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>]);
@@ -5146,17 +5850,15 @@
         <span class="kw">let </span>list_a_array = Arc::new(ListArray::from(list_data)) <span class="kw">as </span>ArrayRef;
         <span class="kw">let </span>struct_b_array = StructArray::from(<span class="macro">vec!</span>[(list_a, list_a_array)]);
 
-        <span class="kw">let </span>batch2 = RecordBatch::try_from_iter(<span class="macro">vec!</span>[(
-            <span class="string">&quot;struct_b&quot;</span>,
-            Arc::new(struct_b_array) <span class="kw">as </span>ArrayRef,
-        )])
-        .unwrap();
+        <span class="kw">let </span>batch2 =
+            RecordBatch::try_from_iter(<span class="macro">vec!</span>[(<span class="string">"struct_b"</span>, Arc::new(struct_b_array) <span class="kw">as </span>ArrayRef)])
+                .unwrap();
 
         <span class="kw">let </span>batches = <span class="kw-2">&amp;</span>[batch1, batch2];
 
         <span class="comment">// Verify data is as expected
 
-        </span><span class="kw">let </span>expected = <span class="string">r#&quot;
+        </span><span class="kw">let </span>expected = <span class="string">r#"
             +-------------------------------------------------------------------------------------------------------+
             | struct_b                                                                                              |
             +-------------------------------------------------------------------------------------------------------+
@@ -5168,7 +5870,7 @@
             | {list: [{leaf_a: 6, leaf_b: }, {leaf_a: 7, leaf_b: }, {leaf_a: 8, leaf_b: }, {leaf_a: 9, leaf_b: 1}]} |
             | {list: [{leaf_a: 10, leaf_b: }]}                                                                      |
             +-------------------------------------------------------------------------------------------------------+
-        &quot;#</span>.trim().split(<span class="string">&#39;\n&#39;</span>).map(|x| x.trim()).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;().join(<span class="string">&quot;\n&quot;</span>);
+        "#</span>.trim().split(<span class="string">'\n'</span>).map(|x| x.trim()).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;().join(<span class="string">"\n"</span>);
 
         <span class="kw">let </span>actual = pretty_format_batches(batches).unwrap().to_string();
         <span class="macro">assert_eq!</span>(actual, expected);
@@ -5211,9 +5913,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_arrow_writer_metadata() {
-        <span class="kw">let </span>batch_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;int32&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>batch_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"int32"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
         <span class="kw">let </span>file_schema = batch_schema.clone().with_metadata(
-            <span class="macro">vec!</span>[(<span class="string">&quot;foo&quot;</span>.to_string(), <span class="string">&quot;bar&quot;</span>.to_string())]
+            <span class="macro">vec!</span>[(<span class="string">"foo"</span>.to_string(), <span class="string">"bar"</span>.to_string())]
                 .into_iter()
                 .collect(),
         );
@@ -5225,16 +5927,15 @@
         .unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(<span class="number">1024</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>writer =
-            ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, Arc::new(file_schema), <span class="prelude-val">None</span>).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, Arc::new(file_schema), <span class="prelude-val">None</span>).unwrap();
         writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
         writer.close().unwrap();
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_arrow_writer_nullable() {
-        <span class="kw">let </span>batch_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;int32&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
-        <span class="kw">let </span>file_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;int32&quot;</span>, DataType::Int32, <span class="bool-val">true</span>)]);
+        <span class="kw">let </span>batch_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"int32"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>file_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"int32"</span>, DataType::Int32, <span class="bool-val">true</span>)]);
         <span class="kw">let </span>file_schema = Arc::new(file_schema);
 
         <span class="kw">let </span>batch = RecordBatch::try_new(
@@ -5244,8 +5945,7 @@
         .unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(<span class="number">1024</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>writer =
-            ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, file_schema.clone(), <span class="prelude-val">None</span>).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, file_schema.clone(), <span class="prelude-val">None</span>).unwrap();
         writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
         writer.close().unwrap();
 
@@ -5259,7 +5959,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>in_progress_accounting() {
         <span class="comment">// define schema
-        </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;a&quot;</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        </span><span class="kw">let </span>schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"a"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
 
         <span class="comment">// create some data
         </span><span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
@@ -5272,7 +5972,8 @@
         <span class="comment">// starts empty
         </span><span class="macro">assert_eq!</span>(writer.in_progress_size(), <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(writer.in_progress_rows(), <span class="number">0</span>);
-        writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
+        <span class="macro">assert_eq!</span>(writer.bytes_written(), <span class="number">4</span>); <span class="comment">// Initial header
+        </span>writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
 
         <span class="comment">// updated on write
         </span><span class="kw">let </span>initial_size = writer.in_progress_size();
@@ -5284,10 +5985,12 @@
         <span class="macro">assert!</span>(writer.in_progress_size() &gt; initial_size);
         <span class="macro">assert_eq!</span>(writer.in_progress_rows(), <span class="number">10</span>);
 
-        <span class="comment">// cleared on flush
-        </span>writer.flush().unwrap();
+        <span class="comment">// in progress tracking is cleared, but the overall data written is updated
+        </span><span class="kw">let </span>pre_flush_bytes_written = writer.bytes_written();
+        writer.flush().unwrap();
         <span class="macro">assert_eq!</span>(writer.in_progress_size(), <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(writer.in_progress_rows(), <span class="number">0</span>);
+        <span class="macro">assert!</span>(writer.bytes_written() &gt; pre_flush_bytes_written);
 
         writer.close().unwrap();
     }
@@ -5297,8 +6000,8 @@
         <span class="kw">let </span>a = Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]);
         <span class="kw">let </span>b = Int32Array::new(<span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">5</span>].into(), <span class="prelude-val">Some</span>(NullBuffer::new_null(<span class="number">5</span>)));
         <span class="kw">let </span>batch = RecordBatch::try_from_iter(<span class="macro">vec!</span>[
-            (<span class="string">&quot;a&quot;</span>, Arc::new(a) <span class="kw">as </span>ArrayRef),
-            (<span class="string">&quot;b&quot;</span>, Arc::new(b) <span class="kw">as </span>ArrayRef),
+            (<span class="string">"a"</span>, Arc::new(a) <span class="kw">as </span>ArrayRef),
+            (<span class="string">"b"</span>, Arc::new(b) <span class="kw">as </span>ArrayRef),
         ])
         .unwrap();
 
@@ -5317,5 +6020,202 @@
         </span><span class="macro">assert_eq!</span>(index[<span class="number">0</span>][<span class="number">0</span>].len(), <span class="number">1</span>); <span class="comment">// 1 page
         </span><span class="macro">assert_eq!</span>(index[<span class="number">0</span>][<span class="number">1</span>].len(), <span class="number">1</span>); <span class="comment">// 1 page
     </span>}
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_disabled_statistics_with_page() {
+        <span class="kw">let </span>file_schema = Schema::new(<span class="macro">vec!</span>[
+            Field::new(<span class="string">"a"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+        ]);
+        <span class="kw">let </span>file_schema = Arc::new(file_schema);
+
+        <span class="kw">let </span>batch = RecordBatch::try_new(
+            file_schema.clone(),
+            <span class="macro">vec!</span>[
+                Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>])) <span class="kw">as _</span>,
+                Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"w"</span>, <span class="string">"x"</span>, <span class="string">"y"</span>, <span class="string">"z"</span>])) <span class="kw">as _</span>,
+            ],
+        )
+        .unwrap();
+
+        <span class="kw">let </span>props = WriterProperties::builder()
+            .set_statistics_enabled(EnabledStatistics::None)
+            .set_column_statistics_enabled(<span class="string">"a"</span>.into(), EnabledStatistics::Page)
+            .build();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(<span class="number">1024</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, file_schema.clone(), <span class="prelude-val">Some</span>(props)).unwrap();
+        writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
+
+        <span class="kw">let </span>metadata = writer.close().unwrap();
+        <span class="macro">assert_eq!</span>(metadata.row_groups.len(), <span class="number">1</span>);
+        <span class="kw">let </span>row_group = <span class="kw-2">&amp;</span>metadata.row_groups[<span class="number">0</span>];
+        <span class="macro">assert_eq!</span>(row_group.columns.len(), <span class="number">2</span>);
+        <span class="comment">// Column "a" has both offset and column index, as requested
+        </span><span class="macro">assert!</span>(row_group.columns[<span class="number">0</span>].offset_index_offset.is_some());
+        <span class="macro">assert!</span>(row_group.columns[<span class="number">0</span>].column_index_offset.is_some());
+        <span class="comment">// Column "b" should only have offset index
+        </span><span class="macro">assert!</span>(row_group.columns[<span class="number">1</span>].offset_index_offset.is_some());
+        <span class="macro">assert!</span>(row_group.columns[<span class="number">1</span>].column_index_offset.is_none());
+
+        <span class="kw">let </span>options = ReadOptionsBuilder::new().with_page_index().build();
+        <span class="kw">let </span>reader = SerializedFileReader::new_with_options(Bytes::from(buf), options).unwrap();
+
+        <span class="kw">let </span>row_group = reader.get_row_group(<span class="number">0</span>).unwrap();
+        <span class="kw">let </span>a_col = row_group.metadata().column(<span class="number">0</span>);
+        <span class="kw">let </span>b_col = row_group.metadata().column(<span class="number">1</span>);
+
+        <span class="comment">// Column chunk of column "a" should have chunk level statistics
+        </span><span class="kw">if let </span>Statistics::ByteArray(byte_array_stats) = a_col.statistics().unwrap() {
+            <span class="kw">let </span>min = byte_array_stats.min();
+            <span class="kw">let </span>max = byte_array_stats.max();
+
+            <span class="macro">assert_eq!</span>(min.as_bytes(), <span class="kw-2">&amp;</span>[<span class="string">b'a'</span>]);
+            <span class="macro">assert_eq!</span>(max.as_bytes(), <span class="kw-2">&amp;</span>[<span class="string">b'd'</span>]);
+        } <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">"expecting Statistics::ByteArray"</span>);
+        }
+
+        <span class="comment">// The column chunk for column "b" shouldn't have statistics
+        </span><span class="macro">assert!</span>(b_col.statistics().is_none());
+
+        <span class="kw">let </span>offset_index = reader.metadata().offset_index().unwrap();
+        <span class="macro">assert_eq!</span>(offset_index.len(), <span class="number">1</span>); <span class="comment">// 1 row group
+        </span><span class="macro">assert_eq!</span>(offset_index[<span class="number">0</span>].len(), <span class="number">2</span>); <span class="comment">// 2 columns
+
+        </span><span class="kw">let </span>column_index = reader.metadata().column_index().unwrap();
+        <span class="macro">assert_eq!</span>(column_index.len(), <span class="number">1</span>); <span class="comment">// 1 row group
+        </span><span class="macro">assert_eq!</span>(column_index[<span class="number">0</span>].len(), <span class="number">2</span>); <span class="comment">// 2 columns
+
+        </span><span class="kw">let </span>a_idx = <span class="kw-2">&amp;</span>column_index[<span class="number">0</span>][<span class="number">0</span>];
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(a_idx, Index::BYTE_ARRAY(<span class="kw">_</span>)), <span class="string">"{a_idx:?}"</span>);
+        <span class="kw">let </span>b_idx = <span class="kw-2">&amp;</span>column_index[<span class="number">0</span>][<span class="number">1</span>];
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(b_idx, Index::NONE), <span class="string">"{b_idx:?}"</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_disabled_statistics_with_chunk() {
+        <span class="kw">let </span>file_schema = Schema::new(<span class="macro">vec!</span>[
+            Field::new(<span class="string">"a"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"b"</span>, DataType::Utf8, <span class="bool-val">true</span>),
+        ]);
+        <span class="kw">let </span>file_schema = Arc::new(file_schema);
+
+        <span class="kw">let </span>batch = RecordBatch::try_new(
+            file_schema.clone(),
+            <span class="macro">vec!</span>[
+                Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>])) <span class="kw">as _</span>,
+                Arc::new(StringArray::from(<span class="macro">vec!</span>[<span class="string">"w"</span>, <span class="string">"x"</span>, <span class="string">"y"</span>, <span class="string">"z"</span>])) <span class="kw">as _</span>,
+            ],
+        )
+        .unwrap();
+
+        <span class="kw">let </span>props = WriterProperties::builder()
+            .set_statistics_enabled(EnabledStatistics::None)
+            .set_column_statistics_enabled(<span class="string">"a"</span>.into(), EnabledStatistics::Chunk)
+            .build();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(<span class="number">1024</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, file_schema.clone(), <span class="prelude-val">Some</span>(props)).unwrap();
+        writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
+
+        <span class="kw">let </span>metadata = writer.close().unwrap();
+        <span class="macro">assert_eq!</span>(metadata.row_groups.len(), <span class="number">1</span>);
+        <span class="kw">let </span>row_group = <span class="kw-2">&amp;</span>metadata.row_groups[<span class="number">0</span>];
+        <span class="macro">assert_eq!</span>(row_group.columns.len(), <span class="number">2</span>);
+        <span class="comment">// Column "a" should only have offset index
+        </span><span class="macro">assert!</span>(row_group.columns[<span class="number">0</span>].offset_index_offset.is_some());
+        <span class="macro">assert!</span>(row_group.columns[<span class="number">0</span>].column_index_offset.is_none());
+        <span class="comment">// Column "b" should only have offset index
+        </span><span class="macro">assert!</span>(row_group.columns[<span class="number">1</span>].offset_index_offset.is_some());
+        <span class="macro">assert!</span>(row_group.columns[<span class="number">1</span>].column_index_offset.is_none());
+
+        <span class="kw">let </span>options = ReadOptionsBuilder::new().with_page_index().build();
+        <span class="kw">let </span>reader = SerializedFileReader::new_with_options(Bytes::from(buf), options).unwrap();
+
+        <span class="kw">let </span>row_group = reader.get_row_group(<span class="number">0</span>).unwrap();
+        <span class="kw">let </span>a_col = row_group.metadata().column(<span class="number">0</span>);
+        <span class="kw">let </span>b_col = row_group.metadata().column(<span class="number">1</span>);
+
+        <span class="comment">// Column chunk of column "a" should have chunk level statistics
+        </span><span class="kw">if let </span>Statistics::ByteArray(byte_array_stats) = a_col.statistics().unwrap() {
+            <span class="kw">let </span>min = byte_array_stats.min();
+            <span class="kw">let </span>max = byte_array_stats.max();
+
+            <span class="macro">assert_eq!</span>(min.as_bytes(), <span class="kw-2">&amp;</span>[<span class="string">b'a'</span>]);
+            <span class="macro">assert_eq!</span>(max.as_bytes(), <span class="kw-2">&amp;</span>[<span class="string">b'd'</span>]);
+        } <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">"expecting Statistics::ByteArray"</span>);
+        }
+
+        <span class="comment">// The column chunk for column "b"  shouldn't have statistics
+        </span><span class="macro">assert!</span>(b_col.statistics().is_none());
+
+        <span class="kw">let </span>column_index = reader.metadata().column_index().unwrap();
+        <span class="macro">assert_eq!</span>(column_index.len(), <span class="number">1</span>); <span class="comment">// 1 row group
+        </span><span class="macro">assert_eq!</span>(column_index[<span class="number">0</span>].len(), <span class="number">2</span>); <span class="comment">// 2 columns
+
+        </span><span class="kw">let </span>a_idx = <span class="kw-2">&amp;</span>column_index[<span class="number">0</span>][<span class="number">0</span>];
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(a_idx, Index::NONE), <span class="string">"{a_idx:?}"</span>);
+        <span class="kw">let </span>b_idx = <span class="kw-2">&amp;</span>column_index[<span class="number">0</span>][<span class="number">1</span>];
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(b_idx, Index::NONE), <span class="string">"{b_idx:?}"</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_arrow_writer_skip_metadata() {
+        <span class="kw">let </span>batch_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"int32"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>file_schema = Arc::new(batch_schema.clone());
+
+        <span class="kw">let </span>batch = RecordBatch::try_new(
+            Arc::new(batch_schema),
+            <span class="macro">vec!</span>[Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])) <span class="kw">as _</span>],
+        )
+        .unwrap();
+        <span class="kw">let </span>skip_options = ArrowWriterOptions::new().with_skip_arrow_metadata(<span class="bool-val">true</span>);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(<span class="number">1024</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer =
+            ArrowWriter::try_new_with_options(<span class="kw-2">&amp;mut </span>buf, file_schema.clone(), skip_options).unwrap();
+        writer.write(<span class="kw-2">&amp;</span>batch).unwrap();
+        writer.close().unwrap();
+
+        <span class="kw">let </span>bytes = Bytes::from(buf);
+        <span class="kw">let </span>reader_builder = ParquetRecordBatchReaderBuilder::try_new(bytes).unwrap();
+        <span class="macro">assert_eq!</span>(file_schema, <span class="kw-2">*</span>reader_builder.schema());
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(key_value_metadata) = reader_builder
+            .metadata()
+            .file_metadata()
+            .key_value_metadata()
+        {
+            <span class="macro">assert!</span>(!key_value_metadata
+                .iter()
+                .any(|kv| kv.key.as_str() == ARROW_SCHEMA_META_KEY));
+        }
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>mismatched_schemas() {
+        <span class="kw">let </span>batch_schema = Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"count"</span>, DataType::Int32, <span class="bool-val">false</span>)]);
+        <span class="kw">let </span>file_schema = Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(
+            <span class="string">"temperature"</span>,
+            DataType::Float64,
+            <span class="bool-val">false</span>,
+        )]));
+
+        <span class="kw">let </span>batch = RecordBatch::try_new(
+            Arc::new(batch_schema),
+            <span class="macro">vec!</span>[Arc::new(Int32Array::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])) <span class="kw">as _</span>],
+        )
+        .unwrap();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(<span class="number">1024</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ArrowWriter::try_new(<span class="kw-2">&amp;mut </span>buf, file_schema.clone(), <span class="prelude-val">None</span>).unwrap();
+
+        <span class="kw">let </span>err = writer.write(<span class="kw-2">&amp;</span>batch).unwrap_err().to_string();
+        <span class="macro">assert_eq!</span>(
+            err,
+            <span class="string">"Arrow: Incompatible type. Field 'temperature' has type Float64, array has type Int32"
+        </span>);
+    }
 }
 </code></pre></div></section></main></body></html>

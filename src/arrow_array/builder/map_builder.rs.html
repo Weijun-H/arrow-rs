@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/builder/map_builder.rs`."><title>map_builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../arrow_array/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-array/src/builder/map_builder.rs`."><title>map_builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="arrow_array" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -256,19 +256,141 @@
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
@@ -278,7 +400,7 @@
 <span class="kw">use </span>arrow_buffer::Buffer;
 <span class="kw">use </span>arrow_buffer::{NullBuffer, NullBufferBuilder};
 <span class="kw">use </span>arrow_data::ArrayData;
-<span class="kw">use </span>arrow_schema::{ArrowError, DataType, Field};
+<span class="kw">use </span>arrow_schema::{ArrowError, DataType, Field, FieldRef};
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -291,16 +413,16 @@
 /// let string_builder = StringBuilder::new();
 /// let int_builder = Int32Builder::with_capacity(4);
 ///
-/// // Construct `[{&quot;joe&quot;: 1}, {&quot;blogs&quot;: 2, &quot;foo&quot;: 4}, {}, null]`
+/// // Construct `[{"joe": 1}, {"blogs": 2, "foo": 4}, {}, null]`
 /// let mut builder = MapBuilder::new(None, string_builder, int_builder);
 ///
-/// builder.keys().append_value(&quot;joe&quot;);
+/// builder.keys().append_value("joe");
 /// builder.values().append_value(1);
 /// builder.append(true).unwrap();
 ///
-/// builder.keys().append_value(&quot;blogs&quot;);
+/// builder.keys().append_value("blogs");
 /// builder.values().append_value(2);
-/// builder.keys().append_value(&quot;foo&quot;);
+/// builder.keys().append_value("foo");
 /// builder.values().append_value(4);
 /// builder.append(true).unwrap();
 /// builder.append(true).unwrap();
@@ -309,7 +431,7 @@
 /// let array = builder.finish();
 /// assert_eq!(array.value_offsets(), &amp;[0, 1, 3, 3, 3]);
 /// assert_eq!(array.values().as_ref(), &amp;Int32Array::from(vec![1, 2, 4]));
-/// assert_eq!(array.keys().as_ref(), &amp;StringArray::from(vec![&quot;joe&quot;, &quot;blogs&quot;, &quot;foo&quot;]));
+/// assert_eq!(array.keys().as_ref(), &amp;StringArray::from(vec!["joe", "blogs", "foo"]));
 ///
 /// ```
 </span><span class="attr">#[derive(Debug)]
@@ -319,6 +441,7 @@
     field_names: MapFieldNames,
     key_builder: K,
     value_builder: V,
+    value_field: <span class="prelude-ty">Option</span>&lt;FieldRef&gt;,
 }
 
 <span class="doccomment">/// The [`Field`] names for a [`MapArray`]
@@ -335,20 +458,16 @@
 <span class="kw">impl </span>Default <span class="kw">for </span>MapFieldNames {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            entry: <span class="string">&quot;entries&quot;</span>.to_string(),
-            key: <span class="string">&quot;keys&quot;</span>.to_string(),
-            value: <span class="string">&quot;values&quot;</span>.to_string(),
+            entry: <span class="string">"entries"</span>.to_string(),
+            key: <span class="string">"keys"</span>.to_string(),
+            value: <span class="string">"values"</span>.to_string(),
         }
     }
 }
 
 <span class="kw">impl</span>&lt;K: ArrayBuilder, V: ArrayBuilder&gt; MapBuilder&lt;K, V&gt; {
     <span class="doccomment">/// Creates a new `MapBuilder`
-    </span><span class="kw">pub fn </span>new(
-        field_names: <span class="prelude-ty">Option</span>&lt;MapFieldNames&gt;,
-        key_builder: K,
-        value_builder: V,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(field_names: <span class="prelude-ty">Option</span>&lt;MapFieldNames&gt;, key_builder: K, value_builder: V) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>capacity = key_builder.len();
         <span class="self">Self</span>::with_capacity(field_names, key_builder, value_builder, capacity)
     }
@@ -368,7 +487,21 @@
             field_names: field_names.unwrap_or_default(),
             key_builder,
             value_builder,
+            value_field: <span class="prelude-val">None</span>,
         }
+    }
+
+    <span class="doccomment">/// Override the field passed to [`MapBuilder::new`]
+    ///
+    /// By default a nullable field is created with the name `values`
+    ///
+    /// Note: [`Self::finish`] and [`Self::finish_cloned`] will panic if the
+    /// field's data type does not match that of `V`
+    </span><span class="kw">pub fn </span>with_values_field(<span class="self">self</span>, field: <span class="kw">impl </span>Into&lt;FieldRef&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            value_field: <span class="prelude-val">Some</span>(field.into()),
+            ..<span class="self">self
+        </span>}
     }
 
     <span class="doccomment">/// Returns the key array builder of the map
@@ -381,6 +514,11 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.value_builder
     }
 
+    <span class="doccomment">/// Returns both the key and value array builders of the map
+    </span><span class="kw">pub fn </span>entries(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (<span class="kw-2">&amp;mut </span>K, <span class="kw-2">&amp;mut </span>V) {
+        (<span class="kw-2">&amp;mut </span><span class="self">self</span>.key_builder, <span class="kw-2">&amp;mut </span><span class="self">self</span>.value_builder)
+    }
+
     <span class="doccomment">/// Finish the current map array slot
     ///
     /// Returns an error if the key and values builders are in an inconsistent state.
@@ -388,7 +526,7 @@
     </span><span class="kw">pub fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, is_valid: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArrowError&gt; {
         <span class="kw">if </span><span class="self">self</span>.key_builder.len() != <span class="self">self</span>.value_builder.len() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::InvalidArgumentError(<span class="macro">format!</span>(
-                <span class="string">&quot;Cannot append to a map builder when its keys and values have unequal lengths of {} and {}&quot;</span>,
+                <span class="string">"Cannot append to a map builder when its keys and values have unequal lengths of {} and {}"</span>,
                 <span class="self">self</span>.key_builder.len(),
                 <span class="self">self</span>.value_builder.len()
             )));
@@ -432,7 +570,7 @@
     ) -&gt; MapArray {
         <span class="macro">assert!</span>(
             keys_arr.null_count() == <span class="number">0</span>,
-            <span class="string">&quot;Keys array must have no null values, found {} null value(s)&quot;</span>,
+            <span class="string">"Keys array must have no null values, found {} null value(s)"</span>,
             keys_arr.null_count()
         );
 
@@ -441,11 +579,14 @@
             keys_arr.data_type().clone(),
             <span class="bool-val">false</span>, <span class="comment">// always non-nullable
         </span>));
-        <span class="kw">let </span>values_field = Arc::new(Field::new(
-            <span class="self">self</span>.field_names.value.as_str(),
-            values_arr.data_type().clone(),
-            <span class="bool-val">true</span>,
-        ));
+        <span class="kw">let </span>values_field = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.value_field {
+            <span class="prelude-val">Some</span>(f) =&gt; f.clone(),
+            <span class="prelude-val">None </span>=&gt; Arc::new(Field::new(
+                <span class="self">self</span>.field_names.value.as_str(),
+                values_arr.data_type().clone(),
+                <span class="bool-val">true</span>,
+            )),
+        };
 
         <span class="kw">let </span>struct_array =
             StructArray::from(<span class="macro">vec!</span>[(keys_field, keys_arr), (values_field, values_arr)]);
@@ -464,6 +605,11 @@
         <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{ array_data.build_unchecked() };
 
         MapArray::from(array_data)
+    }
+
+    <span class="doccomment">/// Returns the current null buffer as a slice
+    </span><span class="kw">pub fn </span>validity_slice(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
+        <span class="self">self</span>.null_buffer_builder.as_slice()
     }
 }
 
@@ -496,22 +642,120 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">crate</span>::builder::{Int32Builder, StringBuilder};
+    <span class="kw">use </span><span class="kw">crate</span>::builder::{make_builder, Int32Builder, StringBuilder};
+    <span class="kw">use crate</span>::{Int32Array, StringArray};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
-    #[should_panic(
-        expected = <span class="string">&quot;Keys array must have no null values, found 1 null value(s)&quot;
-    </span>)]
+    #[should_panic(expected = <span class="string">"Keys array must have no null values, found 1 null value(s)"</span>)]
     </span><span class="kw">fn </span>test_map_builder_with_null_keys_panics() {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            MapBuilder::new(<span class="prelude-val">None</span>, StringBuilder::new(), Int32Builder::new());
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = MapBuilder::new(<span class="prelude-val">None</span>, StringBuilder::new(), Int32Builder::new());
         builder.keys().append_null();
         builder.values().append_value(<span class="number">42</span>);
         builder.append(<span class="bool-val">true</span>).unwrap();
 
         builder.finish();
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_boxed_map_builder() {
+        <span class="kw">let </span>keys_builder = make_builder(<span class="kw-2">&amp;</span>DataType::Utf8, <span class="number">5</span>);
+        <span class="kw">let </span>values_builder = make_builder(<span class="kw-2">&amp;</span>DataType::Int32, <span class="number">5</span>);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = MapBuilder::new(<span class="prelude-val">None</span>, keys_builder, values_builder);
+        builder
+            .keys()
+            .as_any_mut()
+            .downcast_mut::&lt;StringBuilder&gt;()
+            .expect(<span class="string">"should be an StringBuilder"</span>)
+            .append_value(<span class="string">"1"</span>);
+        builder
+            .values()
+            .as_any_mut()
+            .downcast_mut::&lt;Int32Builder&gt;()
+            .expect(<span class="string">"should be an Int32Builder"</span>)
+            .append_value(<span class="number">42</span>);
+        builder.append(<span class="bool-val">true</span>).unwrap();
+
+        <span class="kw">let </span>map_array = builder.finish();
+
+        <span class="macro">assert_eq!</span>(
+            map_array
+                .keys()
+                .as_any()
+                .downcast_ref::&lt;StringArray&gt;()
+                .expect(<span class="string">"should be an StringArray"</span>)
+                .value(<span class="number">0</span>),
+            <span class="string">"1"
+        </span>);
+        <span class="macro">assert_eq!</span>(
+            map_array
+                .values()
+                .as_any()
+                .downcast_ref::&lt;Int32Array&gt;()
+                .expect(<span class="string">"should be an Int32Array"</span>)
+                .value(<span class="number">0</span>),
+            <span class="number">42
+        </span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_with_values_field() {
+        <span class="kw">let </span>value_field = Arc::new(Field::new(<span class="string">"bars"</span>, DataType::Int32, <span class="bool-val">false</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = MapBuilder::new(<span class="prelude-val">None</span>, Int32Builder::new(), Int32Builder::new())
+            .with_values_field(value_field.clone());
+        builder.keys().append_value(<span class="number">1</span>);
+        builder.values().append_value(<span class="number">2</span>);
+        builder.append(<span class="bool-val">true</span>).unwrap();
+        builder.append(<span class="bool-val">false</span>).unwrap(); <span class="comment">// This is fine as nullability refers to nullability of values
+        </span>builder.keys().append_value(<span class="number">3</span>);
+        builder.values().append_value(<span class="number">4</span>);
+        builder.append(<span class="bool-val">true</span>).unwrap();
+        <span class="kw">let </span>map = builder.finish();
+
+        <span class="macro">assert_eq!</span>(map.len(), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(
+            map.data_type(),
+            <span class="kw-2">&amp;</span>DataType::Map(
+                Arc::new(Field::new(
+                    <span class="string">"entries"</span>,
+                    DataType::Struct(
+                        <span class="macro">vec!</span>[
+                            Arc::new(Field::new(<span class="string">"keys"</span>, DataType::Int32, <span class="bool-val">false</span>)),
+                            value_field.clone()
+                        ]
+                        .into()
+                    ),
+                    <span class="bool-val">false</span>,
+                )),
+                <span class="bool-val">false
+            </span>)
+        );
+
+        builder.keys().append_value(<span class="number">5</span>);
+        builder.values().append_value(<span class="number">6</span>);
+        builder.append(<span class="bool-val">true</span>).unwrap();
+        <span class="kw">let </span>map = builder.finish();
+
+        <span class="macro">assert_eq!</span>(map.len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(
+            map.data_type(),
+            <span class="kw-2">&amp;</span>DataType::Map(
+                Arc::new(Field::new(
+                    <span class="string">"entries"</span>,
+                    DataType::Struct(
+                        <span class="macro">vec!</span>[
+                            Arc::new(Field::new(<span class="string">"keys"</span>, DataType::Int32, <span class="bool-val">false</span>)),
+                            value_field
+                        ]
+                        .into()
+                    ),
+                    <span class="bool-val">false</span>,
+                )),
+                <span class="bool-val">false
+            </span>)
+        );
     }
 }
 </code></pre></div></section></main></body></html>

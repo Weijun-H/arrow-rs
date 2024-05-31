@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-arith/src/boolean.rs`."><title>boolean.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_arith" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_arith/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-arith/src/boolean.rs`."><title>boolean.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_arith" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -896,36 +896,52 @@
 <a href="#896" id="896">896</a>
 <a href="#897" id="897">897</a>
 <a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
 // to you under the Apache License, Version 2.0 (the
-// &quot;License&quot;); you may not use this file except in compliance
+// "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
-// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="doccomment">//! Defines boolean kernels on Arrow `BooleanArray`&#39;s, e.g. `AND`, `OR` and `NOT`.
+</span><span class="doccomment">//! Defines boolean kernels on Arrow `BooleanArray`'s, e.g. `AND`, `OR` and `NOT`.
 //!
 //! These kernels can leverage SIMD if available on your system.  Currently no runtime
 //! detection is provided, you should enable the specific SIMD intrinsics using
-//! `RUSTFLAGS=&quot;-C target-feature=+avx2&quot;` for example.  See the documentation
+//! `RUSTFLAGS="-C target-feature=+avx2"` for example.  See the documentation
 //! [here](https://doc.rust-lang.org/stable/core/arch/) for more information.
 
 </span><span class="kw">use </span>arrow_array::<span class="kw-2">*</span>;
 <span class="kw">use </span>arrow_buffer::buffer::{bitwise_bin_op_helper, bitwise_quaternary_op_helper};
-<span class="kw">use </span>arrow_buffer::{BooleanBuffer, NullBuffer};
+<span class="kw">use </span>arrow_buffer::{buffer_bin_and_not, BooleanBuffer, NullBuffer};
 <span class="kw">use </span>arrow_schema::ArrowError;
 
-<span class="doccomment">/// Logical &#39;and&#39; boolean values with Kleene logic
+<span class="doccomment">/// Logical 'and' boolean values with Kleene logic
 ///
 /// # Behavior
 ///
@@ -937,9 +953,9 @@
 /// * `null` and `false` = `false`
 /// * `null` and `null` = `null`
 ///
-/// In other words, in this context a null value really means \&quot;unknown\&quot;,
-/// and an unknown value &#39;and&#39; false is always false.
-/// For a different null behavior, see function \&quot;and\&quot;.
+/// In other words, in this context a null value really means \"unknown\",
+/// and an unknown value 'and' false is always false.
+/// For a different null behavior, see function \"and\".
 ///
 /// # Example
 ///
@@ -955,13 +971,10 @@
 /// # Fails
 ///
 /// If the operands have different lengths
-</span><span class="kw">pub fn </span>and_kleene(
-    left: <span class="kw-2">&amp;</span>BooleanArray,
-    right: <span class="kw-2">&amp;</span>BooleanArray,
-) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
+</span><span class="kw">pub fn </span>and_kleene(left: <span class="kw-2">&amp;</span>BooleanArray, right: <span class="kw-2">&amp;</span>BooleanArray) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
     <span class="kw">if </span>left.len() != right.len() {
         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::ComputeError(
-            <span class="string">&quot;Cannot perform bitwise operation on arrays of different length&quot;</span>.to_string(),
+            <span class="string">"Cannot perform bitwise operation on arrays of different length"</span>.to_string(),
         ));
     }
 
@@ -1023,7 +1036,7 @@
     <span class="prelude-val">Ok</span>(BooleanArray::new(left_values &amp; right_values, nulls))
 }
 
-<span class="doccomment">/// Logical &#39;or&#39; boolean values with Kleene logic
+<span class="doccomment">/// Logical 'or' boolean values with Kleene logic
 ///
 /// # Behavior
 ///
@@ -1035,9 +1048,9 @@
 /// * `null` or `false` = `null`
 /// * `null` or `null` = `null`
 ///
-/// In other words, in this context a null value really means \&quot;unknown\&quot;,
-/// and an unknown value &#39;or&#39; true is always true.
-/// For a different null behavior, see function \&quot;or\&quot;.
+/// In other words, in this context a null value really means \"unknown\",
+/// and an unknown value 'or' true is always true.
+/// For a different null behavior, see function \"or\".
 ///
 /// # Example
 ///
@@ -1053,13 +1066,10 @@
 /// # Fails
 ///
 /// If the operands have different lengths
-</span><span class="kw">pub fn </span>or_kleene(
-    left: <span class="kw-2">&amp;</span>BooleanArray,
-    right: <span class="kw-2">&amp;</span>BooleanArray,
-) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
+</span><span class="kw">pub fn </span>or_kleene(left: <span class="kw-2">&amp;</span>BooleanArray, right: <span class="kw-2">&amp;</span>BooleanArray) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
     <span class="kw">if </span>left.len() != right.len() {
         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::ComputeError(
-            <span class="string">&quot;Cannot perform bitwise operation on arrays of different length&quot;</span>.to_string(),
+            <span class="string">"Cannot perform bitwise operation on arrays of different length"</span>.to_string(),
         ));
     }
 
@@ -1133,7 +1143,7 @@
 {
     <span class="kw">if </span>left.len() != right.len() {
         <span class="kw">return </span><span class="prelude-val">Err</span>(ArrowError::ComputeError(
-            <span class="string">&quot;Cannot perform bitwise operation on arrays of different length&quot;</span>.to_string(),
+            <span class="string">"Cannot perform bitwise operation on arrays of different length"</span>.to_string(),
         ));
     }
 
@@ -1155,10 +1165,7 @@
 /// let and_ab = and(&amp;a, &amp;b).unwrap();
 /// assert_eq!(and_ab, BooleanArray::from(vec![Some(false), Some(true), None]));
 /// ```
-</span><span class="kw">pub fn </span>and(
-    left: <span class="kw-2">&amp;</span>BooleanArray,
-    right: <span class="kw-2">&amp;</span>BooleanArray,
-) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
+</span><span class="kw">pub fn </span>and(left: <span class="kw-2">&amp;</span>BooleanArray, right: <span class="kw-2">&amp;</span>BooleanArray) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
     binary_boolean_kernel(left, right, |a, b| a &amp; b)
 }
 
@@ -1177,6 +1184,27 @@
 /// ```
 </span><span class="kw">pub fn </span>or(left: <span class="kw-2">&amp;</span>BooleanArray, right: <span class="kw-2">&amp;</span>BooleanArray) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
     binary_boolean_kernel(left, right, |a, b| a | b)
+}
+
+<span class="doccomment">/// Performs `AND_NOT` operation on two arrays. If either left or right value is null then the
+/// result is also null.
+/// # Error
+/// This function errors when the arrays have different lengths.
+/// # Example
+/// ```rust
+/// # use arrow_array::BooleanArray;
+/// # use arrow_arith::boolean::{and, not, and_not};
+/// let a = BooleanArray::from(vec![Some(false), Some(true), None]);
+/// let b = BooleanArray::from(vec![Some(true), Some(true), Some(false)]);
+/// let andn_ab = and_not(&amp;a, &amp;b).unwrap();
+/// assert_eq!(andn_ab, BooleanArray::from(vec![Some(false), Some(false), None]));
+/// // It's equal to and(left, not(right))
+/// assert_eq!(andn_ab, and(&amp;a, &amp;not(&amp;b).unwrap()).unwrap());
+</span><span class="kw">pub fn </span>and_not(left: <span class="kw-2">&amp;</span>BooleanArray, right: <span class="kw-2">&amp;</span>BooleanArray) -&gt; <span class="prelude-ty">Result</span>&lt;BooleanArray, ArrowError&gt; {
+    binary_boolean_kernel(left, right, |a, b| {
+        <span class="kw">let </span>buffer = buffer_bin_and_not(a.inner(), b.offset(), b.inner(), a.offset(), a.len());
+        BooleanBuffer::new(buffer, left.offset(), left.len())
+    })
 }
 
 <span class="doccomment">/// Performs unary `NOT` operation on an arrays. If value is null then the result is also
@@ -1261,6 +1289,18 @@
         <span class="kw">let </span>expected = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]);
 
         <span class="macro">assert_eq!</span>(c, expected);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_bool_array_and_not() {
+        <span class="kw">let </span>a = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]);
+        <span class="kw">let </span>b = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>]);
+        <span class="kw">let </span>c = and_not(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>b).unwrap();
+
+        <span class="kw">let </span>expected = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>]);
+
+        <span class="macro">assert_eq!</span>(c, expected);
+        <span class="macro">assert_eq!</span>(c, and(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>not(<span class="kw-2">&amp;</span>b).unwrap()).unwrap());
     }
 
     <span class="attr">#[test]
@@ -1479,8 +1519,7 @@
         <span class="kw">let </span>a = a.as_any().downcast_ref::&lt;BooleanArray&gt;().unwrap();
         <span class="kw">let </span>c = not(a).unwrap();
 
-        <span class="kw">let </span>expected =
-            BooleanArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">Some</span>(<span class="bool-val">true</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="bool-val">false</span>)]);
+        <span class="kw">let </span>expected = BooleanArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">Some</span>(<span class="bool-val">true</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="bool-val">false</span>)]);
 
         <span class="macro">assert_eq!</span>(c, expected);
     }
@@ -1529,12 +1568,10 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_bool_array_and_sliced_same_offset() {
         <span class="kw">let </span>a = BooleanArray::from(<span class="macro">vec!</span>[
-            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
-            <span class="bool-val">true</span>,
+            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>,
         ]);
         <span class="kw">let </span>b = BooleanArray::from(<span class="macro">vec!</span>[
-            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>,
-            <span class="bool-val">true</span>,
+            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
         ]);
 
         <span class="kw">let </span>a = a.slice(<span class="number">8</span>, <span class="number">4</span>);
@@ -1552,12 +1589,10 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_bool_array_and_sliced_same_offset_mod8() {
         <span class="kw">let </span>a = BooleanArray::from(<span class="macro">vec!</span>[
-            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
-            <span class="bool-val">false</span>,
+            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>,
         ]);
         <span class="kw">let </span>b = BooleanArray::from(<span class="macro">vec!</span>[
-            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>,
-            <span class="bool-val">true</span>,
+            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
         ]);
 
         <span class="kw">let </span>a = a.slice(<span class="number">0</span>, <span class="number">4</span>);
@@ -1575,8 +1610,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_bool_array_and_sliced_offset1() {
         <span class="kw">let </span>a = BooleanArray::from(<span class="macro">vec!</span>[
-            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
-            <span class="bool-val">true</span>,
+            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>,
         ]);
         <span class="kw">let </span>b = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>]);
 
@@ -1594,8 +1628,7 @@
     </span><span class="kw">fn </span>test_bool_array_and_sliced_offset2() {
         <span class="kw">let </span>a = BooleanArray::from(<span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>]);
         <span class="kw">let </span>b = BooleanArray::from(<span class="macro">vec!</span>[
-            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>,
-            <span class="bool-val">true</span>,
+            <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>,
         ]);
 
         <span class="kw">let </span>b = b.slice(<span class="number">8</span>, <span class="number">4</span>);
@@ -1628,8 +1661,7 @@
 
         <span class="kw">let </span>c = and(a, b).unwrap();
 
-        <span class="kw">let </span>expected =
-            BooleanArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="bool-val">true</span>)]);
+        <span class="kw">let </span>expected = BooleanArray::from(<span class="macro">vec!</span>[<span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">Some</span>(<span class="bool-val">false</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="bool-val">true</span>)]);
 
         <span class="macro">assert_eq!</span>(expected, c);
     }

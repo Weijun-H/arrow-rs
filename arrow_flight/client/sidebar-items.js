@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["FlightClient"]};
+window.SIDEBAR_ITEMS = {"struct":["FallibleRequestStream","FallibleTonicResponseStream","FlightClient"]};

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-flight/src/arrow.flight.protocol.rs`."><title>arrow.flight.protocol.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-47e7ab555ef2818a.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_flight" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.0-nightly (8550f15e1 2023-08-27)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-f194925aa375ae96.css" data-theme-dark-css="dark-1dd4d1ce031e15de.css" data-theme-ayu-css="ayu-49e58d069f567085.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-ef3a2de404864b0b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-f194925aa375ae96.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1dd4d1ce031e15de.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../arrow_flight/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `arrow-flight/src/arrow.flight.protocol.rs`."><title>arrow.flight.protocol.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="arrow_flight" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (6f3df08aa 2024-05-30)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1362,8 +1362,288 @@
 <a href="#1362" id="1362">1362</a>
 <a href="#1363" id="1363">1363</a>
 <a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
+<a href="#1468" id="1468">1468</a>
+<a href="#1469" id="1469">1469</a>
+<a href="#1470" id="1470">1470</a>
+<a href="#1471" id="1471">1471</a>
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
+<a href="#1494" id="1494">1494</a>
+<a href="#1495" id="1495">1495</a>
+<a href="#1496" id="1496">1496</a>
+<a href="#1497" id="1497">1497</a>
+<a href="#1498" id="1498">1498</a>
+<a href="#1499" id="1499">1499</a>
+<a href="#1500" id="1500">1500</a>
+<a href="#1501" id="1501">1501</a>
+<a href="#1502" id="1502">1502</a>
+<a href="#1503" id="1503">1503</a>
+<a href="#1504" id="1504">1504</a>
+<a href="#1505" id="1505">1505</a>
+<a href="#1506" id="1506">1506</a>
+<a href="#1507" id="1507">1507</a>
+<a href="#1508" id="1508">1508</a>
+<a href="#1509" id="1509">1509</a>
+<a href="#1510" id="1510">1510</a>
+<a href="#1511" id="1511">1511</a>
+<a href="#1512" id="1512">1512</a>
+<a href="#1513" id="1513">1513</a>
+<a href="#1514" id="1514">1514</a>
+<a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
+<a href="#1521" id="1521">1521</a>
+<a href="#1522" id="1522">1522</a>
+<a href="#1523" id="1523">1523</a>
+<a href="#1524" id="1524">1524</a>
+<a href="#1525" id="1525">1525</a>
+<a href="#1526" id="1526">1526</a>
+<a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
+<a href="#1531" id="1531">1531</a>
+<a href="#1532" id="1532">1532</a>
+<a href="#1533" id="1533">1533</a>
+<a href="#1534" id="1534">1534</a>
+<a href="#1535" id="1535">1535</a>
+<a href="#1536" id="1536">1536</a>
+<a href="#1537" id="1537">1537</a>
+<a href="#1538" id="1538">1538</a>
+<a href="#1539" id="1539">1539</a>
+<a href="#1540" id="1540">1540</a>
+<a href="#1541" id="1541">1541</a>
+<a href="#1542" id="1542">1542</a>
+<a href="#1543" id="1543">1543</a>
+<a href="#1544" id="1544">1544</a>
+<a href="#1545" id="1545">1545</a>
+<a href="#1546" id="1546">1546</a>
+<a href="#1547" id="1547">1547</a>
+<a href="#1548" id="1548">1548</a>
+<a href="#1549" id="1549">1549</a>
+<a href="#1550" id="1550">1550</a>
+<a href="#1551" id="1551">1551</a>
+<a href="#1552" id="1552">1552</a>
+<a href="#1553" id="1553">1553</a>
+<a href="#1554" id="1554">1554</a>
+<a href="#1555" id="1555">1555</a>
+<a href="#1556" id="1556">1556</a>
+<a href="#1557" id="1557">1557</a>
+<a href="#1558" id="1558">1558</a>
+<a href="#1559" id="1559">1559</a>
+<a href="#1560" id="1560">1560</a>
+<a href="#1561" id="1561">1561</a>
+<a href="#1562" id="1562">1562</a>
+<a href="#1563" id="1563">1563</a>
+<a href="#1564" id="1564">1564</a>
+<a href="#1565" id="1565">1565</a>
+<a href="#1566" id="1566">1566</a>
+<a href="#1567" id="1567">1567</a>
+<a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
+<a href="#1581" id="1581">1581</a>
+<a href="#1582" id="1582">1582</a>
+<a href="#1583" id="1583">1583</a>
+<a href="#1584" id="1584">1584</a>
+<a href="#1585" id="1585">1585</a>
+<a href="#1586" id="1586">1586</a>
+<a href="#1587" id="1587">1587</a>
+<a href="#1588" id="1588">1588</a>
+<a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
+<a href="#1597" id="1597">1597</a>
+<a href="#1598" id="1598">1598</a>
+<a href="#1599" id="1599">1599</a>
+<a href="#1600" id="1600">1600</a>
+<a href="#1601" id="1601">1601</a>
+<a href="#1602" id="1602">1602</a>
+<a href="#1603" id="1603">1603</a>
+<a href="#1604" id="1604">1604</a>
+<a href="#1605" id="1605">1605</a>
+<a href="#1606" id="1606">1606</a>
+<a href="#1607" id="1607">1607</a>
+<a href="#1608" id="1608">1608</a>
+<a href="#1609" id="1609">1609</a>
+<a href="#1610" id="1610">1610</a>
+<a href="#1611" id="1611">1611</a>
+<a href="#1612" id="1612">1612</a>
+<a href="#1613" id="1613">1613</a>
+<a href="#1614" id="1614">1614</a>
+<a href="#1615" id="1615">1615</a>
+<a href="#1616" id="1616">1616</a>
+<a href="#1617" id="1617">1617</a>
+<a href="#1618" id="1618">1618</a>
+<a href="#1619" id="1619">1619</a>
+<a href="#1620" id="1620">1620</a>
+<a href="#1621" id="1621">1621</a>
+<a href="#1622" id="1622">1622</a>
+<a href="#1623" id="1623">1623</a>
+<a href="#1624" id="1624">1624</a>
+<a href="#1625" id="1625">1625</a>
+<a href="#1626" id="1626">1626</a>
+<a href="#1627" id="1627">1627</a>
+<a href="#1628" id="1628">1628</a>
+<a href="#1629" id="1629">1629</a>
+<a href="#1630" id="1630">1630</a>
+<a href="#1631" id="1631">1631</a>
+<a href="#1632" id="1632">1632</a>
+<a href="#1633" id="1633">1633</a>
+<a href="#1634" id="1634">1634</a>
+<a href="#1635" id="1635">1635</a>
+<a href="#1636" id="1636">1636</a>
+<a href="#1637" id="1637">1637</a>
+<a href="#1638" id="1638">1638</a>
+<a href="#1639" id="1639">1639</a>
+<a href="#1640" id="1640">1640</a>
+<a href="#1641" id="1641">1641</a>
+<a href="#1642" id="1642">1642</a>
+<a href="#1643" id="1643">1643</a>
 </pre></div><pre class="rust"><code><span class="comment">// This file was automatically generated through the build.rs script, and should not be edited.
 
+// This file is @generated by prost-build.
 </span><span class="doccomment">///
 /// The request that a client provides to a server on handshake.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
@@ -1371,11 +1651,11 @@
 </span><span class="kw">pub struct </span>HandshakeRequest {
     <span class="doccomment">///
     /// A defined protocol version
-    </span><span class="attr">#[prost(uint64, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(uint64, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>protocol_version: u64,
     <span class="doccomment">///
     /// Arbitrary auth/handshake info.
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>payload: ::prost::bytes::Bytes,
 }
 <span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
@@ -1383,11 +1663,11 @@
 </span><span class="kw">pub struct </span>HandshakeResponse {
     <span class="doccomment">///
     /// A defined protocol version
-    </span><span class="attr">#[prost(uint64, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(uint64, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>protocol_version: u64,
     <span class="doccomment">///
     /// Arbitrary auth/handshake info.
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>payload: ::prost::bytes::Bytes,
 }
 <span class="doccomment">///
@@ -1395,9 +1675,9 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>BasicAuth {
-    <span class="attr">#[prost(string, tag = <span class="string">&quot;2&quot;</span>)]
+    <span class="attr">#[prost(string, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>username: ::prost::alloc::string::String,
-    <span class="attr">#[prost(string, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="attr">#[prost(string, tag = <span class="string">"3"</span>)]
     </span><span class="kw">pub </span>password: ::prost::alloc::string::String,
 }
 <span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
@@ -1409,9 +1689,9 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>ActionType {
-    <span class="attr">#[prost(string, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(string, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>r#type: ::prost::alloc::string::String,
-    <span class="attr">#[prost(string, tag = <span class="string">&quot;2&quot;</span>)]
+    <span class="attr">#[prost(string, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>description: ::prost::alloc::string::String,
 }
 <span class="doccomment">///
@@ -1420,7 +1700,7 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Criteria {
-    <span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>expression: ::prost::bytes::Bytes,
 }
 <span class="doccomment">///
@@ -1428,18 +1708,48 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Action {
-    <span class="attr">#[prost(string, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(string, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>r#type: ::prost::alloc::string::String,
-    <span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    <span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>body: ::prost::bytes::Bytes,
+}
+<span class="doccomment">///
+/// The request of the CancelFlightInfo action.
+///
+/// The request should be stored in Action.body.
+</span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+</span><span class="kw">pub struct </span>CancelFlightInfoRequest {
+    <span class="attr">#[prost(message, optional, tag = <span class="string">"1"</span>)]
+    </span><span class="kw">pub </span>info: ::core::option::Option&lt;FlightInfo&gt;,
+}
+<span class="doccomment">///
+/// The request of the RenewFlightEndpoint action.
+///
+/// The request should be stored in Action.body.
+</span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+</span><span class="kw">pub struct </span>RenewFlightEndpointRequest {
+    <span class="attr">#[prost(message, optional, tag = <span class="string">"1"</span>)]
+    </span><span class="kw">pub </span>endpoint: ::core::option::Option&lt;FlightEndpoint&gt;,
 }
 <span class="doccomment">///
 /// An opaque result returned after executing an action.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span><span class="prelude-ty">Result </span>{
-    <span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>body: ::prost::bytes::Bytes,
+}
+<span class="doccomment">///
+/// The result of the CancelFlightInfo action.
+///
+/// The result should be stored in Result.body.
+</span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+</span><span class="kw">pub struct </span>CancelFlightInfoResult {
+    <span class="attr">#[prost(enumeration = <span class="string">"CancelStatus"</span>, tag = <span class="string">"1"</span>)]
+    </span><span class="kw">pub </span>status: i32,
 }
 <span class="doccomment">///
 /// Wrap the result of a getSchema call
@@ -1450,7 +1760,7 @@
     ///    4 bytes - an optional IPC_CONTINUATION_TOKEN prefix
     ///    4 bytes - the byte length of the payload
     ///    a flatbuffer Message whose header is the Schema
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>schema: ::prost::bytes::Bytes,
 }
 <span class="doccomment">///
@@ -1459,17 +1769,17 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>FlightDescriptor {
-    <span class="attr">#[prost(enumeration = <span class="string">&quot;flight_descriptor::DescriptorType&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(enumeration = <span class="string">"flight_descriptor::DescriptorType"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>r#type: i32,
     <span class="doccomment">///
     /// Opaque value used to express a command. Should only be defined when
     /// type = CMD.
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>cmd: ::prost::bytes::Bytes,
     <span class="doccomment">///
     /// List of strings identifying a particular dataset. Should only be defined
     /// when type = PATH.
-    </span><span class="attr">#[prost(string, repeated, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="attr">#[prost(string, repeated, tag = <span class="string">"3"</span>)]
     </span><span class="kw">pub </span>path: ::prost::alloc::vec::Vec&lt;::prost::alloc::string::String&gt;,
 }
 <span class="doccomment">/// Nested message and enum types in `FlightDescriptor`.
@@ -1505,19 +1815,19 @@
         ///
         /// The values are not transformed in any way and thus are considered stable
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
-        </span><span class="kw">pub fn </span>as_str_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        </span><span class="kw">pub fn </span>as_str_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
             <span class="kw">match </span><span class="self">self </span>{
-                DescriptorType::Unknown =&gt; <span class="string">&quot;UNKNOWN&quot;</span>,
-                DescriptorType::Path =&gt; <span class="string">&quot;PATH&quot;</span>,
-                DescriptorType::Cmd =&gt; <span class="string">&quot;CMD&quot;</span>,
+                DescriptorType::Unknown =&gt; <span class="string">"UNKNOWN"</span>,
+                DescriptorType::Path =&gt; <span class="string">"PATH"</span>,
+                DescriptorType::Cmd =&gt; <span class="string">"CMD"</span>,
             }
         }
         <span class="doccomment">/// Creates an enum from field names used in the ProtoBuf definition.
         </span><span class="kw">pub fn </span>from_str_name(value: <span class="kw-2">&amp;</span>str) -&gt; ::core::option::Option&lt;<span class="self">Self</span>&gt; {
             <span class="kw">match </span>value {
-                <span class="string">&quot;UNKNOWN&quot; </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Unknown),
-                <span class="string">&quot;PATH&quot; </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Path),
-                <span class="string">&quot;CMD&quot; </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Cmd),
+                <span class="string">"UNKNOWN" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Unknown),
+                <span class="string">"PATH" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Path),
+                <span class="string">"CMD" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Cmd),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }
         }
@@ -1533,11 +1843,11 @@
     ///    4 bytes - an optional IPC_CONTINUATION_TOKEN prefix
     ///    4 bytes - the byte length of the payload
     ///    a flatbuffer Message whose header is the Schema
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>schema: ::prost::bytes::Bytes,
     <span class="doccomment">///
     /// The descriptor associated with this info.
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>flight_descriptor: ::core::option::Option&lt;FlightDescriptor&gt;,
     <span class="doccomment">///
     /// A list of endpoints associated with the flight. To consume the
@@ -1548,31 +1858,82 @@
     /// represent partitioned data.
     ///
     /// If the returned data has an ordering, an application can use
-    /// &quot;FlightInfo.ordered = true&quot; or should return the all data in a
+    /// "FlightInfo.ordered = true" or should return the all data in a
     /// single endpoint. Otherwise, there is no ordering defined on
     /// endpoints or the data within.
     ///
     /// A client can read ordered data by reading data from returned
     /// endpoints, in order, from front to back.
     ///
-    /// Note that a client may ignore &quot;FlightInfo.ordered = true&quot;. If an
+    /// Note that a client may ignore "FlightInfo.ordered = true". If an
     /// ordering is important for an application, an application must
     /// choose one of them:
     ///
     /// * An application requires that all clients must read data in
     ///    returned endpoints order.
     /// * An application must return the all data in a single endpoint.
-    </span><span class="attr">#[prost(message, repeated, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="attr">#[prost(message, repeated, tag = <span class="string">"3"</span>)]
     </span><span class="kw">pub </span>endpoint: ::prost::alloc::vec::Vec&lt;FlightEndpoint&gt;,
     <span class="doccomment">/// Set these to -1 if unknown.
-    </span><span class="attr">#[prost(int64, tag = <span class="string">&quot;4&quot;</span>)]
+    </span><span class="attr">#[prost(int64, tag = <span class="string">"4"</span>)]
     </span><span class="kw">pub </span>total_records: i64,
-    <span class="attr">#[prost(int64, tag = <span class="string">&quot;5&quot;</span>)]
+    <span class="attr">#[prost(int64, tag = <span class="string">"5"</span>)]
     </span><span class="kw">pub </span>total_bytes: i64,
     <span class="doccomment">///
     /// FlightEndpoints are in the same order as the data.
-    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;6&quot;</span>)]
+    </span><span class="attr">#[prost(bool, tag = <span class="string">"6"</span>)]
     </span><span class="kw">pub </span>ordered: bool,
+    <span class="doccomment">///
+    /// Application-defined metadata.
+    ///
+    /// There is no inherent or required relationship between this
+    /// and the app_metadata fields in the FlightEndpoints or resulting
+    /// FlightData messages. Since this metadata is application-defined,
+    /// a given application could define there to be a relationship,
+    /// but there is none required by the spec.
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"7"</span>)]
+    </span><span class="kw">pub </span>app_metadata: ::prost::bytes::Bytes,
+}
+<span class="doccomment">///
+/// The information to process a long-running query.
+</span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+</span><span class="kw">pub struct </span>PollInfo {
+    <span class="doccomment">///
+    /// The currently available results.
+    ///
+    /// If "flight_descriptor" is not specified, the query is complete
+    /// and "info" specifies all results. Otherwise, "info" contains
+    /// partial query results.
+    ///
+    /// Note that each PollInfo response contains a complete
+    /// FlightInfo (not just the delta between the previous and current
+    /// FlightInfo).
+    ///
+    /// Subsequent PollInfo responses may only append new endpoints to
+    /// info.
+    ///
+    /// Clients can begin fetching results via DoGet(Ticket) with the
+    /// ticket in the info before the query is
+    /// completed. FlightInfo.ordered is also valid.
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"1"</span>)]
+    </span><span class="kw">pub </span>info: ::core::option::Option&lt;FlightInfo&gt;,
+    <span class="doccomment">///
+    /// The descriptor the client should use on the next try.
+    /// If unset, the query is complete.
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"2"</span>)]
+    </span><span class="kw">pub </span>flight_descriptor: ::core::option::Option&lt;FlightDescriptor&gt;,
+    <span class="doccomment">///
+    /// Query progress. If known, must be in \[0.0, 1.0\] but need not be
+    /// monotonic or nondecreasing. If unknown, do not set.
+    </span><span class="attr">#[prost(double, optional, tag = <span class="string">"3"</span>)]
+    </span><span class="kw">pub </span>progress: ::core::option::Option&lt;f64&gt;,
+    <span class="doccomment">///
+    /// Expiration time for this request. After this passes, the server
+    /// might not accept the retry descriptor anymore (and the query may
+    /// be cancelled). This may be updated on a call to PollFlightInfo.
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"4"</span>)]
+    </span><span class="kw">pub </span>expiration_time: ::core::option::Option&lt;::prost_types::Timestamp&gt;,
 }
 <span class="doccomment">///
 /// A particular stream or split associated with a flight.
@@ -1581,7 +1942,7 @@
 </span><span class="kw">pub struct </span>FlightEndpoint {
     <span class="doccomment">///
     /// Token used to retrieve this stream.
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>ticket: ::core::option::Option&lt;Ticket&gt;,
     <span class="doccomment">///
     /// A list of URIs where this ticket can be redeemed via DoGet().
@@ -1598,8 +1959,24 @@
     ///
     /// In other words, an application can use multiple locations to
     /// represent redundant and/or load balanced services.
-    </span><span class="attr">#[prost(message, repeated, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(message, repeated, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>location: ::prost::alloc::vec::Vec&lt;Location&gt;,
+    <span class="doccomment">///
+    /// Expiration time of this stream. If present, clients may assume
+    /// they can retry DoGet requests. Otherwise, it is
+    /// application-defined whether DoGet requests may be retried.
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"3"</span>)]
+    </span><span class="kw">pub </span>expiration_time: ::core::option::Option&lt;::prost_types::Timestamp&gt;,
+    <span class="doccomment">///
+    /// Application-defined metadata.
+    ///
+    /// There is no inherent or required relationship between this
+    /// and the app_metadata fields in the FlightInfo or resulting
+    /// FlightData messages. Since this metadata is application-defined,
+    /// a given application could define there to be a relationship,
+    /// but there is none required by the spec.
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"4"</span>)]
+    </span><span class="kw">pub </span>app_metadata: ::prost::bytes::Bytes,
 }
 <span class="doccomment">///
 /// A location where a Flight service will accept retrieval of a particular
@@ -1607,7 +1984,7 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Location {
-    <span class="attr">#[prost(string, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(string, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>uri: ::prost::alloc::string::String,
 }
 <span class="doccomment">///
@@ -1619,7 +1996,7 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Ticket {
-    <span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>ticket: ::prost::bytes::Bytes,
 }
 <span class="doccomment">///
@@ -1630,22 +2007,22 @@
     <span class="doccomment">///
     /// The descriptor of the data. This is only relevant when a client is
     /// starting a new DoPut stream.
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>flight_descriptor: ::core::option::Option&lt;FlightDescriptor&gt;,
     <span class="doccomment">///
     /// Header for message data as described in Message.fbs::Message.
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"2"</span>)]
     </span><span class="kw">pub </span>data_header: ::prost::bytes::Bytes,
     <span class="doccomment">///
     /// Application-defined metadata.
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"3"</span>)]
     </span><span class="kw">pub </span>app_metadata: ::prost::bytes::Bytes,
     <span class="doccomment">///
     /// The actual batch of Arrow data. Preferably handled with minimal-copies
     /// coming last in the definition to help with sidecar patterns (it is
     /// expected that some implementations will fetch this field off the wire
     /// with specialized code to avoid extra memory copies).
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1000&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1000"</span>)]
     </span><span class="kw">pub </span>data_body: ::prost::bytes::Bytes,
 }
 <span class="doccomment">/// *
@@ -1653,8 +2030,53 @@
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>PutResult {
-    <span class="attr">#[prost(bytes = <span class="string">&quot;bytes&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    <span class="attr">#[prost(bytes = <span class="string">"bytes"</span>, tag = <span class="string">"1"</span>)]
     </span><span class="kw">pub </span>app_metadata: ::prost::bytes::Bytes,
+}
+<span class="doccomment">///
+/// The result of a cancel operation.
+///
+/// This is used by CancelFlightInfoResult.status.
+</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+</span><span class="kw">pub enum </span>CancelStatus {
+    <span class="doccomment">/// The cancellation status is unknown. Servers should avoid using
+    /// this value (send a NOT_FOUND error if the requested query is
+    /// not known). Clients can retry the request.
+    </span>Unspecified = <span class="number">0</span>,
+    <span class="doccomment">/// The cancellation request is complete. Subsequent requests with
+    /// the same payload may return CANCELLED or a NOT_FOUND error.
+    </span>Cancelled = <span class="number">1</span>,
+    <span class="doccomment">/// The cancellation request is in progress. The client may retry
+    /// the cancellation request.
+    </span>Cancelling = <span class="number">2</span>,
+    <span class="doccomment">/// The query is not cancellable. The client should not retry the
+    /// cancellation request.
+    </span>NotCancellable = <span class="number">3</span>,
+}
+<span class="kw">impl </span>CancelStatus {
+    <span class="doccomment">/// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    </span><span class="kw">pub fn </span>as_str_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
+        <span class="kw">match </span><span class="self">self </span>{
+            CancelStatus::Unspecified =&gt; <span class="string">"CANCEL_STATUS_UNSPECIFIED"</span>,
+            CancelStatus::Cancelled =&gt; <span class="string">"CANCEL_STATUS_CANCELLED"</span>,
+            CancelStatus::Cancelling =&gt; <span class="string">"CANCEL_STATUS_CANCELLING"</span>,
+            CancelStatus::NotCancellable =&gt; <span class="string">"CANCEL_STATUS_NOT_CANCELLABLE"</span>,
+        }
+    }
+    <span class="doccomment">/// Creates an enum from field names used in the ProtoBuf definition.
+    </span><span class="kw">pub fn </span>from_str_name(value: <span class="kw-2">&amp;</span>str) -&gt; ::core::option::Option&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">match </span>value {
+            <span class="string">"CANCEL_STATUS_UNSPECIFIED" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Unspecified),
+            <span class="string">"CANCEL_STATUS_CANCELLED" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Cancelled),
+            <span class="string">"CANCEL_STATUS_CANCELLING" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::Cancelling),
+            <span class="string">"CANCEL_STATUS_NOT_CANCELLABLE" </span>=&gt; <span class="prelude-val">Some</span>(<span class="self">Self</span>::NotCancellable),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+        }
+    }
 }
 <span class="doccomment">/// Generated client implementations.
 </span><span class="kw">pub mod </span>flight_service_client {
@@ -1685,7 +2107,7 @@
     <span class="kw">where
         </span>T: tonic::client::GrpcService&lt;tonic::body::BoxBody&gt;,
         T::Error: Into&lt;StdError&gt;,
-        T::ResponseBody: Body&lt;Data = Bytes&gt; + Send + <span class="lifetime">&#39;static</span>,
+        T::ResponseBody: Body&lt;Data = Bytes&gt; + Send + <span class="lifetime">'static</span>,
         &lt;T::ResponseBody <span class="kw">as </span>Body&gt;::Error: Into&lt;StdError&gt; + Send,
     {
         <span class="kw">pub fn </span>new(inner: T) -&gt; <span class="self">Self </span>{
@@ -1764,17 +2186,17 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/Handshake&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/Handshake"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_streaming_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;Handshake&quot;</span>),
+                    GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"Handshake"</span>),
                 );
             <span class="self">self</span>.inner.streaming(req, path, codec).<span class="kw">await
         </span>}
@@ -1798,17 +2220,17 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/ListFlights&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/ListFlights"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;ListFlights&quot;</span>),
+                    GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"ListFlights"</span>),
                 );
             <span class="self">self</span>.inner.server_streaming(req, path, codec).<span class="kw">await
         </span>}
@@ -1833,19 +2255,69 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/GetFlightInfo&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/GetFlightInfo"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        <span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>,
-                        <span class="string">&quot;GetFlightInfo&quot;</span>,
+                        <span class="string">"arrow.flight.protocol.FlightService"</span>,
+                        <span class="string">"GetFlightInfo"</span>,
+                    ),
+                );
+            <span class="self">self</span>.inner.unary(req, path, codec).<span class="kw">await
+        </span>}
+        <span class="doccomment">///
+        /// For a given FlightDescriptor, start a query and get information
+        /// to poll its execution status. This is a useful interface if the
+        /// query may be a long-running query. The first PollFlightInfo call
+        /// should return as quickly as possible. (GetFlightInfo doesn't
+        /// return until the query is complete.)
+        ///
+        /// A client can consume any available results before
+        /// the query is completed. See PollInfo.info for details.
+        ///
+        /// A client can poll the updated query status by calling
+        /// PollFlightInfo() with PollInfo.flight_descriptor. A server
+        /// should not respond until the result would be different from last
+        /// time. That way, the client can "long poll" for updates
+        /// without constantly making requests. Clients can set a short timeout
+        /// to avoid blocking calls if desired.
+        ///
+        /// A client can't use PollInfo.flight_descriptor after
+        /// PollInfo.expiration_time passes. A server might not accept the
+        /// retry descriptor anymore and the query may be cancelled.
+        ///
+        /// A client may use the CancelFlightInfo action with
+        /// PollInfo.info to cancel the running query.
+        </span><span class="kw">pub async fn </span>poll_flight_info(
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+            request: <span class="kw">impl </span>tonic::IntoRequest&lt;<span class="kw">super</span>::FlightDescriptor&gt;,
+        ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="kw">super</span>::PollInfo&gt;, tonic::Status&gt; {
+            <span class="self">self</span>.inner
+                .ready()
+                .<span class="kw">await
+                </span>.map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
+                    )
+                })<span class="question-mark">?</span>;
+            <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
+            <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
+                <span class="string">"/arrow.flight.protocol.FlightService/PollFlightInfo"</span>,
+            );
+            <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        <span class="string">"arrow.flight.protocol.FlightService"</span>,
+                        <span class="string">"PollFlightInfo"</span>,
                     ),
                 );
             <span class="self">self</span>.inner.unary(req, path, codec).<span class="kw">await
@@ -1865,17 +2337,17 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/GetSchema&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/GetSchema"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;GetSchema&quot;</span>),
+                    GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"GetSchema"</span>),
                 );
             <span class="self">self</span>.inner.unary(req, path, codec).<span class="kw">await
         </span>}
@@ -1897,16 +2369,16 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoGet&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/DoGet"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;DoGet&quot;</span>));
+                .insert(GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"DoGet"</span>));
             <span class="self">self</span>.inner.server_streaming(req, path, codec).<span class="kw">await
         </span>}
         <span class="doccomment">///
@@ -1914,7 +2386,7 @@
         /// flight stream. This allows a client of a flight service to upload a stream
         /// of data. Depending on the particular flight service, a client consumer
         /// could be allowed to upload a single stream per descriptor or an unlimited
-        /// number. In the latter, the service might implement a &#39;seal&#39; action that
+        /// number. In the latter, the service might implement a 'seal' action that
         /// can be applied to a descriptor once all streams are uploaded.
         </span><span class="kw">pub async fn </span>do_put(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1929,16 +2401,16 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoPut&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/DoPut"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_streaming_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;DoPut&quot;</span>));
+                .insert(GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"DoPut"</span>));
             <span class="self">self</span>.inner.streaming(req, path, codec).<span class="kw">await
         </span>}
         <span class="doccomment">///
@@ -1960,17 +2432,17 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoExchange&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/DoExchange"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_streaming_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;DoExchange&quot;</span>),
+                    GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"DoExchange"</span>),
                 );
             <span class="self">self</span>.inner.streaming(req, path, codec).<span class="kw">await
         </span>}
@@ -1994,17 +2466,17 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoAction&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/DoAction"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;DoAction&quot;</span>),
+                    GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"DoAction"</span>),
                 );
             <span class="self">self</span>.inner.server_streaming(req, path, codec).<span class="kw">await
         </span>}
@@ -2025,17 +2497,17 @@
                 </span>.map_err(|e| {
                     tonic::Status::new(
                         tonic::Code::Unknown,
-                        <span class="macro">format!</span>(<span class="string">&quot;Service was not ready: {}&quot;</span>, e.into()),
+                        <span class="macro">format!</span>(<span class="string">"Service was not ready: {}"</span>, e.into()),
                     )
                 })<span class="question-mark">?</span>;
             <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
             <span class="kw">let </span>path = http::uri::PathAndQuery::from_static(
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/ListActions&quot;</span>,
+                <span class="string">"/arrow.flight.protocol.FlightService/ListActions"</span>,
             );
             <span class="kw">let </span><span class="kw-2">mut </span>req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(<span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>, <span class="string">&quot;ListActions&quot;</span>),
+                    GrpcMethod::new(<span class="string">"arrow.flight.protocol.FlightService"</span>, <span class="string">"ListActions"</span>),
                 );
             <span class="self">self</span>.inner.server_streaming(req, path, codec).<span class="kw">await
         </span>}
@@ -2047,13 +2519,13 @@
     </span><span class="kw">use </span>tonic::codegen::<span class="kw-2">*</span>;
     <span class="doccomment">/// Generated trait containing gRPC methods that should be implemented for use with FlightServiceServer.
     </span><span class="attr">#[async_trait]
-    </span><span class="kw">pub trait </span>FlightService: Send + Sync + <span class="lifetime">&#39;static </span>{
+    </span><span class="kw">pub trait </span>FlightService: Send + Sync + <span class="lifetime">'static </span>{
         <span class="doccomment">/// Server streaming response type for the Handshake method.
-        </span><span class="kw">type </span>HandshakeStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>HandshakeStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::HandshakeResponse, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// Handshake between client and server. Depending on the server, the
         /// handshake may be required to determine the token that should be used for
@@ -2064,11 +2536,11 @@
             request: tonic::Request&lt;tonic::Streaming&lt;<span class="kw">super</span>::HandshakeRequest&gt;&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="self">Self</span>::HandshakeStream&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Server streaming response type for the ListFlights method.
-        </span><span class="kw">type </span>ListFlightsStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>ListFlightsStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::FlightInfo, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// Get a list of available streams given a particular criteria. Most flight
         /// services will expose one or more streams that are readily available for
@@ -2099,6 +2571,33 @@
             request: tonic::Request&lt;<span class="kw">super</span>::FlightDescriptor&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="kw">super</span>::FlightInfo&gt;, tonic::Status&gt;;
         <span class="doccomment">///
+        /// For a given FlightDescriptor, start a query and get information
+        /// to poll its execution status. This is a useful interface if the
+        /// query may be a long-running query. The first PollFlightInfo call
+        /// should return as quickly as possible. (GetFlightInfo doesn't
+        /// return until the query is complete.)
+        ///
+        /// A client can consume any available results before
+        /// the query is completed. See PollInfo.info for details.
+        ///
+        /// A client can poll the updated query status by calling
+        /// PollFlightInfo() with PollInfo.flight_descriptor. A server
+        /// should not respond until the result would be different from last
+        /// time. That way, the client can "long poll" for updates
+        /// without constantly making requests. Clients can set a short timeout
+        /// to avoid blocking calls if desired.
+        ///
+        /// A client can't use PollInfo.flight_descriptor after
+        /// PollInfo.expiration_time passes. A server might not accept the
+        /// retry descriptor anymore and the query may be cancelled.
+        ///
+        /// A client may use the CancelFlightInfo action with
+        /// PollInfo.info to cancel the running query.
+        </span><span class="kw">async fn </span>poll_flight_info(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            request: tonic::Request&lt;<span class="kw">super</span>::FlightDescriptor&gt;,
+        ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="kw">super</span>::PollInfo&gt;, tonic::Status&gt;;
+        <span class="doccomment">///
         /// For a given FlightDescriptor, get the Schema as described in Schema.fbs::Schema
         /// This is used when a consumer needs the Schema of flight stream. Similar to
         /// GetFlightInfo this interface may generate a new flight that was not previously
@@ -2108,11 +2607,11 @@
             request: tonic::Request&lt;<span class="kw">super</span>::FlightDescriptor&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="kw">super</span>::SchemaResult&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Server streaming response type for the DoGet method.
-        </span><span class="kw">type </span>DoGetStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>DoGetStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::FlightData, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// Retrieve a single stream associated with a particular descriptor
         /// associated with the referenced ticket. A Flight can be composed of one or
@@ -2123,28 +2622,28 @@
             request: tonic::Request&lt;<span class="kw">super</span>::Ticket&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="self">Self</span>::DoGetStream&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Server streaming response type for the DoPut method.
-        </span><span class="kw">type </span>DoPutStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>DoPutStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::PutResult, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// Push a stream to the flight service associated with a particular
         /// flight stream. This allows a client of a flight service to upload a stream
         /// of data. Depending on the particular flight service, a client consumer
         /// could be allowed to upload a single stream per descriptor or an unlimited
-        /// number. In the latter, the service might implement a &#39;seal&#39; action that
+        /// number. In the latter, the service might implement a 'seal' action that
         /// can be applied to a descriptor once all streams are uploaded.
         </span><span class="kw">async fn </span>do_put(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             request: tonic::Request&lt;tonic::Streaming&lt;<span class="kw">super</span>::FlightData&gt;&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="self">Self</span>::DoPutStream&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Server streaming response type for the DoExchange method.
-        </span><span class="kw">type </span>DoExchangeStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>DoExchangeStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::FlightData, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// Open a bidirectional data channel for a given descriptor. This
         /// allows clients to send and receive arbitrary Arrow data and
@@ -2156,11 +2655,11 @@
             request: tonic::Request&lt;tonic::Streaming&lt;<span class="kw">super</span>::FlightData&gt;&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="self">Self</span>::DoExchangeStream&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Server streaming response type for the DoAction method.
-        </span><span class="kw">type </span>DoActionStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>DoActionStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::Result, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// Flight services can support an arbitrary number of simple actions in
         /// addition to the possible ListFlights, GetFlightInfo, DoGet, DoPut
@@ -2173,11 +2672,11 @@
             request: tonic::Request&lt;<span class="kw">super</span>::Action&gt;,
         ) -&gt; std::result::Result&lt;tonic::Response&lt;<span class="self">Self</span>::DoActionStream&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Server streaming response type for the ListActions method.
-        </span><span class="kw">type </span>ListActionsStream: futures_core::Stream&lt;
+        </span><span class="kw">type </span>ListActionsStream: tonic::codegen::tokio_stream::Stream&lt;
                 Item = std::result::Result&lt;<span class="kw">super</span>::ActionType, tonic::Status&gt;,
             &gt;
             + Send
-            + <span class="lifetime">&#39;static</span>;
+            + <span class="lifetime">'static</span>;
         <span class="doccomment">///
         /// A flight service exposes all of the available action types that it has
         /// along with descriptions. This allows different flight consumers to
@@ -2259,22 +2758,22 @@
     <span class="kw">impl</span>&lt;T, B&gt; tonic::codegen::Service&lt;http::Request&lt;B&gt;&gt; <span class="kw">for </span>FlightServiceServer&lt;T&gt;
     <span class="kw">where
         </span>T: FlightService,
-        B: Body + Send + <span class="lifetime">&#39;static</span>,
-        B::Error: Into&lt;StdError&gt; + Send + <span class="lifetime">&#39;static</span>,
+        B: Body + Send + <span class="lifetime">'static</span>,
+        B::Error: Into&lt;StdError&gt; + Send + <span class="lifetime">'static</span>,
     {
         <span class="kw">type </span>Response = http::Response&lt;tonic::body::BoxBody&gt;;
         <span class="kw">type </span>Error = std::convert::Infallible;
         <span class="kw">type </span>Future = BoxFuture&lt;<span class="self">Self</span>::Response, <span class="self">Self</span>::Error&gt;;
         <span class="kw">fn </span>poll_ready(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-            _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+            _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;std::result::Result&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
             Poll::Ready(<span class="prelude-val">Ok</span>(()))
         }
         <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: http::Request&lt;B&gt;) -&gt; <span class="self">Self</span>::Future {
             <span class="kw">let </span>inner = <span class="self">self</span>.inner.clone();
             <span class="kw">match </span>req.uri().path() {
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/Handshake&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/Handshake" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>HandshakeSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2294,7 +2793,9 @@
                             &gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{ (<span class="kw-2">*</span>inner).handshake(request).<span class="kw">await </span>};
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::handshake(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
+                            </span>};
                             Box::pin(fut)
                         }
                     }
@@ -2321,7 +2822,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/ListFlights&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/ListFlights" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>ListFlightsSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2340,7 +2841,7 @@
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
                             <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                                (<span class="kw-2">*</span>inner).list_flights(request).<span class="kw">await
+                                &lt;T <span class="kw">as </span>FlightService&gt;::list_flights(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
                             </span>};
                             Box::pin(fut)
                         }
@@ -2368,7 +2869,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/GetFlightInfo&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/GetFlightInfo" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>GetFlightInfoSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2386,7 +2887,7 @@
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
                             <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                                (<span class="kw-2">*</span>inner).get_flight_info(request).<span class="kw">await
+                                &lt;T <span class="kw">as </span>FlightService&gt;::get_flight_info(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
                             </span>};
                             Box::pin(fut)
                         }
@@ -2414,7 +2915,54 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/GetSchema&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/PollFlightInfo" </span>=&gt; {
+                    <span class="attr">#[allow(non_camel_case_types)]
+                    </span><span class="kw">struct </span>PollFlightInfoSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
+                    <span class="kw">impl</span>&lt;
+                        T: FlightService,
+                    &gt; tonic::server::UnaryService&lt;<span class="kw">super</span>::FlightDescriptor&gt;
+                    <span class="kw">for </span>PollFlightInfoSvc&lt;T&gt; {
+                        <span class="kw">type </span>Response = <span class="kw">super</span>::PollInfo;
+                        <span class="kw">type </span>Future = BoxFuture&lt;
+                            tonic::Response&lt;<span class="self">Self</span>::Response&gt;,
+                            tonic::Status,
+                        &gt;;
+                        <span class="kw">fn </span>call(
+                            <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                            request: tonic::Request&lt;<span class="kw">super</span>::FlightDescriptor&gt;,
+                        ) -&gt; <span class="self">Self</span>::Future {
+                            <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::poll_flight_info(<span class="kw-2">&amp;</span>inner, request)
+                                    .<span class="kw">await
+                            </span>};
+                            Box::pin(fut)
+                        }
+                    }
+                    <span class="kw">let </span>accept_compression_encodings = <span class="self">self</span>.accept_compression_encodings;
+                    <span class="kw">let </span>send_compression_encodings = <span class="self">self</span>.send_compression_encodings;
+                    <span class="kw">let </span>max_decoding_message_size = <span class="self">self</span>.max_decoding_message_size;
+                    <span class="kw">let </span>max_encoding_message_size = <span class="self">self</span>.max_encoding_message_size;
+                    <span class="kw">let </span>inner = <span class="self">self</span>.inner.clone();
+                    <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                        <span class="kw">let </span>inner = inner.<span class="number">0</span>;
+                        <span class="kw">let </span>method = PollFlightInfoSvc(inner);
+                        <span class="kw">let </span>codec = tonic::codec::ProstCodec::default();
+                        <span class="kw">let </span><span class="kw-2">mut </span>grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        <span class="kw">let </span>res = grpc.unary(method, req).<span class="kw">await</span>;
+                        <span class="prelude-val">Ok</span>(res)
+                    };
+                    Box::pin(fut)
+                }
+                <span class="string">"/arrow.flight.protocol.FlightService/GetSchema" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>GetSchemaSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2431,7 +2979,9 @@
                             request: tonic::Request&lt;<span class="kw">super</span>::FlightDescriptor&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{ (<span class="kw-2">*</span>inner).get_schema(request).<span class="kw">await </span>};
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::get_schema(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
+                            </span>};
                             Box::pin(fut)
                         }
                     }
@@ -2458,7 +3008,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoGet&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/DoGet" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>DoGetSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2476,7 +3026,9 @@
                             request: tonic::Request&lt;<span class="kw">super</span>::Ticket&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{ (<span class="kw-2">*</span>inner).do_get(request).<span class="kw">await </span>};
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::do_get(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
+                            </span>};
                             Box::pin(fut)
                         }
                     }
@@ -2503,7 +3055,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoPut&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/DoPut" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>DoPutSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2521,7 +3073,9 @@
                             request: tonic::Request&lt;tonic::Streaming&lt;<span class="kw">super</span>::FlightData&gt;&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{ (<span class="kw-2">*</span>inner).do_put(request).<span class="kw">await </span>};
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::do_put(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
+                            </span>};
                             Box::pin(fut)
                         }
                     }
@@ -2548,7 +3102,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoExchange&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/DoExchange" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>DoExchangeSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2566,7 +3120,9 @@
                             request: tonic::Request&lt;tonic::Streaming&lt;<span class="kw">super</span>::FlightData&gt;&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{ (<span class="kw-2">*</span>inner).do_exchange(request).<span class="kw">await </span>};
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::do_exchange(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
+                            </span>};
                             Box::pin(fut)
                         }
                     }
@@ -2593,7 +3149,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/DoAction&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/DoAction" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>DoActionSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2611,7 +3167,9 @@
                             request: tonic::Request&lt;<span class="kw">super</span>::Action&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{ (<span class="kw-2">*</span>inner).do_action(request).<span class="kw">await </span>};
+                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                &lt;T <span class="kw">as </span>FlightService&gt;::do_action(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
+                            </span>};
                             Box::pin(fut)
                         }
                     }
@@ -2638,7 +3196,7 @@
                     };
                     Box::pin(fut)
                 }
-                <span class="string">&quot;/arrow.flight.protocol.FlightService/ListActions&quot; </span>=&gt; {
+                <span class="string">"/arrow.flight.protocol.FlightService/ListActions" </span>=&gt; {
                     <span class="attr">#[allow(non_camel_case_types)]
                     </span><span class="kw">struct </span>ListActionsSvc&lt;T: FlightService&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
@@ -2657,7 +3215,7 @@
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
                             <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                                (<span class="kw-2">*</span>inner).list_actions(request).<span class="kw">await
+                                &lt;T <span class="kw">as </span>FlightService&gt;::list_actions(<span class="kw-2">&amp;</span>inner, request).<span class="kw">await
                             </span>};
                             Box::pin(fut)
                         }
@@ -2690,8 +3248,8 @@
                         <span class="prelude-val">Ok</span>(
                             http::Response::builder()
                                 .status(<span class="number">200</span>)
-                                .header(<span class="string">&quot;grpc-status&quot;</span>, <span class="string">&quot;12&quot;</span>)
-                                .header(<span class="string">&quot;content-type&quot;</span>, <span class="string">&quot;application/grpc&quot;</span>)
+                                .header(<span class="string">"grpc-status"</span>, <span class="string">"12"</span>)
+                                .header(<span class="string">"content-type"</span>, <span class="string">"application/grpc"</span>)
                                 .body(empty_body())
                                 .unwrap(),
                         )
@@ -2718,12 +3276,12 @@
         }
     }
     <span class="kw">impl</span>&lt;T: std::fmt::Debug&gt; std::fmt::Debug <span class="kw">for </span>_Inner&lt;T&gt; {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+            <span class="macro">write!</span>(f, <span class="string">"{:?}"</span>, <span class="self">self</span>.<span class="number">0</span>)
         }
     }
     <span class="kw">impl</span>&lt;T: FlightService&gt; tonic::server::NamedService <span class="kw">for </span>FlightServiceServer&lt;T&gt; {
-        <span class="kw">const </span>NAME: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;arrow.flight.protocol.FlightService&quot;</span>;
+        <span class="kw">const </span>NAME: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">"arrow.flight.protocol.FlightService"</span>;
     }
 }
 </code></pre></div></section></main></body></html>
