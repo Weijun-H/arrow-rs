@@ -41,6 +41,9 @@ pub(crate) enum PrimitiveVariantToArrowRowBuilder<'a> {
     Float16(VariantToPrimitiveArrowRowBuilder<'a, datatypes::Float16Type>),
     Float32(VariantToPrimitiveArrowRowBuilder<'a, datatypes::Float32Type>),
     Float64(VariantToPrimitiveArrowRowBuilder<'a, datatypes::Float64Type>),
+    Decimal32(VariantToPrimitiveArrowRowBuilder<'a, datatypes::Decimal32Type>),
+    Decimal64(VariantToPrimitiveArrowRowBuilder<'a, datatypes::Decimal64Type>),
+    Decimal128(VariantToPrimitiveArrowRowBuilder<'a, datatypes::Decimal128Type>),
 }
 
 /// Builder for converting variant values into strongly typed Arrow arrays.
@@ -70,6 +73,9 @@ impl<'a> PrimitiveVariantToArrowRowBuilder<'a> {
             Float16(b) => b.append_null(),
             Float32(b) => b.append_null(),
             Float64(b) => b.append_null(),
+            Decimal32(b) => b.append_null(),
+            Decimal64(b) => b.append_null(),
+            Decimal128(b) => b.append_null(),
         }
     }
 
@@ -87,6 +93,9 @@ impl<'a> PrimitiveVariantToArrowRowBuilder<'a> {
             Float16(b) => b.append_value(value),
             Float32(b) => b.append_value(value),
             Float64(b) => b.append_value(value),
+            Decimal32(b) => b.append_value(value),
+            Decimal64(b) => b.append_value(value),
+            Decimal128(b) => b.append_value(value),
         }
     }
 
@@ -104,6 +113,9 @@ impl<'a> PrimitiveVariantToArrowRowBuilder<'a> {
             Float16(b) => b.finish(),
             Float32(b) => b.finish(),
             Float64(b) => b.finish(),
+            Decimal32(b) => b.finish(),
+            Decimal64(b) => b.finish(),
+            Decimal128(b) => b.finish(),
         }
     }
 }
@@ -190,6 +202,19 @@ pub(crate) fn make_primitive_variant_to_arrow_row_builder<'a>(
             cast_options,
             capacity,
         )),
+        DataType::Decimal32(_, _) => Decimal32(VariantToPrimitiveArrowRowBuilder::new(
+            cast_options,
+            capacity,
+        )),
+        DataType::Decimal64(_, _) => Decimal64(VariantToPrimitiveArrowRowBuilder::new(
+            cast_options,
+            capacity,
+        )),
+        DataType::Decimal128(_, _) => Decimal128(VariantToPrimitiveArrowRowBuilder::new(
+            cast_options,
+            capacity,
+        )),
+
         _ if data_type.is_primitive() => {
             return Err(ArrowError::NotYetImplemented(format!(
                 "Primitive data_type {data_type:?} not yet implemented"
@@ -293,6 +318,9 @@ fn get_type_name<T: ArrowPrimitiveType>() -> &'static str {
         "arrow_array::types::Float32Type" => "Float32",
         "arrow_array::types::Float64Type" => "Float64",
         "arrow_array::types::Float16Type" => "Float16",
+        "arrow_array::types::Decimal32Type" => "Decimal32",
+        "arrow_array::types::Decimal64Type" => "Decimal64",
+        "arrow_array::types::Decimal128Type" => "Decimal128",
         _ => "Unknown",
     }
 }
@@ -324,7 +352,7 @@ where
 
     fn append_value(&mut self, value: &Variant<'_, '_>) -> Result<bool> {
         if let Some(v) = value.as_primitive() {
-            self.builder.append_value(v);
+            self.builder.append_value(v.value(0));
             Ok(true)
         } else {
             if !self.cast_options.safe {

@@ -17,7 +17,15 @@
 
 //! Module for transforming a typed arrow `Array` to `VariantArray`.
 
-use arrow::datatypes::{self, ArrowPrimitiveType};
+use arrow::{
+    array::{
+        Array, Decimal128Array, Decimal32Array, Decimal64Array, Float16Array, Float32Array,
+        Float64Array, Int16Array, Int32Array, Int64Array, Int8Array, PrimitiveArray, UInt16Array,
+        UInt32Array, UInt64Array, UInt8Array,
+    },
+    datatypes::{self, ArrowPrimitiveType, DataType, DecimalType},
+    ipc::Int,
+};
 use parquet_variant::Variant;
 
 /// Options for controlling the behavior of `cast_to_variant_with_options`.
@@ -35,66 +43,94 @@ impl Default for CastOptions {
 
 /// Helper trait for converting `Variant` values to arrow primitive values.
 pub(crate) trait VariantAsPrimitive<T: ArrowPrimitiveType> {
-    fn as_primitive(&self) -> Option<T::Native>;
+    fn as_primitive(&self) -> Option<PrimitiveArray<T>>;
 }
 
 impl VariantAsPrimitive<datatypes::Int32Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<i32> {
-        self.as_int32()
+    fn as_primitive(&self) -> Option<Int32Array> {
+        self.as_int32().map(|v| Int32Array::from(vec![v]))
     }
 }
 impl VariantAsPrimitive<datatypes::Int16Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<i16> {
-        self.as_int16()
+    fn as_primitive(&self) -> Option<Int16Array> {
+        self.as_int16().map(|v| Int16Array::from(vec![v]))
     }
 }
 impl VariantAsPrimitive<datatypes::Int8Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<i8> {
-        self.as_int8()
+    fn as_primitive(&self) -> Option<Int8Array> {
+        self.as_int8().map(|v| Int8Array::from(vec![v]))
     }
 }
 impl VariantAsPrimitive<datatypes::Int64Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<i64> {
-        self.as_int64()
+    fn as_primitive(&self) -> Option<Int64Array> {
+        self.as_int64().map(|v| Int64Array::from(vec![v]))
     }
 }
 impl VariantAsPrimitive<datatypes::Float16Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<half::f16> {
-        self.as_f16()
+    fn as_primitive(&self) -> Option<Float16Array> {
+        self.as_f16().map(|v| Float16Array::from(vec![v]))
     }
 }
 impl VariantAsPrimitive<datatypes::Float32Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<f32> {
-        self.as_f32()
+    fn as_primitive(&self) -> Option<Float32Array> {
+        self.as_f32().map(|v| Float32Array::from(vec![v]))
     }
 }
 impl VariantAsPrimitive<datatypes::Float64Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<f64> {
-        self.as_f64()
+    fn as_primitive(&self) -> Option<Float64Array> {
+        self.as_f64().map(|v| Float64Array::from(vec![v]))
     }
 }
 
 impl VariantAsPrimitive<datatypes::UInt8Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<u8> {
-        self.as_u8()
+    fn as_primitive(&self) -> Option<UInt8Array> {
+        self.as_u8().map(|v| UInt8Array::from(vec![v]))
     }
 }
 
 impl VariantAsPrimitive<datatypes::UInt16Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<u16> {
-        self.as_u16()
+    fn as_primitive(&self) -> Option<UInt16Array> {
+        self.as_u16().map(|v| UInt16Array::from(vec![v]))
     }
 }
 
 impl VariantAsPrimitive<datatypes::UInt32Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<u32> {
-        self.as_u32()
+    fn as_primitive(&self) -> Option<UInt32Array> {
+        self.as_u32().map(|v| UInt32Array::from(vec![v]))
     }
 }
 
 impl VariantAsPrimitive<datatypes::UInt64Type> for Variant<'_, '_> {
-    fn as_primitive(&self) -> Option<u64> {
-        self.as_u64()
+    fn as_primitive(&self) -> Option<UInt64Array> {
+        self.as_u64().map(|v| UInt64Array::from(vec![v]))
+    }
+}
+
+impl VariantAsPrimitive<datatypes::Decimal32Type> for Variant<'_, '_> {
+    fn as_primitive(&self) -> Option<Decimal32Array> {
+        self.as_decimal4().and_then(|d| {
+            Decimal32Array::from(vec![d.integer()])
+                .with_precision_and_scale(d.scale(), d.scale() as i8)
+                .ok()
+        })
+    }
+}
+impl VariantAsPrimitive<datatypes::Decimal64Type> for Variant<'_, '_> {
+    fn as_primitive(&self) -> Option<Decimal64Array> {
+        self.as_decimal8().and_then(|d| {
+            Decimal64Array::from(vec![d.integer()])
+                .with_precision_and_scale(d.scale(), d.scale() as i8)
+                .ok()
+        })
+    }
+}
+impl VariantAsPrimitive<datatypes::Decimal128Type> for Variant<'_, '_> {
+    fn as_primitive(&self) -> Option<Decimal128Array> {
+        self.as_decimal16().and_then(|d| {
+            Decimal128Array::from(vec![d.integer()])
+                .with_precision_and_scale(d.scale(), d.scale() as i8)
+                .ok()
+        })
     }
 }
 
