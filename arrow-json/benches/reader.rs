@@ -23,9 +23,7 @@ use std::hint::black_box;
 use std::sync::Arc;
 
 const BINARY_ROWS: usize = 1 << 15;
-const LIST_ROWS: usize = 1 << 14;
 const BINARY_BYTES: usize = 64;
-const LIST_LEN: usize = 32;
 
 fn bench_decode(c: &mut Criterion, name: &str, data: &[u8], field: Arc<Field>, rows: usize) {
     c.bench_function(name, |b| {
