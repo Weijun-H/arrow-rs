@@ -43,7 +43,7 @@ fn invalid_hex_error_at(index: usize, byte: u8) -> ArrowError {
 
 fn decode_hex_to_vec(hex_string: &str, out: &mut Vec<u8>) -> Result<(), ArrowError> {
     let bytes = hex_string.as_bytes();
-    out.reserve((bytes.len() + 1) / 2);
+    out.reserve(bytes.len().div_ceil(2));
 
     let mut iter = bytes.chunks_exact(2);
     for (pair_index, pair) in (&mut iter).enumerate() {
@@ -207,7 +207,7 @@ fn estimate_data_capacity(tape: &Tape<'_>, pos: &[u32]) -> Result<usize, ArrowEr
             TapeElement::String(idx) => {
                 let string_len = tape.get_string(idx).len();
                 // two hex characters represent one byte
-                let decoded_len = (string_len + 1) / 2;
+                let decoded_len = string_len.div_ceil(2);
                 data_capacity += decoded_len;
             }
             TapeElement::Null => {}
